@@ -1,0 +1,21 @@
+{
+  "name": "FIRST Assist",
+  "short_name": "FIRSTAssist",
+  "description": "Technical incident reporting and knowledge sharing for FRC events.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F6F0",
+  "theme_color": "#1F3A52",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
