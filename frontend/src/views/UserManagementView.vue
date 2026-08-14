@@ -1,9 +1,9 @@
 <template>
-  <div class="space-y-8">
+  <div class="space-y-8 text-textMain">
     <div class="flex justify-between items-center">
       <div>
-        <h2 class="text-3xl font-extrabold text-primaryNavy tracking-tight">User Management</h2>
-        <p class="text-sm text-gray-500 mt-1">Manage system accounts, access levels, and active volunteers</p>
+        <h2 class="text-3xl font-extrabold text-primaryTeal tracking-tight">User Management</h2>
+        <p class="text-sm text-gray-400 mt-1">Manage system accounts, access levels, and active volunteers</p>
       </div>
       <button
         @click="showCreateForm = !showCreateForm"
@@ -14,36 +14,36 @@
     </div>
 
     <!-- Create User Card -->
-    <div v-if="showCreateForm" class="bg-bgCard p-6 rounded-2xl shadow border border-gray-100 max-w-xl animate-fadeIn">
-      <h3 class="text-lg font-bold text-primaryNavy mb-4">Register Authorized Volunteer</h3>
+    <div v-if="showCreateForm" class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 max-w-xl animate-fadeIn">
+      <h3 class="text-lg font-bold text-primaryTeal mb-4">Register Authorized Volunteer</h3>
       <form @submit.prevent="handleCreateUser" class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-primaryNavy uppercase tracking-wider mb-2">Name</label>
-            <input v-model="form.name" type="text" required placeholder="e.g. John Doe" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm">
+            <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Name</label>
+            <input v-model="form.name" type="text" required placeholder="e.g. John Doe" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-primaryNavy uppercase tracking-wider mb-2">Email Address</label>
-            <input v-model="form.email" type="email" required placeholder="csa@first.org" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm">
+            <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Email Address</label>
+            <input v-model="form.email" type="email" required placeholder="csa@first.org" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500">
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-primaryNavy uppercase tracking-wider mb-2">Temporary Password</label>
-            <input v-model="form.password" type="password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm">
+            <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Temporary Password</label>
+            <input v-model="form.password" type="password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-primaryNavy uppercase tracking-wider mb-2">System Role</label>
-            <select v-model="form.role" required class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm bg-white">
-              <option value="CSA">Control System Advisor (CSA)</option>
-              <option value="FTA">FIRST Technical Advisor (FTA)</option>
-              <option value="ADMIN">Administrator</option>
+            <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">System Role</label>
+            <select v-model="form.role" required class="w-full px-4 py-2.5 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm bg-bgCard text-textMain">
+              <option value="CSA" class="bg-bgCard">Control System Advisor (CSA)</option>
+              <option value="FTA" class="bg-bgCard">FIRST Technical Advisor (FTA)</option>
+              <option value="ADMIN" class="bg-bgCard">Administrator</option>
             </select>
           </div>
         </div>
 
-        <div v-if="createError" class="text-accentCoral text-xs font-medium bg-red-50 p-3 rounded">
+        <div v-if="createError" class="text-accentCoral text-xs font-medium bg-red-950/40 rounded p-3">
           {{ createError }}
         </div>
 
@@ -58,20 +58,20 @@
     </div>
 
     <!-- Users Table -->
-    <div class="bg-bgCard rounded-2xl shadow overflow-hidden border border-gray-100">
+    <div class="bg-bgCard rounded-2xl shadow overflow-hidden border border-gray-800">
       <div v-if="loading" class="text-center py-12">
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primaryTeal border-t-transparent"></div>
-        <p class="text-gray-500 mt-3 text-sm">Loading users list...</p>
+        <p class="text-gray-400 mt-3 text-sm">Loading users list...</p>
       </div>
 
-      <div v-else-if="error" class="bg-red-50 text-accentCoral p-4 text-center text-sm font-medium">
+      <div v-else-if="error" class="bg-red-950/40 text-accentCoral p-4 text-center text-sm font-medium border border-red-900/30">
         {{ error }}
       </div>
 
       <div v-else class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-gray-50 border-b border-gray-100 text-xs font-bold uppercase tracking-wider text-primaryNavy">
+            <tr class="bg-bgMain border-b border-gray-800 text-xs font-bold uppercase tracking-wider text-primaryTeal">
               <th class="px-6 py-4">Name</th>
               <th class="px-6 py-4">Email</th>
               <th class="px-6 py-4">Role</th>
@@ -79,14 +79,14 @@
               <th class="px-6 py-4 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100 text-sm text-gray-700">
-            <tr v-for="user in users" :key="user._id" class="hover:bg-gray-50/50 transition">
-              <td class="px-6 py-4 font-semibold text-primaryNavy">{{ user.name }}</td>
+          <tbody class="divide-y divide-gray-800 text-sm text-gray-300">
+            <tr v-for="user in users" :key="user._id" class="hover:bg-bgMain/30 transition">
+              <td class="px-6 py-4 font-semibold text-white">{{ user.name }}</td>
               <td class="px-6 py-4 font-mono text-xs">{{ user.email }}</td>
               <td class="px-6 py-4">
                 <span :class="{
                   'bg-primaryTeal/10 text-primaryTeal': user.role === 'CSA',
-                  'bg-primaryNavy/10 text-primaryNavy': user.role === 'FTA',
+                  'bg-accentYellow/10 text-accentYellow': user.role === 'FTA',
                   'bg-accentPurple/10 text-accentPurple': user.role === 'ADMIN'
                 }" class="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase font-mono">
                   {{ user.role }}
@@ -94,9 +94,9 @@
               </td>
               <td class="px-6 py-4">
                 <span :class="{
-                  'bg-green-100 text-green-800': user.status === 'ACTIVE',
-                  'bg-red-100 text-red-800': user.status === 'INACTIVE'
-                }" class="px-2 py-0.5 rounded text-xs font-medium">
+                  'bg-green-950/40 text-green-400 border border-green-900/30': user.status === 'ACTIVE',
+                  'bg-red-950/40 text-accentCoral border border-red-900/30': user.status === 'INACTIVE'
+                }" class="px-2.5 py-0.5 rounded text-xs font-medium uppercase font-mono tracking-wider">
                   {{ user.status }}
                 </span>
               </td>

@@ -1,35 +1,35 @@
 <template>
-  <div class="max-w-2xl mx-auto space-y-8 animate-fadeIn">
+  <div class="max-w-2xl mx-auto space-y-8 animate-fadeIn text-textMain">
     <div>
-      <h2 class="text-3xl font-extrabold text-primaryNavy tracking-tight">My Profile</h2>
-      <p class="text-sm text-gray-500 mt-1">Manage your account information, credentials, and password settings</p>
+      <h2 class="text-3xl font-extrabold text-primaryTeal tracking-tight">My Profile</h2>
+      <p class="text-sm text-gray-400 mt-1">Manage your account information, credentials, and password settings</p>
     </div>
 
     <!-- Basic Profile Info -->
-    <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-100 space-y-6">
-      <h3 class="text-lg font-bold text-primaryNavy border-b pb-3">Account Details</h3>
+    <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-6">
+      <h3 class="text-lg font-bold text-primaryTeal border-b border-gray-800 pb-3">Account Details</h3>
       
       <form @submit.prevent="handleUpdateProfile" class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-primaryNavy uppercase tracking-wider mb-2">Full Name</label>
-            <input v-model="profile.name" type="text" required class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm">
+            <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Full Name</label>
+            <input v-model="profile.name" type="text" required class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-primaryNavy uppercase tracking-wider mb-2">Email Address</label>
-            <input v-model="profile.email" type="email" required class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm">
+            <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Email Address</label>
+            <input v-model="profile.email" type="email" required class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500">
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-primaryNavy uppercase tracking-wider mb-2">Designated Role</label>
-          <input :value="profile.role" type="text" disabled class="w-full px-4 py-2.5 rounded-lg border border-gray-100 bg-gray-50 text-gray-500 text-sm font-mono uppercase tracking-wider">
+          <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Designated Role</label>
+          <input :value="profile.role" type="text" disabled class="w-full px-4 py-2.5 rounded-lg border border-gray-800 bg-bgMain/60 text-gray-400 text-sm font-mono uppercase tracking-wider">
         </div>
 
-        <div v-if="profileError" class="text-accentCoral text-xs font-medium p-3 bg-red-50 rounded">
+        <div v-if="profileError" class="text-accentCoral text-xs font-medium p-3 bg-red-950/40 rounded">
           {{ profileError }}
         </div>
-        <div v-if="profileSuccess" class="text-green-700 text-xs font-medium p-3 bg-green-50 rounded">
+        <div v-if="profileSuccess" class="text-green-400 border border-green-900/30 text-xs font-medium p-3 bg-green-950/40 rounded">
           Profile updated successfully!
         </div>
 
@@ -44,30 +44,30 @@
     </div>
 
     <!-- Password Management -->
-    <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-100 space-y-6">
-      <h3 class="text-lg font-bold text-primaryNavy border-b pb-3">Update Password</h3>
+    <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-6">
+      <h3 class="text-lg font-bold text-primaryTeal border-b border-gray-800 pb-3">Update Password</h3>
       
       <form @submit.prevent="handlePasswordChange" class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-primaryNavy uppercase tracking-wider mb-2">Current Password</label>
-          <input v-model="passwordForm.currentPassword" type="password" required class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm">
+          <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Current Password</label>
+          <input v-model="passwordForm.currentPassword" type="password" required class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500">
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-primaryNavy uppercase tracking-wider mb-2">New Password</label>
-            <input v-model="passwordForm.newPassword" type="password" required class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm">
+            <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">New Password</label>
+            <input v-model="passwordForm.newPassword" type="password" required class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-primaryNavy uppercase tracking-wider mb-2">Confirm New Password</label>
-            <input v-model="passwordForm.confirmPassword" type="password" required class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm">
+            <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Confirm New Password</label>
+            <input v-model="passwordForm.confirmPassword" type="password" required class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500">
           </div>
         </div>
 
-        <div v-if="passwordError" class="text-accentCoral text-xs font-medium p-3 bg-red-50 rounded">
+        <div v-if="passwordError" class="text-accentCoral text-xs font-medium p-3 bg-red-950/40 rounded">
           {{ passwordError }}
         </div>
-        <div v-if="passwordSuccess" class="text-green-700 text-xs font-medium p-3 bg-green-50 rounded">
+        <div v-if="passwordSuccess" class="text-green-400 border border-green-900/30 text-xs font-medium p-3 bg-green-950/40 rounded">
           Password updated successfully!
         </div>
 

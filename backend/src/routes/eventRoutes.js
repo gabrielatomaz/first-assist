@@ -1,6 +1,8 @@
 import express from 'express';
 import { Event } from '../models/Event.js';
+import { Team } from '../models/Team.js';
 import { requireRole } from '../middleware/authMiddleware.js';
+import { logIncidentChange } from '../utils/auditLogger.js';
 
 const router = express.Router();
 
@@ -27,8 +29,8 @@ router.get('/active', async (req, res) => {
   }
 });
 
-// Create new event (Admin only)
-router.post('/', requireRole(['ADMIN']), async (req, res) => {
+// Create new event (Admin and FTA allowed - Epic 11 / TCC management)
+router.post('/', requireRole(['ADMIN', 'FTA']), async (req, res) => {
   try {
     const { code, name, location, isActive } = req.body;
     if (!code || !name) {
@@ -41,6 +43,15 @@ router.post('/', requireRole(['ADMIN']), async (req, res) => {
     }
 
     const newEvent = await Event.create({ code, name, location, isActive: !!isActive });
+    
+    // Log audit timeline
+    await logIncidentChange({
+      userId: req.user._id,
+      action: 'EVENT_CREATION',
+      newValue: code,
+      details: `Event "${name}" (${code}) created`
+    });
+
     res.status(201).json(newEvent);
   } catch (error) {
     if (error.code === 11000) {
@@ -50,8 +61,8 @@ router.post('/', requireRole(['ADMIN']), async (req, res) => {
   }
 });
 
-// Set event active (Admin only)
-router.patch('/:code/active', requireRole(['ADMIN']), async (req, res) => {
+// Set event active (Admin and FTA allowed)
+router.patch('/:code/active', requireRole(['ADMIN', 'FTA']), async (req, res) => {
   try {
     await Event.updateMany({}, { isActive: false });
     const event = await Event.findOneAndUpdate(
@@ -60,7 +71,67 @@ router.patch('/:code/active', requireRole(['ADMIN']), async (req, res) => {
       { new: true }
     );
     if (!event) return res.status(404).json({ error: 'Event not found' });
+    
+    // Log audit timeline
+    await logIncidentChange({
+      userId: req.user._id,
+      action: 'EVENT_ACTIVATION',
+      newValue: event.code,
+      details: `Event "${event.name}" (${event.code}) marked active`
+    });
+
     res.json(event);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add Team to Event attendance list (Admin and FTA allowed)
+router.post('/:code/teams', requireRole(['ADMIN', 'FTA']), async (req, res) => {
+  try {
+    const { teamNumber } = req.body;
+    const num = Number(teamNumber);
+    if (isNaN(num)) return res.status(400).json({ error: 'Valid team number is required' });
+
+    // Verify team actually exists first
+    const teamExists = await Team.findOne({ number: num });
+    if (!teamExists) {
+      return res.status(404).json({ error: `Team ${num} must be registered in the system first` });
+    }
+
+    const event = await Event.findOne({ code: req.params.code });
+    if (!event) return res.status(404).json({ error: 'Event not found' });
+
+    if (event.teams.includes(num)) {
+      return res.status(409).json({ error: `Team ${num} is already registered at this event` });
+    }
+
+    event.teams.push(num);
+    await event.save();
+
+    // Log audit timeline
+    await logIncidentChange({
+      userId: req.user._id,
+      action: 'EVENT_TEAM_ADDED',
+      newValue: `${req.params.code}:${num}`,
+      details: `Team ${num} added to Event "${event.name}"`
+    });
+
+    res.json(event);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get all Teams registered/attending this Event
+router.get('/:code/teams', async (req, res) => {
+  try {
+    const event = await Event.findOne({ code: req.params.code });
+    if (!event) return res.status(404).json({ error: 'Event not found' });
+
+    // Fetch team documents matching event.teams numbers list
+    const attendingTeams = await Team.find({ number: { $in: event.teams } }).sort({ number: 1 });
+    res.json(attendingTeams);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

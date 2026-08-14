@@ -10,20 +10,20 @@
         </div>
         
         <div v-if="suggestion && !loading" class="flex items-center space-x-2 text-xs">
-          <span class="text-gray-500 font-medium">Was this suggestion helpful?</span>
+          <span class="text-gray-400 font-medium">Was this suggestion helpful?</span>
           <div class="flex items-center space-x-1">
             <button
               @click="rateSuggestion('HELPFUL')"
-              :class="suggestion.rating === 'HELPFUL' ? 'bg-primaryTeal text-white' : 'bg-white text-gray-400 hover:text-gray-600'"
-              class="p-1 px-2 rounded border border-gray-200 transition duration-150 text-xs font-semibold flex items-center shadow-sm"
+              :class="suggestion.rating === 'HELPFUL' ? 'bg-primaryTeal text-white border-primaryTeal' : 'bg-bgMain text-gray-300 hover:text-white border-gray-700'"
+              class="p-1 px-2 rounded border transition duration-150 text-xs font-semibold flex items-center shadow-sm"
               title="Helpful"
             >
               👍 Helpful
             </button>
             <button
               @click="rateSuggestion('NOT_HELPFUL')"
-              :class="suggestion.rating === 'NOT_HELPFUL' ? 'bg-accentCoral text-white border-accentCoral/30' : 'bg-white text-gray-400 hover:text-gray-600'"
-              class="p-1 px-2 rounded border border-gray-200 transition duration-150 text-xs font-semibold flex items-center shadow-sm"
+              :class="suggestion.rating === 'NOT_HELPFUL' ? 'bg-accentCoral text-white border-accentCoral/30' : 'bg-bgMain text-gray-300 hover:text-white border-gray-700'"
+              class="p-1 px-2 rounded border transition duration-150 text-xs font-semibold flex items-center shadow-sm"
               title="Reject suggestion"
             >
               👎 Reject
@@ -33,7 +33,7 @@
       </div>
 
       <!-- Graceful Fallback Notice (US-AI-006) -->
-      <div v-if="error" class="bg-amber-50 border border-amber-200/50 p-4 rounded-xl text-amber-800 text-xs flex flex-col space-y-1">
+      <div v-if="error" class="bg-amber-950/40 border border-amber-900/50 p-4 rounded-xl text-amber-300 text-xs flex flex-col space-y-1">
         <span class="font-bold">⚠️ AI Diagnostics Offline</span>
         <span>The AI analysis helper is currently unavailable. Please continue investigating the incident manually.</span>
       </div>
@@ -46,17 +46,17 @@
 
       <!-- Main suggestions -->
       <div v-else-if="suggestion" class="space-y-4">
-        <div class="space-y-4 text-sm text-gray-700">
+        <div class="space-y-4 text-sm text-textMain">
           <div>
             <h4 class="font-bold text-accentPurple text-xs uppercase tracking-wider mb-1">Likely Root Cause</h4>
-            <p class="bg-white/80 p-3 rounded-lg border border-accentPurple/5 text-gray-800 leading-relaxed font-medium">
+            <p class="bg-bgMain p-3 rounded-lg border border-gray-700 text-gray-200 leading-relaxed font-medium">
               {{ suggestion.suggestedCause }}
             </p>
           </div>
 
           <div>
             <h4 class="font-bold text-accentPurple text-xs uppercase tracking-wider mb-1">Recommended Solution</h4>
-            <p class="bg-white/80 p-3 rounded-lg border border-accentPurple/5 text-gray-800 leading-relaxed font-medium">
+            <p class="bg-bgMain p-3 rounded-lg border border-gray-700 text-gray-200 leading-relaxed font-medium">
               {{ suggestion.suggestedSolution }}
             </p>
           </div>
@@ -65,35 +65,35 @@
     </div>
 
     <!-- Related Historical Incidents (US-AI-004) -->
-    <div v-if="relatedIncidents.length > 0" class="bg-white p-6 rounded-2xl border border-gray-100 shadow space-y-4">
-      <div class="flex items-center space-x-2 border-b pb-3">
+    <div v-if="relatedIncidents.length > 0" class="bg-bgCard p-6 rounded-2xl border border-gray-700 shadow space-y-4">
+      <div class="flex items-center space-x-2 border-b border-gray-700 pb-3">
         <span class="text-lg">📚</span>
-        <h4 class="text-base font-bold text-primaryNavy tracking-tight">Related Resolved Tickets</h4>
+        <h4 class="text-base font-bold text-primaryTeal tracking-tight">Related Resolved Tickets</h4>
       </div>
       
       <div class="space-y-3">
         <div 
           v-for="ticket in relatedIncidents" 
           :key="ticket._id"
-          class="p-4 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-gray-50 transition duration-150 flex flex-col space-y-2 text-xs"
+          class="p-4 rounded-xl border border-gray-800 bg-bgMain/60 hover:bg-bgMain transition duration-150 flex flex-col space-y-2 text-xs"
         >
           <div class="flex justify-between items-center">
-            <span class="font-extrabold text-primaryNavy text-sm">Team {{ ticket.teamNumber }}</span>
-            <span class="text-[10px] bg-green-100 text-green-800 font-bold uppercase font-mono px-2 py-0.5 rounded">
+            <span class="font-extrabold text-white text-sm">Team {{ ticket.teamNumber }}</span>
+            <span class="text-[10px] bg-green-950/40 text-green-400 border border-green-900/30 font-bold uppercase font-mono px-2 py-0.5 rounded">
               Resolved
             </span>
           </div>
           
-          <p class="text-gray-500 font-medium line-clamp-2">{{ ticket.description }}</p>
+          <p class="text-gray-300 font-medium line-clamp-2">{{ ticket.description }}</p>
           
-          <div class="grid grid-cols-2 gap-4 border-t pt-2 mt-1">
+          <div class="grid grid-cols-2 gap-4 border-t border-gray-800 pt-2 mt-1">
             <div>
               <span class="block text-[10px] font-bold text-gray-400 uppercase">Root Cause</span>
-              <span class="text-gray-700 font-medium line-clamp-1">{{ ticket.rootCause }}</span>
+              <span class="text-gray-200 font-medium line-clamp-1">{{ ticket.rootCause }}</span>
             </div>
             <div>
               <span class="block text-[10px] font-bold text-gray-400 uppercase">Solution</span>
-              <span class="text-gray-700 font-medium line-clamp-1">{{ ticket.appliedSolution }}</span>
+              <span class="text-gray-200 font-medium line-clamp-1">{{ ticket.appliedSolution }}</span>
             </div>
           </div>
         </div>

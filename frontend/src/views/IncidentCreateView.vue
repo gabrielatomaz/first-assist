@@ -1,57 +1,57 @@
 <template>
-  <div class="max-w-2xl mx-auto bg-bgCard p-8 rounded-2xl shadow border border-gray-100 mt-8 animate-fadeIn">
-    <h2 class="text-3xl font-extrabold text-primaryNavy tracking-tight mb-2">Report Technical Incident</h2>
-    <p class="text-sm text-gray-500 mb-6">Document issues immediately to request field support</p>
+  <div class="max-w-2xl mx-auto bg-bgCard p-8 rounded-2xl shadow border border-gray-800 mt-8 animate-fadeIn">
+    <h2 class="text-3xl font-extrabold text-primaryTeal tracking-tight mb-2">Report Technical Incident</h2>
+    <p class="text-sm text-gray-400 mb-6">Document issues immediately to request field support</p>
 
     <!-- Active Event Banner -->
-    <div v-if="activeEvent" class="bg-gray-50 border p-3 rounded-lg text-xs font-semibold text-gray-600 mb-4 flex items-center space-x-1.5 shadow-sm">
+    <div v-if="activeEvent" class="bg-bgMain border border-gray-800 p-3 rounded-lg text-xs font-semibold text-gray-400 mb-4 flex items-center space-x-1.5 shadow-sm">
       <span>🏆 Submitting to Active Event context:</span>
-      <span class="text-primaryNavy font-extrabold">{{ activeEvent.name }} ({{ activeEvent.code }})</span>
+      <span class="text-primaryTeal font-extrabold">{{ activeEvent.name }} ({{ activeEvent.code }})</span>
     </div>
     
     <form @submit.prevent="submitIncident" class="space-y-6">
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs font-semibold text-primaryNavy uppercase tracking-wider mb-2">Team Number</label>
-          <input v-model="form.teamNumber" type="number" required class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm" placeholder="e.g. 254">
+          <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Team Number</label>
+          <input v-model="form.teamNumber" type="number" required class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500" placeholder="e.g. 254">
         </div>
         <div>
-          <label class="block text-xs font-semibold text-primaryNavy uppercase tracking-wider mb-2">Match Number</label>
-          <input v-model="form.matchNumber" type="text" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm" placeholder="e.g. Q12">
+          <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Match Number</label>
+          <input v-model="form.matchNumber" type="text" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500" placeholder="e.g. Q12">
         </div>
       </div>
 
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs font-semibold text-primaryNavy uppercase tracking-wider mb-2">Category</label>
-          <select v-model="form.category" required class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm bg-white">
-            <option value="RADIO_COMMS">Radio & Comms</option>
-            <option value="ROBOTIC_POWER">Robot Power Path</option>
-            <option value="CAN_BUS">CAN Bus Connection</option>
-            <option value="MECHANICAL">Mechanical Issue</option>
-            <option value="CODE_EXCEPTION">Robot User Code</option>
-            <option value="OTHER">Other Issues</option>
+          <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Category</label>
+          <select v-model="form.category" required class="w-full px-4 py-2.5 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm bg-bgCard text-textMain">
+            <option value="RADIO_COMMS" class="bg-bgCard">Radio & Comms</option>
+            <option value="ROBOTIC_POWER" class="bg-bgCard">Robot Power Path</option>
+            <option value="CAN_BUS" class="bg-bgCard">CAN Bus Connection</option>
+            <option value="MECHANICAL" class="bg-bgCard">Mechanical Issue</option>
+            <option value="CODE_EXCEPTION" class="bg-bgCard">Robot User Code</option>
+            <option value="OTHER" class="bg-bgCard">Other Issues</option>
           </select>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-primaryNavy uppercase tracking-wider mb-2">Priority</label>
-          <select v-model="form.priority" required class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm bg-white">
-            <option value="LOW">Low Priority</option>
-            <option value="MEDIUM">Medium Priority</option>
-            <option value="HIGH">High Priority</option>
-            <option value="CRITICAL">Critical Alert</option>
+          <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Priority</label>
+          <select v-model="form.priority" required class="w-full px-4 py-2.5 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm bg-bgCard text-textMain">
+            <option value="LOW" class="bg-bgCard">Low Priority</option>
+            <option value="MEDIUM" class="bg-bgCard">Medium Priority</option>
+            <option value="HIGH" class="bg-bgCard">High Priority</option>
+            <option value="CRITICAL" class="bg-bgCard">Critical Alert</option>
           </select>
         </div>
       </div>
       
       <div>
         <div class="flex justify-between items-center mb-2">
-          <label class="block text-xs font-semibold text-primaryNavy uppercase tracking-wider">Issue Description</label>
+          <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider">Issue Description</label>
           <span v-if="transcriptionSource" class="text-[10px] text-primaryTeal bg-primaryTeal/10 px-2 py-0.5 rounded font-bold uppercase font-mono tracking-wider">
             Transcribed (Review Details below)
           </span>
         </div>
-        <textarea v-model="form.description" required rows="4" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm" placeholder="Describe the problem..."></textarea>
+        <textarea v-model="form.description" required rows="4" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500" placeholder="Describe the problem..."></textarea>
       </div>
 
       <!-- Recording status banner -->

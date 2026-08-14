@@ -21,16 +21,16 @@
           </div>
           
           <div class="hidden md:flex items-center space-x-6 text-sm font-semibold">
-            <router-link to="/" class="hover:text-accentLightblue transition duration-150" active-class="text-accentLightblue">
+            <router-link to="/" class="hover:text-accentYellow transition duration-150" active-class="text-accentYellow">
               Dashboard
             </router-link>
-            <router-link to="/knowledge-base" class="hover:text-accentLightblue transition duration-150" active-class="text-accentLightblue">
+            <router-link to="/knowledge-base" class="hover:text-accentYellow transition duration-150" active-class="text-accentYellow">
               Knowledge Base
             </router-link>
-            <router-link v-if="authStore.isAdmin" to="/users" class="hover:text-accentLightblue transition duration-150" active-class="text-accentLightblue">
+            <router-link v-if="authStore.isAdmin" to="/users" class="hover:text-accentYellow transition duration-150" active-class="text-accentYellow">
               Technicians
             </router-link>
-            <router-link v-if="authStore.isAdmin" to="/admin" class="hover:text-accentLightblue transition duration-150" active-class="text-accentLightblue">
+            <router-link v-if="authStore.isAdmin || authStore.isFTA" to="/admin" class="hover:text-accentYellow transition duration-150" active-class="text-accentYellow">
               Admin Panel
             </router-link>
           </div>
@@ -50,19 +50,19 @@
             </button>
 
             <!-- Notifications Drawer -->
-            <div v-if="showNotifications" class="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 text-gray-800 animate-fadeIn">
-              <div class="p-3 border-b flex justify-between items-center bg-gray-50 rounded-t-2xl">
-                <span class="text-xs font-extrabold text-primaryNavy uppercase tracking-wider">Notifications</span>
+            <div v-if="showNotifications" class="absolute right-0 mt-3 w-80 bg-bgCard rounded-2xl shadow-xl border border-gray-700 z-50 text-textMain animate-fadeIn">
+              <div class="p-3 border-b border-gray-700 flex justify-between items-center bg-bgMain rounded-t-2xl">
+                <span class="text-xs font-extrabold text-primaryTeal uppercase tracking-wider">Notifications</span>
                 <button 
                   v-if="unreadCount > 0"
                   @click="markAllNotificationsAsRead" 
-                  class="text-[9px] text-primaryTeal hover:underline font-bold uppercase"
+                  class="text-[9px] text-accentYellow hover:underline font-bold uppercase"
                 >
                   Mark all read
                 </button>
               </div>
 
-              <div class="max-h-64 overflow-y-auto divide-y divide-gray-100">
+              <div class="max-h-64 overflow-y-auto divide-y divide-gray-700">
                 <div v-if="notifications.length === 0" class="p-6 text-center text-xs text-gray-400 font-medium">
                   No notifications yet.
                 </div>
@@ -70,10 +70,10 @@
                   v-for="notif in notifications" 
                   :key="notif._id"
                   @click="clickNotification(notif)"
-                  class="p-3 hover:bg-gray-50 transition duration-150 cursor-pointer flex flex-col space-y-1"
-                  :class="!notif.isRead ? 'bg-primaryTeal/5' : ''"
+                  class="p-3 hover:bg-bgMain transition duration-150 cursor-pointer flex flex-col space-y-1"
+                  :class="!notif.isRead ? 'bg-primaryTeal/10' : ''"
                 >
-                  <p class="text-xs font-medium text-gray-700">{{ notif.text }}</p>
+                  <p class="text-xs font-medium text-gray-200">{{ notif.text }}</p>
                   <span class="text-[9px] text-gray-400">{{ formatTime(notif.createdAt) }}</span>
                 </div>
               </div>
@@ -85,7 +85,7 @@
             <div class="w-2 h-2 rounded-full bg-primaryTeal animate-pulse"></div>
             <div class="text-left">
               <p class="text-xs font-bold leading-tight">{{ authStore.user?.name }}</p>
-              <p class="text-[9px] text-accentLightblue font-mono tracking-widest uppercase leading-none">{{ authStore.user?.role }}</p>
+              <p class="text-[9px] text-accentYellow font-mono tracking-widest uppercase leading-none">{{ authStore.user?.role }}</p>
             </div>
           </router-link>
 
@@ -106,7 +106,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-100 border-t py-4 text-center text-xs text-gray-400">
+    <footer class="bg-primaryNavy border-t border-gray-800 py-4 text-center text-xs text-gray-500">
       <p>&copy; 2026 FIRST Assist. Built for FIRST Robotics Competition technical support.</p>
     </footer>
   </div>

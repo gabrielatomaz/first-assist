@@ -1,35 +1,35 @@
 <template>
   <div class="flex items-center justify-center min-h-[80vh] px-4">
-    <div class="w-full max-w-md bg-bgCard p-8 rounded-2xl shadow-xl border border-gray-100 transition duration-300 hover:shadow-2xl">
+    <div class="w-full max-w-md bg-bgCard p-8 rounded-2xl shadow-xl border border-gray-800 transition duration-300 hover:shadow-2xl">
       <div class="text-center mb-8">
-        <h2 class="text-3xl font-extrabold text-primaryNavy tracking-tight">FIRST Assist</h2>
-        <p class="text-sm text-gray-500 mt-2">Sign in to coordinate technical support</p>
+        <h2 class="text-3xl font-extrabold text-primaryTeal tracking-tight">FIRST Assist</h2>
+        <p class="text-sm text-gray-400 mt-2">Sign in to coordinate technical support</p>
       </div>
 
       <form @submit.prevent="handleLogin" class="space-y-6">
         <div>
-          <label class="block text-xs font-semibold text-primaryNavy uppercase tracking-wider mb-2">Email Address</label>
+          <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Email Address</label>
           <input
             v-model="email"
             type="email"
             required
             placeholder="csa@first.org"
-            class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal transition duration-200"
+            class="w-full px-4 py-3 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal transition duration-200"
           >
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-primaryNavy uppercase tracking-wider mb-2">Password</label>
+          <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Password</label>
           <input
             v-model="password"
             type="password"
             required
             placeholder="••••••••"
-            class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal transition duration-200"
+            class="w-full px-4 py-3 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal transition duration-200"
           >
         </div>
 
-        <div v-if="error" class="bg-red-50 border-l-4 border-accentCoral p-4 rounded text-sm text-accentCoral font-medium">
+        <div v-if="error" class="bg-red-950/40 border-l-4 border-accentCoral p-4 rounded text-sm text-accentCoral font-medium">
           {{ error }}
         </div>
 

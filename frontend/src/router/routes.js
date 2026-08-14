@@ -63,6 +63,6 @@ export default [
     path: '/admin',
     name: 'admin-dashboard',
     component: AdminDashboardView,
-    meta: { requiresAuth: true, roles: ['ADMIN'] }
+    meta: { requiresAuth: true, roles: ['ADMIN', 'FTA'] }
   }
 ];

@@ -4,8 +4,8 @@ import { requireRole } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Restrict all routes to ADMIN
-router.use(requireRole(['ADMIN']));
+// Restrict all routes to ADMIN and FTA
+router.use(requireRole(['ADMIN', 'FTA']));
 
 // Retrieve scrolling list of all system audit logs
 router.get('/audit-logs', async (req, res) => {

@@ -6,4 +6,13 @@
   body {
     @apply bg-bgMain text-textMain;
   }
+  
+  /* Global Dark Mode Input and Dropdown Styles */
+  input, textarea, select {
+    @apply bg-bgCard text-textMain border-gray-700 focus:ring-primaryTeal/20 focus:border-primaryTeal !important;
+  }
+  
+  input::placeholder, textarea::placeholder {
+    @apply text-gray-500 !important;
+  }
 }

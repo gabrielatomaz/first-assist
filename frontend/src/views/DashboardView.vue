@@ -2,14 +2,14 @@
   <div class="space-y-6">
     <div class="flex flex-col md:flex-row justify-between md:items-center gap-4">
       <div>
-        <h2 class="text-3xl font-extrabold text-primaryNavy tracking-tight">Technical Incidents</h2>
-        <p class="text-sm text-gray-500 mt-1">Real-time status tracking and CSA assignments for FRC teams</p>
+        <h2 class="text-3xl font-extrabold text-primaryTeal tracking-tight">Technical Incidents</h2>
+        <p class="text-sm text-gray-400 mt-1">Real-time status tracking and CSA assignments for FRC teams</p>
       </div>
 
       <!-- Filters (Status & Event) -->
       <div class="flex flex-wrap items-center gap-3">
         <!-- Event Code Filter (Epic 11 / Epic 16) -->
-        <select v-model="eventFilter" @change="fetchIncidents" class="px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-xs bg-white font-semibold">
+        <select v-model="eventFilter" @change="fetchIncidents" class="px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-xs bg-bgCard font-semibold text-textMain">
           <option value="ALL">All Competitions</option>
           <option v-for="ev in events" :key="ev._id" :value="ev.code">
             {{ ev.name }} ({{ ev.code }})
@@ -17,7 +17,7 @@
         </select>
 
         <!-- Status Filter (Epic 16) -->
-        <select v-model="statusFilter" @change="fetchIncidents" class="px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-xs bg-white font-semibold">
+        <select v-model="statusFilter" @change="fetchIncidents" class="px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-xs bg-bgCard font-semibold text-textMain">
           <option value="ALL">All Active Issues</option>
           <option value="OPEN">Open Queue</option>
           <option value="ASSIGNED">Assigned</option>
@@ -29,7 +29,7 @@
 
         <button
           @click="fetchIncidents"
-          class="bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 border rounded-lg text-xs font-semibold shadow-sm transition duration-150"
+          class="bg-bgCard hover:bg-gray-800 text-textMain px-4 py-2 border border-gray-700 rounded-lg text-xs font-semibold shadow-sm transition duration-150"
         >
           &#8635; Refresh
         </button>

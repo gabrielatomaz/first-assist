@@ -1,11 +1,11 @@
 <template>
   <div class="max-w-4xl mx-auto space-y-6 mt-8 animate-fadeIn">
     <!-- Header -->
-    <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
       <div>
-        <h2 class="text-3xl font-extrabold text-primaryNavy tracking-tight">Team {{ teamNumber }}</h2>
-        <p class="text-sm text-gray-500 font-medium mt-1">
-          Rookie Year: <span class="font-bold text-gray-700">{{ team ? team.rookieYear || 'N/A' : 'N/A' }}</span>
+        <h2 class="text-3xl font-extrabold text-primaryTeal tracking-tight">Team {{ teamNumber }}</h2>
+        <p class="text-sm text-gray-400 font-medium mt-1">
+          Rookie Year: <span class="font-bold text-gray-300">{{ team ? team.rookieYear || 'N/A' : 'N/A' }}</span>
         </p>
       </div>
       <router-link to="/" class="text-xs text-primaryTeal hover:underline font-bold uppercase tracking-wider">
@@ -15,24 +15,24 @@
 
     <!-- History stats -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="bg-white p-5 rounded-2xl border shadow-sm flex flex-col items-center justify-center">
-        <span class="text-3xl font-extrabold text-primaryNavy">{{ incidents.length }}</span>
+      <div class="bg-bgCard p-5 rounded-2xl border border-gray-800 shadow-sm flex flex-col items-center justify-center">
+        <span class="text-3xl font-extrabold text-primaryTeal">{{ incidents.length }}</span>
         <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1">Total Reported Incidents</span>
       </div>
-      <div class="bg-white p-5 rounded-2xl border shadow-sm flex flex-col items-center justify-center">
-        <span class="text-3xl font-extrabold text-green-600">{{ resolvedCount }}</span>
+      <div class="bg-bgCard p-5 rounded-2xl border border-gray-800 shadow-sm flex flex-col items-center justify-center">
+        <span class="text-3xl font-extrabold text-green-500">{{ resolvedCount }}</span>
         <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1">Resolved Issues</span>
       </div>
-      <div class="bg-white p-5 rounded-2xl border shadow-sm flex flex-col items-center justify-center">
+      <div class="bg-bgCard p-5 rounded-2xl border border-gray-800 shadow-sm flex flex-col items-center justify-center">
         <span class="text-3xl font-extrabold text-accentCoral">{{ openCount }}</span>
         <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1">Open/Active issues</span>
       </div>
     </div>
 
     <!-- History Timeline List -->
-    <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-100 space-y-6">
-      <div class="border-b pb-3">
-        <h3 class="text-lg font-bold text-primaryNavy tracking-tight">Incident History Log</h3>
+    <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-6">
+      <div class="border-b border-gray-800 pb-3">
+        <h3 class="text-lg font-bold text-textMain tracking-tight">Incident History Log</h3>
       </div>
 
       <div v-if="loading" class="text-center py-6 text-xs text-gray-400 font-bold">
@@ -47,7 +47,7 @@
         <div 
           v-for="inc in incidents" 
           :key="inc._id"
-          class="p-4 rounded-xl border border-gray-100 bg-white hover:shadow-sm transition flex flex-col space-y-3"
+          class="p-4 rounded-xl border border-gray-800 bg-bgCard hover:shadow-md transition flex flex-col space-y-3"
         >
           <div class="flex justify-between items-center">
             <div class="flex items-center space-x-2">
@@ -61,16 +61,16 @@
             </span>
           </div>
 
-          <p class="text-xs text-gray-700 leading-relaxed font-medium">{{ inc.description }}</p>
+          <p class="text-xs text-gray-200 leading-relaxed font-medium">{{ inc.description }}</p>
 
-          <div v-if="inc.rootCause || inc.appliedSolution" class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-3 rounded-lg text-xs mt-1 border border-gray-100">
+          <div v-if="inc.rootCause || inc.appliedSolution" class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-bgMain p-3 rounded-lg text-xs mt-1 border border-gray-800">
             <div>
               <span class="block text-[9px] font-extrabold text-gray-400 uppercase tracking-widest">Root Cause</span>
-              <span class="text-gray-700 font-medium leading-relaxed">{{ inc.rootCause || 'N/A' }}</span>
+              <span class="text-gray-200 font-medium leading-relaxed">{{ inc.rootCause || 'N/A' }}</span>
             </div>
             <div>
               <span class="block text-[9px] font-extrabold text-gray-400 uppercase tracking-widest">Applied Solution</span>
-              <span class="text-gray-700 font-medium leading-relaxed">{{ inc.appliedSolution || 'N/A' }}</span>
+              <span class="text-gray-200 font-medium leading-relaxed">{{ inc.appliedSolution || 'N/A' }}</span>
             </div>
           </div>
 
@@ -132,13 +132,13 @@ const fetchHistory = async () => {
 
 const statusBadgeClass = (status) => {
   switch (status) {
-    case 'OPEN': return 'bg-gray-100 text-gray-500';
-    case 'ASSIGNED': return 'bg-amber-100 text-amber-700';
-    case 'IN_PROGRESS': return 'bg-blue-100 text-blue-700 animate-pulse';
-    case 'WAITING': return 'bg-purple-100 text-purple-700';
-    case 'RESOLVED': return 'bg-green-100 text-green-700';
-    case 'CLOSED': return 'bg-primaryNavy text-white';
-    default: return 'bg-gray-100 text-gray-400';
+    case 'OPEN': return 'bg-primaryTeal/10 text-primaryTeal border border-primaryTeal/25';
+    case 'ASSIGNED': return 'bg-accentPurple/10 text-accentPurple border border-accentPurple/25';
+    case 'IN_PROGRESS': return 'bg-accentYellow/10 text-accentYellow border border-accentYellow/20';
+    case 'WAITING': return 'bg-gray-800 text-gray-400 border border-gray-700';
+    case 'RESOLVED': return 'bg-green-950/40 text-green-400 border border-green-900/30';
+    case 'CLOSED': return 'bg-gray-800/80 text-gray-500 border border-gray-700/50';
+    default: return 'bg-gray-800 text-gray-400 border border-gray-700';
   }
 };
 

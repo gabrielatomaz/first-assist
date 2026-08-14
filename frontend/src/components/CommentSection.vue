@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-6">
-    <h3 class="text-lg font-bold text-primaryNavy border-b pb-3">Updates & Discussion</h3>
+    <h3 class="text-lg font-bold text-primaryTeal border-b border-gray-800 pb-3">Updates & Discussion</h3>
 
     <!-- Comments List -->
     <div v-if="loading" class="text-center py-6">
@@ -8,17 +8,17 @@
     </div>
 
     <div v-else class="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-      <div v-for="comment in comments" :key="comment._id" class="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col space-y-2">
+      <div v-for="comment in comments" :key="comment._id" class="bg-bgMain p-4 rounded-xl border border-gray-800 flex flex-col space-y-2">
         <div class="flex justify-between items-center text-xs">
           <div class="flex items-center space-x-2">
-            <span class="font-bold text-primaryNavy">{{ comment.authorId?.name }}</span>
-            <span class="text-[9px] bg-gray-200/80 text-gray-600 px-1.5 py-0.5 rounded font-mono uppercase tracking-wider font-bold">
+            <span class="font-bold text-white">{{ comment.authorId?.name }}</span>
+            <span class="text-[9px] bg-bgCard text-primaryTeal px-1.5 py-0.5 rounded font-mono uppercase tracking-wider font-bold border border-gray-800">
               {{ comment.authorId?.role }}
             </span>
           </div>
           <span class="text-gray-400">{{ formatDate(comment.createdAt) }}</span>
         </div>
-        <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ comment.text }}</p>
+        <p class="text-sm text-gray-200 whitespace-pre-wrap">{{ comment.text }}</p>
       </div>
 
       <div v-if="comments.length === 0" class="text-center py-8 text-sm text-gray-400">
@@ -33,7 +33,7 @@
         type="text"
         required
         placeholder="Type an update or request help..."
-        class="flex-grow px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm"
+        class="flex-grow px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500"
       >
       <button
         type="submit"
