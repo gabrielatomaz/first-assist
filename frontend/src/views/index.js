@@ -1,2 +1,9 @@
-export { default as DashboardView } from './DashboardView.vue'
-export { default as IncidentCreateView } from './IncidentCreateView.vue'
+export { default as DashboardView } from './DashboardView.vue';
+export { default as IncidentCreateView } from './IncidentCreateView.vue';
+export { default as LoginView } from './LoginView.vue';
+export { default as UserManagementView } from './UserManagementView.vue';
+export { default as ProfileView } from './ProfileView.vue';
+export { default as IncidentDetailView } from './IncidentDetailView.vue';
+export { default as KnowledgeBaseView } from './KnowledgeBaseView.vue';
+export { default as TeamProfileView } from './TeamProfileView.vue';
+export { default as AdminDashboardView } from './AdminDashboardView.vue';
