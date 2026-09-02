@@ -70,7 +70,7 @@ This feature provides:
 - **Real-time updates** — No WebSocket/Socket.io, no polling; only manual "↻ Refresh" button
 - **Status filtering** — No filter tabs on the dashboard; all statuses shown together
 - **Pinia store** — Pinia is installed (`package.json`) but no stores are defined; state lives in component `ref()`
-- **API service layer** — Raw `fetch('http://localhost:3000/api/incidents')` calls directly in views
+- **API service layer** — Raw `fetch('http://192.168.15.8:3000/api/incidents')` calls directly in views
 - **Auth protection** — No route guards, no JWT verification, no role-based access
 - **Swagger documentation** — No OpenAPI spec for any endpoint
 - **Tests** — No unit or integration tests for dashboard functionality

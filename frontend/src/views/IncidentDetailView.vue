@@ -26,7 +26,7 @@
         </p>
       </div>
 
-      <div class="flex flex-wrap items-center gap-2">
+      <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 w-full md:w-auto">
         <!-- Assign selection menu for Admin/FTA -->
         <div v-if="authStore.isAdmin || authStore.isFTA" class="flex items-center space-x-2 bg-bgCard px-3 py-1.5 rounded-lg border border-gray-700">
           <label class="text-[10px] font-bold text-gray-400 uppercase">Technician</label>
@@ -205,6 +205,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { CommentSection, AISuggestionPanel, ResolveIncidentModal } from '../components';
+import { getApiUrl } from '../config/api';
 
 const route = useRoute();
 const authStore = useAuthStore();
@@ -231,8 +232,8 @@ const statusBadgeClass = computed(() => {
   if (!incident.value) return '';
   switch (incident.value.status) {
     case 'OPEN': return 'bg-primaryTeal/10 text-primaryTeal border border-primaryTeal/25';
-    case 'ASSIGNED': return 'bg-accentPurple/10 text-accentPurple border border-accentPurple/25';
-    case 'IN_PROGRESS': return 'bg-accentYellow/10 text-accentYellow border border-accentYellow/20';
+    case 'ASSIGNED': return 'bg-accentYellow/10 text-accentYellow border border-accentYellow/25';
+    case 'IN_PROGRESS': return 'bg-accentPurple/10 text-accentPurple border border-accentPurple/25';
     case 'WAITING': return 'bg-gray-800 text-gray-400 border border-gray-700';
     case 'RESOLVED': return 'bg-green-950/40 text-green-400 border border-green-900/30';
     case 'CLOSED': return 'bg-gray-800/80 text-gray-500 border border-gray-700/50';
@@ -251,29 +252,42 @@ const priorityBadgeClass = computed(() => {
   }
 });
 
-const fetchDetails = async () => {
-  loading.value = true;
+const fetchDetails = async (isBackground = false) => {
+  if (!isBackground) {
+    loading.value = true;
+  }
   error.value = null;
   try {
-    const response = await fetch(`http://localhost:3000/api/incidents/${route.params.id}`, {
+    const response = await fetch(getApiUrl(`/incidents/${route.params.id}`), {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     });
     if (!response.ok) throw new Error('Failed to load incident detail parameters');
-    incident.value = await response.json();
-    selectedAssignee.value = incident.value.assignedTo?._id || null;
-    selectedStatus.value = incident.value.status;
-    diagnosisText.value = incident.value.diagnosis || '';
+    const data = await response.json();
+    
+    // Update incident data
+    incident.value = data;
+    selectedAssignee.value = data.assignedTo?._id || null;
+    selectedStatus.value = data.status;
+
+    // Only update diagnosis text if user is NOT currently editing
+    if (!editingDiagnosis.value) {
+      diagnosisText.value = data.diagnosis || '';
+    }
   } catch (err) {
-    error.value = err.message;
+    if (!isBackground) {
+      error.value = err.message;
+    }
   } finally {
-    loading.value = false;
+    if (!isBackground) {
+      loading.value = false;
+    }
   }
 };
 
 const fetchTechnicians = async () => {
   console.log('fetchTechnicians called. Token present:', !!authStore.token);
   try {
-    const response = await fetch('http://localhost:3000/api/users', {
+    const response = await fetch(getApiUrl('/users'), {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     });
     console.log('fetchTechnicians response status:', response.status);
@@ -296,7 +310,7 @@ const fetchTechnicians = async () => {
 
 const assignTechnician = async () => {
   try {
-    const response = await fetch(`http://localhost:3000/api/incidents/${incident.value._id}/status`, {
+    const response = await fetch(getApiUrl(`/incidents/${incident.value._id}/status`), {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -317,7 +331,7 @@ const assignTechnician = async () => {
 const assignToMe = async () => {
   try {
     const nextStatus = incident.value.status === 'OPEN' ? 'ASSIGNED' : incident.value.status;
-    const response = await fetch(`http://localhost:3000/api/incidents/${incident.value._id}/status`, {
+    const response = await fetch(getApiUrl(`/incidents/${incident.value._id}/status`), {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -337,7 +351,7 @@ const assignToMe = async () => {
 
 const updateStatus = async () => {
   try {
-    const response = await fetch(`http://localhost:3000/api/incidents/${incident.value._id}/status`, {
+    const response = await fetch(getApiUrl(`/incidents/${incident.value._id}/status`), {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -357,7 +371,7 @@ const updateStatus = async () => {
 const saveDiagnosis = async () => {
   savingDiagnosis.value = true;
   try {
-    const response = await fetch(`http://localhost:3000/api/incidents/${incident.value._id}/diagnosis`, {
+    const response = await fetch(getApiUrl(`/incidents/${incident.value._id}/diagnosis`), {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -378,7 +392,7 @@ const saveDiagnosis = async () => {
 
 const closeIncident = async () => {
   try {
-    const response = await fetch(`http://localhost:3000/api/incidents/${incident.value._id}/close`, {
+    const response = await fetch(getApiUrl(`/incidents/${incident.value._id}/close`), {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     });
@@ -399,7 +413,7 @@ const handleIncidentResolved = (resolvedData) => {
 
 const fetchAuditLogs = async () => {
   try {
-    const response = await fetch(`http://localhost:3000/api/incidents/${route.params.id}/audit-logs`, {
+    const response = await fetch(getApiUrl(`/incidents/${route.params.id}/audit-logs`), {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     });
     if (response.ok) {
@@ -425,9 +439,9 @@ onMounted(() => {
     fetchTechnicians();
   }
   
-  // Real-time updates (Epic 14) refetches details/logs every 3000ms
+  // Real-time updates (Epic 14) refetches details/logs silently every 3000ms
   pollInterval = setInterval(() => {
-    fetchDetails();
+    fetchDetails(true);
     fetchAuditLogs();
   }, 3000);
 });

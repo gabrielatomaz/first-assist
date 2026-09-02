@@ -80,7 +80,39 @@ const router = express.Router();
  *         description: User not found
  */
 router.get('/', requireRole(['ADMIN', 'FTA']), userController.getUsers);
-router.post('/', requireRole(['ADMIN']), userController.createUser);
-router.patch('/:id/status', requireRole(['ADMIN']), userController.updateStatus);
+router.post('/', requireRole(['ADMIN', 'FTA']), userController.createUser);
+router.patch('/:id/status', requireRole(['ADMIN', 'FTA']), userController.updateStatus);
+
+// Setting active event context per CSA (Admin/FTA) or multi-regionals for FTA (Admin only)
+router.patch('/:id/assigned-event', requireRole(['ADMIN', 'FTA']), async (req, res) => {
+  try {
+    const { assignedEventCode, assignedEventCodes } = req.body;
+    const { User } = await import('../models/User.js');
+    
+    const targetUser = await User.findById(req.params.id);
+    if (!targetUser) return res.status(404).json({ error: 'User not found' });
+
+    // Restrict assigning FTA multi-regionals to ADMIN role only
+    const reqRole = (req.user?.role || '').toUpperCase();
+    if (assignedEventCodes !== undefined && reqRole !== 'ADMIN') {
+      return res.status(403).json({ error: 'Only Administrators can assign regional events to FTAs' });
+    }
+
+    if (assignedEventCode !== undefined) targetUser.assignedEventCode = assignedEventCode || null;
+    if (assignedEventCodes !== undefined) targetUser.assignedEventCodes = Array.isArray(assignedEventCodes) ? assignedEventCodes : [];
+
+    await targetUser.save();
+    res.json({
+      _id: targetUser._id,
+      name: targetUser.name,
+      email: targetUser.email,
+      role: targetUser.role,
+      assignedEventCode: targetUser.assignedEventCode,
+      assignedEventCodes: targetUser.assignedEventCodes
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 export default router;

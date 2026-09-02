@@ -49,6 +49,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { getApiUrl } from '../config/api';
 
 const props = defineProps({
   incidentId: { type: String, required: true }
@@ -63,7 +64,7 @@ const posting = ref(false);
 const fetchComments = async () => {
   loading.value = true;
   try {
-    const response = await fetch(`http://localhost:3000/api/incidents/${props.incidentId}/comments`, {
+    const response = await fetch(getApiUrl(`/incidents/${props.incidentId}/comments`), {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     });
     if (!response.ok) throw new Error('Failed to load comments');
@@ -79,7 +80,7 @@ const handlePostComment = async () => {
   if (!newComment.value.trim()) return;
   posting.value = true;
   try {
-    const response = await fetch(`http://localhost:3000/api/incidents/${props.incidentId}/comments`, {
+    const response = await fetch(getApiUrl(`/incidents/${props.incidentId}/comments`), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

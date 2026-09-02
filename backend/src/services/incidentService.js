@@ -142,8 +142,8 @@ export const incidentService = {
     return updated;
   },
 
-  searchResolvedIncidents: async (keyword, filters = {}) => {
-    const query = { status: 'RESOLVED' };
+  searchResolvedIncidents: async (keyword, filters = {}, pagination = {}) => {
+    const query = { status: { $in: ['RESOLVED', 'CLOSED'] } };
     
     if (filters.category) query.category = filters.category;
     if (filters.priority) query.priority = filters.priority;
@@ -152,16 +152,27 @@ export const incidentService = {
 
     if (keyword) {
       query.$text = { $search: keyword };
-      return await Incident.find(query)
-        .populate('reportedBy', 'name role')
-        .populate('assignedTo', 'name role')
-        .sort({ score: { $meta: 'textScore' } });
     }
 
-    return await Incident.find(query)
+    const page = parseInt(pagination.page) || 1;
+    const limit = parseInt(pagination.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const total = await Incident.countDocuments(query);
+    const incidents = await Incident.find(query)
       .populate('reportedBy', 'name role')
       .populate('assignedTo', 'name role')
-      .sort({ createdAt: -1 });
+      .sort(keyword ? { score: { $meta: 'textScore' } } : { createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return {
+      incidents,
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit) || 1
+    };
   },
 
   getRelatedIncidents: async (incidentId) => {

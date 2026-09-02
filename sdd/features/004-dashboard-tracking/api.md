@@ -3,7 +3,7 @@
 ## Base URL
 
 ```
-http://localhost:3000/api
+http://192.168.15.8:3000/api
 ```
 
 > [!NOTE]
@@ -21,7 +21,7 @@ Retrieves all incidents sorted by creation date (newest first).
 
 ```http
 GET /api/incidents HTTP/1.1
-Host: localhost:3000
+Host: 192.168.15.8:3000
 Authorization: Bearer <JWT_TOKEN>
 ```
 
@@ -83,7 +83,7 @@ Retrieves a single incident by ID with populated user references.
 
 ```http
 GET /api/incidents/665a1b2c3d4e5f6a7b8c9d0e HTTP/1.1
-Host: localhost:3000
+Host: 192.168.15.8:3000
 Authorization: Bearer <JWT_TOKEN>
 ```
 
@@ -157,7 +157,7 @@ Updates the status of an incident. Current implementation only accepts `status`.
 
 ```http
 PATCH /api/incidents/665a1b2c3d4e5f6a7b8c9d0e/status HTTP/1.1
-Host: localhost:3000
+Host: 192.168.15.8:3000
 Authorization: Bearer <JWT_TOKEN>
 Content-Type: application/json
 ```
@@ -230,7 +230,7 @@ Content-Type: application/json
 
 ```javascript
 // Client connects to Socket.io server
-const socket = io('http://localhost:3000')
+const socket = io('http://192.168.15.8:3000')
 ```
 
 ### Events Emitted by Server

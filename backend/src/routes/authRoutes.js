@@ -53,6 +53,9 @@ const router = express.Router();
  *       403:
  *         description: Account deactivated
  */
+import { authMiddleware } from '../middleware/authMiddleware.js';
+
 router.post('/login', authController.login);
+router.get('/me', authMiddleware, authController.me);
 
 export default router;

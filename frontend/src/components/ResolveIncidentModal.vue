@@ -53,6 +53,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { getApiUrl } from '../config/api';
 
 const props = defineProps({
   incidentId: { type: String, required: true }
@@ -68,7 +69,7 @@ const handleSubmit = async () => {
   if (!form.value.rootCause.trim() || !form.value.appliedSolution.trim()) return;
   submitting.value = true;
   try {
-    const response = await fetch(`http://localhost:3000/api/incidents/${props.incidentId}/resolve`, {
+    const response = await fetch(getApiUrl(`/incidents/${props.incidentId}/resolve`), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

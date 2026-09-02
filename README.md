@@ -98,11 +98,11 @@ cd backend
 # Install dependencies
 npm install
 
-# Start the server (runs on http://localhost:3000)
+# Start the server (runs on http://192.168.15.8:3000)
 npm start
 ```
 
-The backend API will be available at `http://localhost:3000`.
+The backend API will be available at `http://192.168.15.8:3000`.
 
 #### Available API Endpoints
 

@@ -7,25 +7,25 @@
 
     <!-- Search & Filters Container -->
     <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-4">
-      <div class="flex items-center space-x-3 border-b border-gray-700 pb-4">
-        <span class="text-gray-400 text-lg">🔍</span>
+      <div class="flex items-center space-x-3 bg-bgMain px-4 py-3 rounded-xl border border-gray-700 focus-within:ring-2 focus-within:ring-primaryTeal/30 focus-within:border-primaryTeal transition-all shadow-inner">
+        <span class="text-primaryTeal text-base">🔍</span>
         <input
           v-model="searchQuery"
           type="text"
           placeholder="Type keywords (e.g. radio, fuse, breaker, CAN)..."
           @input="debouncedSearch"
-          class="w-full bg-transparent focus:outline-none text-sm text-textMain placeholder-gray-500"
+          class="w-full bg-transparent border-none focus:outline-none text-sm text-textMain placeholder-gray-500 font-medium"
         >
-        <button v-if="searchQuery" @click="clearSearch" class="text-xs text-accentYellow hover:underline font-semibold transition">
-          Clear
+        <button v-if="searchQuery" @click="clearSearch" class="text-xs text-accentYellow hover:underline font-bold transition whitespace-nowrap">
+          ✕ Clear
         </button>
       </div>
 
-      <!-- Advanced filters -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <!-- Advanced filters (Category, Priority, Team Number, Event Code) -->
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div>
           <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5">Category</label>
-          <select v-model="filters.category" @change="executeSearch" class="w-full px-3 py-2 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-xs bg-bgCard font-semibold text-textMain">
+          <select v-model="filters.category" @change="executeSearch(1)" class="w-full px-3 py-2 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 text-xs bg-bgCard font-semibold text-textMain">
             <option value="" class="bg-bgCard">All Categories</option>
             <option value="RADIO_COMMS" class="bg-bgCard">Radio & Comms</option>
             <option value="ROBOTIC_POWER" class="bg-bgCard">Robot Power Path</option>
@@ -38,12 +38,22 @@
 
         <div>
           <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5">Priority</label>
-          <select v-model="filters.priority" @change="executeSearch" class="w-full px-3 py-2 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-xs bg-bgCard font-semibold text-textMain">
+          <select v-model="filters.priority" @change="executeSearch(1)" class="w-full px-3 py-2 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 text-xs bg-bgCard font-semibold text-textMain">
             <option value="" class="bg-bgCard">All Priorities</option>
             <option value="LOW" class="bg-bgCard">Low</option>
             <option value="MEDIUM" class="bg-bgCard">Medium</option>
             <option value="HIGH" class="bg-bgCard">High</option>
             <option value="CRITICAL" class="bg-bgCard">Critical</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5">Event Context</label>
+          <select v-model="filters.eventCode" @change="executeSearch(1)" class="w-full px-3 py-2 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 text-xs bg-bgCard font-semibold text-textMain">
+            <option value="" class="bg-bgCard">All Regionals / Events</option>
+            <option v-for="ev in events" :key="ev._id" :value="ev.code" class="bg-bgCard">
+              {{ ev.name }} ({{ ev.code }})
+            </option>
           </select>
         </div>
 
@@ -54,7 +64,7 @@
             type="number"
             placeholder="e.g. 254"
             @input="debouncedSearch"
-            class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgCard focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-xs text-textMain placeholder-gray-500"
+            class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgCard focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 text-xs text-textMain placeholder-gray-500"
           >
         </div>
       </div>
@@ -74,6 +84,9 @@
               <h3 class="font-extrabold text-white text-lg">Team {{ incident.teamNumber }}</h3>
               <span class="bg-primaryTeal/10 text-primaryTeal px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider font-mono">
                 {{ formatCategory(incident.category) }}
+              </span>
+              <span v-if="incident.eventCode" class="bg-accentPurple/10 text-accentPurple px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider font-mono border border-accentPurple/20">
+                🏆 {{ incident.eventCode }}
               </span>
             </div>
             <p class="text-xs text-gray-400 font-medium">Match: {{ incident.matchNumber || 'N/A' }} | Resolved on {{ formatDate(incident.resolvedAt) }}</p>
@@ -102,6 +115,27 @@
       <div v-if="results.length === 0" class="text-center py-12 bg-bgCard rounded-2xl border border-dashed border-gray-800">
         <p class="text-gray-400 text-sm font-medium">No matching resolved incident records found.</p>
       </div>
+
+      <!-- Pagination Controls (FEAT-016) -->
+      <div v-if="totalPages > 1" class="flex justify-between items-center bg-bgCard p-4 rounded-xl border border-gray-800 text-xs text-gray-400">
+        <span>Page {{ currentPage }} of {{ totalPages }} ({{ totalCount }} Total Resolved Tickets)</span>
+        <div class="flex space-x-2">
+          <button 
+            :disabled="currentPage === 1" 
+            @click="executeSearch(currentPage - 1)"
+            class="px-3 py-1.5 rounded bg-bgMain border border-gray-700 disabled:opacity-40 font-bold hover:bg-gray-800 transition"
+          >
+            ← Prev
+          </button>
+          <button 
+            :disabled="currentPage === totalPages" 
+            @click="executeSearch(currentPage + 1)"
+            class="px-3 py-1.5 rounded bg-bgMain border border-gray-700 disabled:opacity-40 font-bold hover:bg-gray-800 transition"
+          >
+            Next →
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -109,29 +143,60 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { getApiUrl } from '../config/api';
 
 const authStore = useAuthStore();
 
 const searchQuery = ref('');
-const filters = ref({ category: '', priority: '', teamNumber: null });
+const filters = ref({ category: '', priority: '', teamNumber: null, eventCode: '' });
+const events = ref([]);
+
 const results = ref([]);
 const searching = ref(true);
+const currentPage = ref(1);
+const totalPages = ref(1);
+const totalCount = ref(0);
 let debounceTimeout = null;
 
-const executeSearch = async () => {
+const loadEvents = async () => {
+  try {
+    const res = await fetch(getApiUrl('/events'), {
+      headers: { 'Authorization': `Bearer ${authStore.token}` }
+    });
+    if (res.ok) {
+      events.value = await res.json();
+    }
+  } catch (err) {
+    console.error('Failed to load events:', err);
+  }
+};
+
+const executeSearch = async (page = 1) => {
   searching.value = true;
+  currentPage.value = page;
   try {
     const params = new URLSearchParams();
-    if (searchQuery.value.trim()) params.append('q', searchQuery.value);
+    params.append('page', String(page));
+    params.append('limit', '10');
+    if (searchQuery.value.trim()) params.append('q', searchQuery.value.trim());
     if (filters.value.category) params.append('category', filters.value.category);
     if (filters.value.priority) params.append('priority', filters.value.priority);
-    if (filters.value.teamNumber) params.append('teamNumber', filters.value.teamNumber);
+    if (filters.value.teamNumber) params.append('teamNumber', String(filters.value.teamNumber));
+    if (filters.value.eventCode) params.append('eventCode', filters.value.eventCode);
     
-    const response = await fetch(`http://localhost:3000/api/incidents/search?${params.toString()}`, {
+    const response = await fetch(getApiUrl(`/incidents/search?${params.toString()}`), {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     });
     if (!response.ok) throw new Error('Failed to query knowledge base');
-    results.value = await response.json();
+    const data = await response.json();
+    
+    if (data.incidents) {
+      results.value = data.incidents;
+      totalPages.value = data.totalPages;
+      totalCount.value = data.total;
+    } else {
+      results.value = data;
+    }
   } catch (err) {
     console.error(err);
   } finally {
@@ -142,13 +207,13 @@ const executeSearch = async () => {
 const debouncedSearch = () => {
   clearTimeout(debounceTimeout);
   debounceTimeout = setTimeout(() => {
-    executeSearch();
-  }, 300); // wait 300ms
+    executeSearch(1);
+  }, 300);
 };
 
 const clearSearch = () => {
   searchQuery.value = '';
-  executeSearch();
+  executeSearch(1);
 };
 
 const formatDate = (dateStr) => {
@@ -163,6 +228,7 @@ const formatCategory = (cat) => {
 };
 
 onMounted(() => {
-  executeSearch();
+  loadEvents();
+  executeSearch(1);
 });
 </script>

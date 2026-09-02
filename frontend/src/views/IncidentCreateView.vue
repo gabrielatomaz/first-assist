@@ -5,23 +5,44 @@
 
     <!-- Active Event Banner -->
     <div v-if="activeEvent" class="bg-bgMain border border-gray-800 p-3 rounded-lg text-xs font-semibold text-gray-400 mb-4 flex items-center space-x-1.5 shadow-sm">
-      <span>🏆 Submitting to Active Event context:</span>
+      <span class="text-accentYellow font-black">🏆</span>
       <span class="text-primaryTeal font-extrabold">{{ activeEvent.name }} ({{ activeEvent.code }})</span>
     </div>
     
     <form @submit.prevent="submitIncident" class="space-y-6">
-      <div class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Team Number</label>
-          <input v-model="form.teamNumber" type="number" required class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500" placeholder="e.g. 254">
+          <input 
+            v-model.number="form.teamNumber" 
+            type="number" 
+            list="eventTeamsList" 
+            required 
+            class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500 font-mono" 
+            placeholder="e.g. 254 (or select below)"
+          >
+          <datalist id="eventTeamsList">
+            <option v-for="team in activeEventTeams" :key="team._id" :value="team.number">
+              Team {{ team.number }} — {{ team.name }}
+            </option>
+          </datalist>
         </div>
         <div>
           <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Match Number</label>
-          <input v-model="form.matchNumber" type="text" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500" placeholder="e.g. Q12">
+          <input 
+            v-model="form.matchNumber" 
+            type="text" 
+            list="matchSuggestionsList" 
+            class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500 font-mono" 
+            placeholder="e.g. Q12 (or pick below)"
+          >
+          <datalist id="matchSuggestionsList">
+            <option v-for="m in matchSuggestions" :key="m" :value="m">{{ m }}</option>
+          </datalist>
         </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Category</label>
           <select v-model="form.category" required class="w-full px-4 py-2.5 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm bg-bgCard text-textMain">
@@ -125,6 +146,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { getApiUrl } from '../config/api';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -138,6 +160,13 @@ const transcribing = ref(false);
 const transcriptionError = ref(null);
 const transcriptionSource = ref(false);
 const activeEvent = ref(null);
+const activeEventTeams = ref([]);
+
+const matchSuggestions = ref([
+  ...Array.from({ length: 60 }, (_, i) => `Q${i + 1}`),
+  'Practice 1', 'Practice 2', 'Practice 3',
+  'Playoff 1', 'Playoff 2', 'Playoff 3', 'Playoff 4', 'Finals 1', 'Finals 2'
+]);
 
 let mediaRecorder = null;
 let audioChunks = [];
@@ -145,16 +174,64 @@ let cachedAudioBlob = null;
 
 const fetchActiveEvent = async () => {
   try {
-    const response = await fetch('http://localhost:3000/api/events/active', {
+    // 1. Sync latest user profile with backend
+    await authStore.fetchCurrentUser();
+
+    // 2. Fetch list of all events
+    const response = await fetch(getApiUrl('/events'), {
+      headers: { 'Authorization': `Bearer ${authStore.token}` }
+    });
+    if (!response.ok) return;
+    const events = await response.json();
+
+    // 3. If user (FTA or CSA) has a specific assigned active event code
+    if (authStore.user?.assignedEventCode) {
+      const assigned = events.find(e => e.code === authStore.user.assignedEventCode);
+      if (assigned) {
+        activeEvent.value = assigned;
+        form.value.eventCode = assigned.code;
+        fetchActiveEventTeams(assigned.code);
+        return;
+      }
+    }
+
+    // 4. If FTA with assigned regionals list
+    if (authStore.user?.role === 'FTA' && authStore.user?.assignedEventCodes?.length > 0) {
+      const assigned = events.find(e => authStore.user.assignedEventCodes.includes(e.code));
+      if (assigned) {
+        activeEvent.value = assigned;
+        form.value.eventCode = assigned.code;
+        fetchActiveEventTeams(assigned.code);
+        return;
+      }
+    }
+
+    // 5. Default global active event lookup
+    const activeRes = await fetch(getApiUrl('/events/active'), {
+      headers: { 'Authorization': `Bearer ${authStore.token}` }
+    });
+    if (activeRes.ok) {
+      const data = await activeRes.json();
+      activeEvent.value = data;
+      form.value.eventCode = data.code;
+      fetchActiveEventTeams(data.code);
+    }
+  } catch (err) {
+    console.error('Failed to load active event:', err);
+  }
+};
+
+const fetchActiveEventTeams = async (eventCode) => {
+  try {
+    const response = await fetch(getApiUrl(`/events/${eventCode}/teams?limit=200`), {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     });
     if (response.ok) {
       const data = await response.json();
-      activeEvent.value = data;
-      form.value.eventCode = data.code;
+      activeEventTeams.value = data.teams || data;
     }
   } catch (err) {
-    console.error('Failed to load active event:', err);
+    console.error('Failed to load active event teams:', err);
   }
 };
 
@@ -199,7 +276,7 @@ const sendAudioForTranscription = async (audioBlob, forceError = false) => {
     formData.append('audio', audioBlob, 'incident.webm');
     
     const errorParam = forceError ? '?simulate_error=true' : '';
-    const response = await fetch(`http://localhost:3000/api/incidents/transcribe${errorParam}`, {
+    const response = await fetch(getApiUrl(`/incidents/transcribe${errorParam}`), {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${authStore.token}`
@@ -235,7 +312,7 @@ const submitIncident = async () => {
   submitting.value = true;
   error.value = null;
   try {
-    const response = await fetch('http://localhost:3000/api/incidents', {
+    const response = await fetch(getApiUrl('/incidents'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

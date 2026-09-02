@@ -7,7 +7,8 @@ import {
   IncidentDetailView,
   KnowledgeBaseView,
   TeamProfileView,
-  AdminDashboardView
+  AdminDashboardView,
+  FTADashboardView
 } from '../views';
 
 export default [
@@ -39,7 +40,7 @@ export default [
     path: '/users',
     name: 'users',
     component: UserManagementView,
-    meta: { requiresAuth: true, roles: ['ADMIN'] }
+    meta: { requiresAuth: true, roles: ['ADMIN', 'FTA'] }
   },
   {
     path: '/incidents/:id',
@@ -63,6 +64,12 @@ export default [
     path: '/admin',
     name: 'admin-dashboard',
     component: AdminDashboardView,
+    meta: { requiresAuth: true, roles: ['ADMIN'] }
+  },
+  {
+    path: '/fta',
+    name: 'fta-dashboard',
+    component: FTADashboardView,
     meta: { requiresAuth: true, roles: ['ADMIN', 'FTA'] }
   }
 ];

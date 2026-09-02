@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { getApiUrl } from '../config/api';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -18,7 +19,7 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true;
       this.error = null;
       try {
-        const response = await fetch('http://localhost:3000/api/auth/login', {
+        const response = await fetch(getApiUrl('/auth/login'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
@@ -45,6 +46,21 @@ export const useAuthStore = defineStore('auth', {
       this.user = null;
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+    },
+    async fetchCurrentUser() {
+      if (!this.token) return;
+      try {
+        const response = await fetch(getApiUrl('/auth/me'), {
+          headers: { 'Authorization': `Bearer ${this.token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          this.user = data;
+          localStorage.setItem('user', JSON.stringify(data));
+        }
+      } catch (err) {
+        console.error('Failed to sync current user profile:', err);
+      }
     }
   }
 });

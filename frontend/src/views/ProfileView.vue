@@ -86,6 +86,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { getApiUrl } from '../config/api';
 
 const authStore = useAuthStore();
 
@@ -103,7 +104,7 @@ const changingPassword = ref(false);
 const fetchProfile = async () => {
   loading.value = true;
   try {
-    const response = await fetch('http://localhost:3000/api/profile', {
+    const response = await fetch(getApiUrl('/profile'), {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     });
     if (!response.ok) throw new Error('Failed to load profile details');
@@ -120,7 +121,7 @@ const handleUpdateProfile = async () => {
   profileError.value = null;
   profileSuccess.value = false;
   try {
-    const response = await fetch('http://localhost:3000/api/profile', {
+    const response = await fetch(getApiUrl('/profile'), {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -155,7 +156,7 @@ const handlePasswordChange = async () => {
 
   changingPassword.value = true;
   try {
-    const response = await fetch('http://localhost:3000/api/profile/password', {
+    const response = await fetch(getApiUrl('/profile/password'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

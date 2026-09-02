@@ -105,6 +105,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { getApiUrl } from '../config/api';
 
 const props = defineProps({
   incidentId: { type: String, required: true }
@@ -120,7 +121,7 @@ const fetchSuggestions = async () => {
   loading.value = true;
   error.value = null;
   try {
-    const response = await fetch(`http://localhost:3000/api/incidents/${props.incidentId}/ai-suggestions`, {
+    const response = await fetch(getApiUrl(`/incidents/${props.incidentId}/ai-suggestions`), {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     });
     if (!response.ok) throw new Error('Failed to retrieve suggestions');
@@ -137,7 +138,7 @@ const fetchSuggestions = async () => {
 
 const fetchRelatedIncidents = async () => {
   try {
-    const response = await fetch(`http://localhost:3000/api/incidents/${props.incidentId}/related`, {
+    const response = await fetch(getApiUrl(`/incidents/${props.incidentId}/related`), {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     });
     if (response.ok) {
@@ -151,7 +152,7 @@ const fetchRelatedIncidents = async () => {
 const rateSuggestion = async (ratingVal) => {
   if (!suggestion.value) return;
   try {
-    const response = await fetch(`http://localhost:3000/api/ai-suggestions/${suggestion.value._id}/rating`, {
+    const response = await fetch(getApiUrl(`/ai-suggestions/${suggestion.value._id}/rating`), {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',

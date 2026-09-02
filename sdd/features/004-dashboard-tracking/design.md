@@ -294,7 +294,7 @@ Replaces raw `fetch()` calls scattered in views. Centralizes API base URL, auth 
 
 ```javascript
 // frontend/src/services/incidentService.js
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+const API_BASE = import.meta.env.VITE_API_URL || 'http://192.168.15.8:3000/api'
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('fa_token')
@@ -385,7 +385,7 @@ export const getIO = () => {
 import { io } from 'socket.io-client'
 import { useIncidentStore } from '@/stores/incidentStore'
 
-const SOCKET_URL = import.meta.env.VITE_WS_URL || 'http://localhost:3000'
+const SOCKET_URL = import.meta.env.VITE_WS_URL || 'http://192.168.15.8:3000'
 
 let socket = null
 

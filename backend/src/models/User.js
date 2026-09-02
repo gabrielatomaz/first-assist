@@ -6,7 +6,9 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   role: { type: String, enum: ['ADMIN', 'FTA', 'CSA'], required: true },
   passwordHash: { type: String, required: true },
-  status: { type: String, enum: ['ACTIVE', 'INACTIVE'], default: 'ACTIVE' }
+  status: { type: String, enum: ['ACTIVE', 'INACTIVE'], default: 'ACTIVE' },
+  assignedEventCode: { type: String, default: null },
+  assignedEventCodes: { type: [String], default: [] }
 }, { timestamps: true });
 
 userSchema.methods.comparePassword = async function(candidatePassword) {

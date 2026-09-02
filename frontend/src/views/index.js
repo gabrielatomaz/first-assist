@@ -7,3 +7,4 @@ export { default as IncidentDetailView } from './IncidentDetailView.vue';
 export { default as KnowledgeBaseView } from './KnowledgeBaseView.vue';
 export { default as TeamProfileView } from './TeamProfileView.vue';
 export { default as AdminDashboardView } from './AdminDashboardView.vue';
+export { default as FTADashboardView } from './FTADashboardView.vue';

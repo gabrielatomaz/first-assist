@@ -123,15 +123,63 @@ router.post('/:code/teams', requireRole(['ADMIN', 'FTA']), async (req, res) => {
   }
 });
 
-// Get all Teams registered/attending this Event
+// Get all Teams registered/attending this Event (with optional pagination & search)
 router.get('/:code/teams', async (req, res) => {
   try {
     const event = await Event.findOne({ code: req.params.code });
     if (!event) return res.status(404).json({ error: 'Event not found' });
 
-    // Fetch team documents matching event.teams numbers list
-    const attendingTeams = await Team.find({ number: { $in: event.teams } }).sort({ number: 1 });
-    res.json(attendingTeams);
+    const search = req.query.search ? String(req.query.search).trim() : '';
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    let query = { number: { $in: event.teams } };
+    if (search) {
+      if (!isNaN(Number(search))) {
+        query.number = { $in: event.teams.filter(n => String(n).includes(search)) };
+      } else {
+        query.name = { $regex: search, $options: 'i' };
+      }
+    }
+
+    const total = await Team.countDocuments(query);
+    const teams = await Team.find(query)
+      .sort({ number: 1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    res.json({
+      teams,
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit) || 1
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Remove Team from Event attendance list (Admin and FTA allowed)
+router.delete('/:code/teams/:teamNumber', requireRole(['ADMIN', 'FTA']), async (req, res) => {
+  try {
+    const num = Number(req.params.teamNumber);
+    if (isNaN(num)) return res.status(400).json({ error: 'Valid team number is required' });
+
+    const event = await Event.findOne({ code: req.params.code });
+    if (!event) return res.status(404).json({ error: 'Event not found' });
+
+    event.teams = event.teams.filter(t => t !== num);
+    await event.save();
+
+    await logIncidentChange({
+      userId: req.user._id,
+      action: 'EVENT_TEAM_REMOVED',
+      newValue: `${req.params.code}:${num}`,
+      details: `Team ${num} removed from Event "${event.name}"`
+    });
+
+    res.json(event);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

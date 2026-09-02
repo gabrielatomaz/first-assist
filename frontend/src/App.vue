@@ -27,59 +27,19 @@
             <router-link to="/knowledge-base" class="hover:text-accentYellow transition duration-150" active-class="text-accentYellow">
               Knowledge Base
             </router-link>
-            <router-link v-if="authStore.isAdmin" to="/users" class="hover:text-accentYellow transition duration-150" active-class="text-accentYellow">
+            <router-link v-if="authStore.isAdmin || authStore.isFTA" to="/users" class="hover:text-accentYellow transition duration-150" active-class="text-accentYellow">
               Technicians
             </router-link>
-            <router-link v-if="authStore.isAdmin || authStore.isFTA" to="/admin" class="hover:text-accentYellow transition duration-150" active-class="text-accentYellow">
-              Admin Panel
+            <router-link v-if="authStore.isAdmin || authStore.isFTA" to="/fta" class="hover:text-accentYellow transition duration-150" active-class="text-accentYellow">
+              FTA Panel
+            </router-link>
+            <router-link v-if="authStore.isAdmin" to="/admin" class="hover:text-accentYellow transition duration-150" active-class="text-accentYellow">
+              System Logs
             </router-link>
           </div>
         </div>
 
         <div class="flex items-center space-x-4">
-          <!-- Notification Bell Dropdown (Epic 10) -->
-          <div class="relative">
-            <button 
-              @click="toggleNotifications" 
-              class="relative bg-white/10 p-2 rounded-lg border border-white/10 hover:bg-white/15 transition duration-150 text-sm focus:outline-none"
-            >
-              🔔
-              <span v-if="unreadCount > 0" class="absolute -top-1.5 -right-1.5 bg-accentCoral text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center border border-primaryNavy">
-                {{ unreadCount }}
-              </span>
-            </button>
-
-            <!-- Notifications Drawer -->
-            <div v-if="showNotifications" class="absolute right-0 mt-3 w-80 bg-bgCard rounded-2xl shadow-xl border border-gray-700 z-50 text-textMain animate-fadeIn">
-              <div class="p-3 border-b border-gray-700 flex justify-between items-center bg-bgMain rounded-t-2xl">
-                <span class="text-xs font-extrabold text-primaryTeal uppercase tracking-wider">Notifications</span>
-                <button 
-                  v-if="unreadCount > 0"
-                  @click="markAllNotificationsAsRead" 
-                  class="text-[9px] text-accentYellow hover:underline font-bold uppercase"
-                >
-                  Mark all read
-                </button>
-              </div>
-
-              <div class="max-h-64 overflow-y-auto divide-y divide-gray-700">
-                <div v-if="notifications.length === 0" class="p-6 text-center text-xs text-gray-400 font-medium">
-                  No notifications yet.
-                </div>
-                <div 
-                  v-for="notif in notifications" 
-                  :key="notif._id"
-                  @click="clickNotification(notif)"
-                  class="p-3 hover:bg-bgMain transition duration-150 cursor-pointer flex flex-col space-y-1"
-                  :class="!notif.isRead ? 'bg-primaryTeal/10' : ''"
-                >
-                  <p class="text-xs font-medium text-gray-200">{{ notif.text }}</p>
-                  <span class="text-[9px] text-gray-400">{{ formatTime(notif.createdAt) }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <!-- Profile Badge -->
           <router-link to="/profile" class="flex items-center space-x-3 bg-white/10 px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/15 transition duration-150">
             <div class="w-2 h-2 rounded-full bg-primaryTeal animate-pulse"></div>
@@ -88,13 +48,52 @@
               <p class="text-[9px] text-accentYellow font-mono tracking-widest uppercase leading-none">{{ authStore.user?.role }}</p>
             </div>
           </router-link>
+          <!-- Mobile Hamburger Toggle Button (FEAT-019) -->
+          <button 
+            @click="mobileMenuOpen = !mobileMenuOpen" 
+            class="md:hidden bg-white/10 p-2 rounded-lg border border-white/10 text-white hover:bg-white/15 focus:outline-none"
+          >
+            <span v-if="!mobileMenuOpen" class="text-base font-bold">☰</span>
+            <span v-else class="text-base font-bold">✕</span>
+          </button>
 
-          <router-link to="/create" class="bg-primaryTeal hover:bg-primaryTeal/90 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow hover:shadow-md transition duration-150">
+          <router-link to="/create" class="hidden sm:inline-block bg-primaryTeal hover:bg-primaryTeal/90 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow hover:shadow-md transition duration-150">
             + Report Incident
           </router-link>
 
-          <button @click="handleLogout" class="text-white/60 hover:text-accentCoral text-sm font-medium transition duration-150">
+          <button @click="handleLogout" class="hidden sm:inline-block text-white/60 hover:text-accentCoral text-sm font-medium transition duration-150">
             Logout
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Dropdown Navigation Drawer (FEAT-019) -->
+      <div v-if="mobileMenuOpen" class="md:hidden border-t border-gray-800 bg-primaryNavy p-4 space-y-3 animate-fadeIn">
+        <div v-if="activeEvent" class="p-2.5 bg-bgMain rounded-lg border border-gray-800 text-xs font-bold text-primaryTeal">
+          🏆 Active Event: {{ activeEvent.name }} ({{ activeEvent.code }})
+        </div>
+
+        <div class="flex flex-col space-y-2 text-sm font-bold">
+          <router-link @click="mobileMenuOpen = false" to="/" class="py-2 px-3 rounded hover:bg-white/10 transition" active-class="text-accentYellow">
+            📊 Dashboard
+          </router-link>
+          <router-link @click="mobileMenuOpen = false" to="/knowledge-base" class="py-2 px-3 rounded hover:bg-white/10 transition" active-class="text-accentYellow">
+            📚 Knowledge Base
+          </router-link>
+          <router-link v-if="authStore.isAdmin || authStore.isFTA" @click="mobileMenuOpen = false" to="/fta" class="py-2 px-3 rounded hover:bg-white/10 transition" active-class="text-accentYellow">
+            🛠️ FTA Panel
+          </router-link>
+          <router-link v-if="authStore.isAdmin" @click="mobileMenuOpen = false" to="/admin" class="py-2 px-3 rounded hover:bg-white/10 transition" active-class="text-accentYellow">
+            📋 System Logs
+          </router-link>
+          <router-link v-if="authStore.isAdmin" @click="mobileMenuOpen = false" to="/users" class="py-2 px-3 rounded hover:bg-white/10 transition" active-class="text-accentYellow">
+            👥 Technicians
+          </router-link>
+          <router-link @click="mobileMenuOpen = false" to="/create" class="py-2 px-3 rounded bg-primaryTeal text-white font-bold text-center">
+            + Report Incident
+          </router-link>
+          <button @click="mobileMenuOpen = false; handleLogout()" class="py-2 px-3 rounded text-left text-accentCoral font-bold hover:bg-white/10">
+            🚪 Logout
           </button>
         </div>
       </div>
@@ -113,21 +112,17 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from './stores/auth';
+import { getApiUrl } from './config/api';
 
 const router = useRouter();
 const authStore = useAuthStore();
 
 const isOffline = ref(!navigator.onLine);
 const activeEvent = ref(null);
-
-const notifications = ref([]);
-const showNotifications = ref(false);
-const unreadCount = computed(() => notifications.value.filter(n => !n.isRead).length);
-
-let pollInterval = null;
+const mobileMenuOpen = ref(false);
 
 const handleLogout = () => {
   authStore.logout();
@@ -141,89 +136,55 @@ const updateOnlineStatus = () => {
 const fetchActiveEvent = async () => {
   if (!authStore.isAuthenticated) return;
   try {
-    const response = await fetch('http://localhost:3000/api/events/active', {
+    // 1. Fetch list of all events
+    const eventsRes = await fetch(getApiUrl('/events'), {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     });
-    if (response.ok) {
-      activeEvent.value = await response.json();
+    if (!eventsRes.ok) return;
+    const events = await eventsRes.json();
+
+    // 2. If user (FTA or CSA) has a specific active assigned event code
+    if (authStore.user?.assignedEventCode) {
+      const assigned = events.find(e => e.code === authStore.user.assignedEventCode);
+      if (assigned) {
+        activeEvent.value = assigned;
+        return;
+      }
+    }
+
+    // 3. For FTA with assigned regionals: select assigned regional
+    if (authStore.user?.role === 'FTA' && authStore.user?.assignedEventCodes?.length > 0) {
+      const assigned = events.find(e => authStore.user.assignedEventCodes.includes(e.code));
+      if (assigned) {
+        activeEvent.value = assigned;
+        return;
+      }
+    }
+
+    // 4. Default global active event context lookup
+    const activeRes = await fetch(getApiUrl('/events/active'), {
+      headers: { 'Authorization': `Bearer ${authStore.token}` }
+    });
+    if (activeRes.ok) {
+      activeEvent.value = await activeRes.json();
     }
   } catch (err) {
     console.error('Failed to load active event context:', err);
   }
 };
 
-const fetchNotifications = async () => {
-  if (!authStore.isAuthenticated) return;
-  try {
-    const response = await fetch('http://localhost:3000/api/notifications', {
-      headers: { 'Authorization': `Bearer ${authStore.token}` }
-    });
-    if (response.ok) {
-      notifications.value = await response.json();
-    }
-  } catch (err) {
-    console.error('Failed to fetch notifications:', err);
-  }
-};
-
-const toggleNotifications = () => {
-  showNotifications.value = !showNotifications.value;
-  if (showNotifications.value) {
-    fetchNotifications();
-  }
-};
-
-const clickNotification = async (notif) => {
-  try {
-    if (!notif.isRead) {
-      await fetch(`http://localhost:3000/api/notifications/${notif._id}/read`, {
-        method: 'PATCH',
-        headers: { 'Authorization': `Bearer ${authStore.token}` }
-      });
-      notif.isRead = true;
-    }
-    showNotifications.value = false;
-    if (notif.link) {
-      router.push(notif.link);
-    }
-  } catch (err) {
-    console.error(err);
-  }
-};
-
-const markAllNotificationsAsRead = async () => {
-  try {
-    await fetch('http://localhost:3000/api/notifications/read-all', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${authStore.token}` }
-    });
-    notifications.value.forEach(n => n.isRead = true);
-  } catch (err) {
-    console.error(err);
-  }
-};
-
-const formatTime = (dateStr) => {
-  const date = new Date(dateStr);
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-};
+watch([() => authStore.user?.assignedEventCode, () => router.currentRoute.value.path], () => {
+  fetchActiveEvent();
+});
 
 onMounted(() => {
   window.addEventListener('online', updateOnlineStatus);
   window.addEventListener('offline', updateOnlineStatus);
-  
   fetchActiveEvent();
-  fetchNotifications();
-  
-  // Real-time polling for notifications (Epic 10 / Epic 14)
-  pollInterval = setInterval(() => {
-    fetchNotifications();
-  }, 5000);
 });
 
 onUnmounted(() => {
   window.removeEventListener('online', updateOnlineStatus);
   window.removeEventListener('offline', updateOnlineStatus);
-  if (pollInterval) clearInterval(pollInterval);
 });
 </script>

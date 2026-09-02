@@ -38,7 +38,7 @@
             <select v-model="form.role" required class="w-full px-4 py-2.5 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm bg-bgCard text-textMain">
               <option value="CSA" class="bg-bgCard">Control System Advisor (CSA)</option>
               <option value="FTA" class="bg-bgCard">FIRST Technical Advisor (FTA)</option>
-              <option value="ADMIN" class="bg-bgCard">Administrator</option>
+              <option v-if="authStore.isAdmin" value="ADMIN" class="bg-bgCard">Administrator</option>
             </select>
           </div>
         </div>
@@ -75,6 +75,7 @@
               <th class="px-6 py-4">Name</th>
               <th class="px-6 py-4">Email</th>
               <th class="px-6 py-4">Role</th>
+              <th class="px-6 py-4">Assigned Regional(s)</th>
               <th class="px-6 py-4">Status</th>
               <th class="px-6 py-4 text-right">Actions</th>
             </tr>
@@ -92,6 +93,41 @@
                   {{ user.role }}
                 </span>
               </td>
+
+              <!-- Assigned Regionals Column -->
+              <td class="px-6 py-4">
+                <!-- Single active regional dropdown for CSA -->
+                <div v-if="user.role === 'CSA'" class="flex items-center space-x-2">
+                  <select v-model="user.assignedEventCode" @change="saveUserEventAssignment(user)" class="px-3 py-1.5 rounded border border-gray-700 bg-bgMain text-textMain text-xs font-bold">
+                    <option :value="null">Global (All Events)</option>
+                    <option v-for="ev in availableEvents" :key="ev._id" :value="ev.code">
+                      {{ ev.name }} ({{ ev.code }})
+                    </option>
+                  </select>
+                </div>
+
+                <!-- Multi-regional assignment for FTA (Editable by Admin) -->
+                <div v-else-if="user.role === 'FTA'" class="space-y-2 max-w-xs">
+                  <div v-if="authStore.isAdmin" class="flex items-center space-x-2">
+                    <select @change="addFTARegional(user, $event)" class="px-2.5 py-1 rounded border border-gray-700 bg-bgMain text-textMain text-xs font-bold">
+                      <option value="">+ Add Regional to FTA</option>
+                      <option v-for="ev in events" :key="ev._id" :value="ev.code">
+                        {{ ev.name }} ({{ ev.code }})
+                      </option>
+                    </select>
+                  </div>
+                  <div class="flex flex-wrap gap-1.5">
+                    <span v-for="code in user.assignedEventCodes" :key="code" class="inline-flex items-center space-x-1 px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-accentYellow/15 text-accentYellow border border-accentYellow/30">
+                      <span>{{ code }}</span>
+                      <button v-if="authStore.isAdmin" @click="removeFTARegional(user, code)" class="text-xs hover:text-red-400 font-bold ml-1 cursor-pointer">✕</button>
+                    </span>
+                    <span v-if="!user.assignedEventCodes || user.assignedEventCodes.length === 0" class="text-[10px] text-gray-500 italic">No regionals assigned</span>
+                  </div>
+                </div>
+
+                <span v-else class="text-xs text-gray-500 italic">N/A (Admin)</span>
+              </td>
+
               <td class="px-6 py-4">
                 <span :class="{
                   'bg-green-950/40 text-green-400 border border-green-900/30': user.status === 'ACTIVE',
@@ -102,6 +138,7 @@
               </td>
               <td class="px-6 py-4 text-right">
                 <button
+                  v-if="canModifyUser(user)"
                   @click="toggleUserStatus(user)"
                   :disabled="updatingStatus === user._id"
                   :class="user.status === 'ACTIVE' ? 'text-accentCoral hover:text-accentCoral/80' : 'text-green-600 hover:text-green-700'"
@@ -109,6 +146,7 @@
                 >
                   {{ user.status === 'ACTIVE' ? 'Deactivate' : 'Reactivate' }}
                 </button>
+                <span v-else class="text-xs text-gray-500 italic">Protected</span>
               </td>
             </tr>
           </tbody>
@@ -119,30 +157,68 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { getApiUrl } from '../config/api';
 
 const authStore = useAuthStore();
 
 const users = ref([]);
+const events = ref([]);
 const loading = ref(true);
 const error = ref(null);
 const showCreateForm = ref(false);
+
+const availableEvents = computed(() => {
+  if (authStore.isAdmin) return events.value;
+  if (authStore.isFTA) {
+    const assigned = authStore.user?.assignedEventCodes || [];
+    if (assigned.length > 0) {
+      return events.value.filter(e => assigned.includes(e.code));
+    }
+  }
+  return events.value;
+});
 
 const form = ref({ name: '', email: '', password: '', role: 'CSA' });
 const creating = ref(false);
 const createError = ref(null);
 const updatingStatus = ref(null);
 
+const canModifyUser = (targetUser) => {
+  if (authStore.isAdmin) return true;
+  if (authStore.isFTA) {
+    return targetUser.role !== 'FTA' && targetUser.role !== 'ADMIN';
+  }
+  return false;
+};
+
+const fetchEvents = async () => {
+  try {
+    const response = await fetch(getApiUrl('/events'), {
+      headers: { 'Authorization': `Bearer ${authStore.token}` }
+    });
+    if (response.ok) {
+      events.value = await response.json();
+    }
+  } catch (err) {
+    console.error('Failed to load events:', err);
+  }
+};
+
 const fetchUsers = async () => {
   loading.value = true;
   error.value = null;
   try {
-    const response = await fetch('http://localhost:3000/api/users', {
+    const response = await fetch(getApiUrl('/users'), {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     });
     if (!response.ok) throw new Error('Failed to fetch users list');
-    users.value = await response.json();
+    const data = await response.json();
+    users.value = data.map(u => ({
+      ...u,
+      assignedEventCodes: u.assignedEventCodes || []
+    }));
   } catch (err) {
     error.value = err.message;
   } finally {
@@ -150,11 +226,52 @@ const fetchUsers = async () => {
   }
 };
 
+const saveUserEventAssignment = async (user) => {
+  try {
+    const payload = {};
+    if (user.role === 'FTA') {
+      payload.assignedEventCodes = user.assignedEventCodes || [];
+    } else {
+      payload.assignedEventCode = user.assignedEventCode || null;
+    }
+
+    const response = await fetch(getApiUrl(`/users/${user._id}/assigned-event`), {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authStore.token}`
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Failed to update event context');
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
+const addFTARegional = async (user, event) => {
+  const code = event.target.value;
+  if (!code) return;
+  if (!user.assignedEventCodes) user.assignedEventCodes = [];
+  if (!user.assignedEventCodes.includes(code)) {
+    user.assignedEventCodes.push(code);
+    await saveUserEventAssignment(user);
+  }
+  event.target.value = '';
+};
+
+const removeFTARegional = async (user, code) => {
+  if (!user.assignedEventCodes) return;
+  user.assignedEventCodes = user.assignedEventCodes.filter(c => c !== code);
+  await saveUserEventAssignment(user);
+};
+
 const handleCreateUser = async () => {
   creating.value = true;
   createError.value = null;
   try {
-    const response = await fetch('http://localhost:3000/api/users', {
+    const response = await fetch(getApiUrl('/users'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -165,7 +282,7 @@ const handleCreateUser = async () => {
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Failed to create user');
     
-    users.value.unshift(data);
+    users.value.unshift({ ...data, assignedEventCodes: data.assignedEventCodes || [] });
     showCreateForm.value = false;
     form.value = { name: '', email: '', password: '', role: 'CSA' };
   } catch (err) {
@@ -179,7 +296,7 @@ const toggleUserStatus = async (user) => {
   updatingStatus.value = user._id;
   const newStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
   try {
-    const response = await fetch(`http://localhost:3000/api/users/${user._id}/status`, {
+    const response = await fetch(getApiUrl(`/users/${user._id}/status`), {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -199,6 +316,7 @@ const toggleUserStatus = async (user) => {
 };
 
 onMounted(() => {
+  fetchEvents();
   fetchUsers();
 });
 </script>

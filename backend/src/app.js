@@ -11,6 +11,7 @@ import eventRoutes from './routes/eventRoutes.js';
 import teamRoutes from './routes/teamRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import tbaRoutes from './routes/tbaRoutes.js';
 import { swaggerSpec } from './config/swagger.js';
 import { authMiddleware } from './middleware/authMiddleware.js';
 
@@ -31,5 +32,6 @@ app.use('/api/events', authMiddleware, eventRoutes);
 app.use('/api/teams', authMiddleware, teamRoutes);
 app.use('/api/notifications', authMiddleware, notificationRoutes);
 app.use('/api/admin', authMiddleware, adminRoutes);
+app.use('/api/tba', authMiddleware, tbaRoutes);
 
 export { app };

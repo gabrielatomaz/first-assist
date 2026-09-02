@@ -51,8 +51,28 @@ export const authController = {
           _id: user._id,
           name: user.name,
           role: user.role,
-          email: user.email
+          email: user.email,
+          assignedEventCode: user.assignedEventCode || null,
+          assignedEventCodes: user.assignedEventCodes || []
         }
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  me: async (req, res) => {
+    try {
+      const user = await User.findById(req.user._id).select('-passwordHash');
+      if (!user) return res.status(404).json({ error: 'User not found' });
+      res.json({
+        _id: user._id,
+        name: user.name,
+        role: user.role,
+        email: user.email,
+        status: user.status,
+        assignedEventCode: user.assignedEventCode || null,
+        assignedEventCodes: user.assignedEventCodes || []
       });
     } catch (error) {
       res.status(500).json({ error: error.message });

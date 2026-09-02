@@ -3,7 +3,17 @@ import { incidentService } from '../services/incidentService.js';
 export const incidentController = {
   getIncidents: async (req, res) => {
     try {
-      const { status, category, priority, teamNumber, eventCode } = req.query;
+      let { status, category, priority, teamNumber, eventCode } = req.query;
+      const userRole = (req.user?.role || '').toUpperCase();
+
+      // Role-based event access scoping:
+      // 1. CSA: Restricted to event assigned by FTA (req.user.assignedEventCode) if set and eventCode not specified
+      if (userRole === 'CSA' && req.user?.assignedEventCode && !eventCode) {
+        eventCode = req.user.assignedEventCode;
+      }
+      // 2. ADMIN: Full access to ALL events across system
+      // 3. FTA: Full access to managed events / assigned events
+
       const incidents = await incidentService.getAllIncidents({ status, category, priority, teamNumber, eventCode });
       res.json(incidents);
     } catch (error) {
@@ -82,8 +92,12 @@ export const incidentController = {
 
   searchIncidents: async (req, res) => {
     try {
-      const { q, category, priority, teamNumber } = req.query;
-      const results = await incidentService.searchResolvedIncidents(q, { category, priority, teamNumber });
+      const { q, category, priority, teamNumber, eventCode, page, limit } = req.query;
+      const results = await incidentService.searchResolvedIncidents(
+        q, 
+        { category, priority, teamNumber, eventCode }, 
+        { page, limit }
+      );
       res.json(results);
     } catch (error) {
       res.status(500).json({ error: error.message });

@@ -41,8 +41,8 @@ const props = defineProps({
 const statusBadgeClass = computed(() => {
   switch (props.incident.status) {
     case 'OPEN': return 'bg-primaryTeal/10 text-primaryTeal border border-primaryTeal/25';
-    case 'ASSIGNED': return 'bg-accentPurple/10 text-accentPurple border border-accentPurple/25';
-    case 'IN_PROGRESS': return 'bg-accentYellow/10 text-accentYellow border border-accentYellow/20';
+    case 'ASSIGNED': return 'bg-accentYellow/10 text-accentYellow border border-accentYellow/25';
+    case 'IN_PROGRESS': return 'bg-accentPurple/10 text-accentPurple border border-accentPurple/25';
     case 'WAITING': return 'bg-gray-800 text-gray-400 border border-gray-700';
     case 'RESOLVED': return 'bg-green-950/40 text-green-400 border border-green-900/30';
     case 'CLOSED': return 'bg-gray-800/80 text-gray-500 border border-gray-700/50';

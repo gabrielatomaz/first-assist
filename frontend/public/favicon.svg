@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2F4F6F" />
+      <stop offset="100%" stop-color="#1B2D40" />
+    </linearGradient>
+    <linearGradient id="tealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4F7F82" />
+      <stop offset="100%" stop-color="#385F62" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E5B962" />
+      <stop offset="100%" stop-color="#DAAB52" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Base Container -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+
+  <!-- Outer Structural Geometric Frame (Subtle Hex/Triangle Network) -->
+  <path d="M 256 96 L 396 176 L 396 336 L 256 416 L 116 336 L 116 176 Z" 
+        fill="none" stroke="#FFFFFF" stroke-width="6" stroke-opacity="0.12" stroke-linejoin="round" />
+
+  <!-- Core Geometric FA Circuit Node Symbol -->
+  <!-- 'F' Structural Node Branch (Teal) -->
+  <path d="M 160 360 L 160 160 L 320 160 M 160 250 L 280 250" 
+        fill="none" stroke="url(#tealGrad)" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- 'A' Structural Node Apex Link (Gold/Mustard) -->
+  <path d="M 256 160 L 352 360 M 204 290 L 320 290" 
+        fill="none" stroke="url(#goldGrad)" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Terminal Connection Nodes (Robot -> Tech -> Solution) -->
+  <circle cx="160" cy="160" r="22" fill="#4F7F82" stroke="#FFFFFF" stroke-width="6" />
+  <circle cx="320" cy="160" r="18" fill="#4F7F82" stroke="#FFFFFF" stroke-width="5" />
+  <circle cx="256" cy="160" r="24" fill="#DAAB52" stroke="#FFFFFF" stroke-width="6" />
+  <circle cx="352" cy="360" r="22" fill="#DAAB52" stroke="#FFFFFF" stroke-width="6" />
+  <circle cx="160" cy="360" r="18" fill="#4F7F82" opacity="0.9" />
+</svg>
