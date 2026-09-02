@@ -44,21 +44,23 @@
     <div v-if="activeTab === 'manage-teams'" class="space-y-6">
       <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-6">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-800 pb-4">
-          <div class="flex items-center space-x-3">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto max-w-full">
             <label class="text-xs font-bold text-gray-400 uppercase">Select Event:</label>
-            <select v-model="selectedEventCode" @change="loadEventTeams(1)" class="px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs font-bold">
-              <option v-for="ev in availableFTAEvents" :key="ev._id" :value="ev.code">
-                {{ ev.name }} ({{ ev.code }}) {{ ev.isActive ? '★ Active' : '' }}
-              </option>
-            </select>
-            <button 
-              v-if="selectedEventCode" 
-              @click="handleSetActiveEvent(selectedEventCode)" 
-              title="Set Active Competition Event"
-              class="bg-accentYellow/20 hover:bg-accentYellow/30 text-accentYellow border border-accentYellow/40 px-3 py-1.5 rounded-lg transition cursor-pointer flex items-center justify-center shadow-sm"
-            >
-              <span class="text-lg font-extrabold leading-none">★</span>
-            </button>
+            <div class="flex items-center space-x-2 w-full min-w-0">
+              <select v-model="selectedEventCode" @change="loadEventTeams(1)" class="w-full min-w-0 flex-1 px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs font-bold truncate">
+                <option v-for="ev in availableFTAEvents" :key="ev._id" :value="ev.code">
+                  {{ ev.name }} ({{ ev.code }}) {{ ev.isActive ? '★ Active' : '' }}
+                </option>
+              </select>
+              <button 
+                v-if="selectedEventCode" 
+                @click="handleSetActiveEvent(selectedEventCode)" 
+                title="Set Active Competition Event"
+                class="flex-shrink-0 bg-accentYellow/20 hover:bg-accentYellow/30 text-accentYellow border border-accentYellow/40 px-3 py-2 rounded-lg transition cursor-pointer flex items-center justify-center shadow-sm"
+              >
+                <span class="text-lg font-extrabold leading-none">★</span>
+              </button>
+            </div>
           </div>
 
           <!-- Add Team to Event inline input -->
