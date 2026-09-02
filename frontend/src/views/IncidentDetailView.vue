@@ -16,7 +16,7 @@
           <span :class="statusBadgeClass" class="px-2.5 py-1 rounded text-xs font-bold font-mono tracking-wider uppercase">
             {{ incident.status }}
           </span>
-          <span :class="priorityBadgeClass" class="px-2 py-0.5 rounded text-[10px] font-extrabold tracking-widest font-mono uppercase">
+          <span :class="priorityBadgeClass" class="px-2.5 py-1 rounded text-xs font-bold font-mono tracking-wider uppercase">
             {{ incident.priority }}
           </span>
           <h2 class="text-3xl font-extrabold text-primaryTeal tracking-tight">Team {{ incident.teamNumber }}</h2>
@@ -26,42 +26,51 @@
         </p>
       </div>
 
-      <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 w-full md:w-auto">
-        <!-- Assign selection menu for Admin/FTA -->
-        <div v-if="authStore.isAdmin || authStore.isFTA" class="flex items-center space-x-2 bg-bgCard px-3 py-1.5 rounded-lg border border-gray-700">
-          <label class="text-[10px] font-bold text-gray-400 uppercase">Technician</label>
-          <select v-model="selectedAssignee" @change="assignTechnician" class="text-xs bg-transparent focus:outline-none font-semibold text-textMain select-none">
-            <option :value="null" class="bg-bgCard">Unassigned</option>
-            <option v-for="user in technicians" :key="user._id" :value="user._id" class="bg-bgCard">{{ user.name }} ({{ user.role }})</option>
+      <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 w-full md:w-auto">
+        <!-- 1. Technician selection dropdown -->
+        <div v-if="authStore.isAdmin || authStore.isFTA" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1 sm:space-x-1.5 w-full sm:w-auto">
+          <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Technician:</label>
+          <select
+            v-model="selectedAssignee"
+            @change="assignTechnician"
+            class="w-full sm:w-auto px-3 py-2 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-xs bg-bgCard font-semibold text-textMain cursor-pointer shadow-sm hover:border-gray-600 transition"
+          >
+            <option :value="null" class="bg-bgCard text-textMain">Unassigned</option>
+            <option v-for="user in technicians" :key="user._id" :value="user._id" class="bg-bgCard text-textMain">{{ user.name }} ({{ user.role }})</option>
           </select>
         </div>
 
-        <!-- Status update select menu -->
-        <div v-if="authStore.isAdmin || authStore.isFTA || isAssignee" class="flex items-center space-x-2 bg-bgCard px-3 py-1.5 rounded-lg border border-gray-700">
-          <label class="text-[10px] font-bold text-gray-400 uppercase">Status</label>
-          <select v-model="selectedStatus" @change="updateStatus" class="text-xs bg-transparent focus:outline-none font-semibold text-textMain">
-            <option value="OPEN" class="bg-bgCard">Open</option>
-            <option value="ASSIGNED" class="bg-bgCard">Assigned</option>
-            <option value="IN_PROGRESS" class="bg-bgCard">In Progress</option>
-            <option value="WAITING" class="bg-bgCard">Waiting</option>
-            <option value="RESOLVED" disabled class="bg-bgCard">Resolved</option>
-            <option value="CLOSED" disabled class="bg-bgCard">Closed</option>
+        <!-- 2. Status update select dropdown -->
+        <div v-if="authStore.isAdmin || authStore.isFTA || isAssignee" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1 sm:space-x-1.5 w-full sm:w-auto">
+          <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Status:</label>
+          <select
+            v-model="selectedStatus"
+            @change="updateStatus"
+            class="w-full sm:w-auto px-3 py-2 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-xs bg-bgCard font-semibold text-textMain cursor-pointer shadow-sm hover:border-gray-600 transition"
+          >
+            <option value="OPEN" class="bg-bgCard text-textMain">Open</option>
+            <option value="ASSIGNED" class="bg-bgCard text-textMain">Assigned</option>
+            <option value="IN_PROGRESS" class="bg-bgCard text-textMain">In Progress</option>
+            <option value="WAITING" class="bg-bgCard text-textMain">Waiting</option>
+            <option value="RESOLVED" disabled class="bg-bgCard text-gray-500">Resolved</option>
+            <option value="CLOSED" disabled class="bg-bgCard text-gray-500">Closed</option>
           </select>
         </div>
 
-        <!-- Action triggers -->
+        <!-- 3. Assign to Me action button (LAST) -->
         <button
           v-if="incident.status !== 'RESOLVED' && incident.status !== 'CLOSED' && incident.assignedTo?._id !== authStore.user?._id"
           @click="assignToMe"
-          class="bg-primaryTeal hover:bg-primaryTeal/90 text-white font-semibold py-2 px-4 rounded-lg text-sm shadow hover:shadow-md transition duration-150"
+          class="w-full sm:w-auto bg-primaryTeal hover:bg-primaryTeal/90 text-white font-semibold py-2 px-3.5 rounded-lg text-xs shadow hover:shadow-md transition duration-150 text-center"
         >
           Assign to Me
         </button>
 
+        <!-- Action triggers (Resolve / Close) -->
         <button
           v-if="incident.status === 'ASSIGNED' || incident.status === 'IN_PROGRESS' || incident.status === 'WAITING'"
           @click="showResolveModal = true"
-          class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg text-sm shadow hover:shadow-md transition duration-150"
+          class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg text-xs shadow hover:shadow-md transition duration-150 text-center"
         >
           Resolve
         </button>
@@ -69,7 +78,7 @@
         <button
           v-if="incident.status === 'RESOLVED' && (authStore.isAdmin || authStore.isFTA)"
           @click="closeIncident"
-          class="bg-primaryNavy hover:bg-primaryNavy/90 text-white font-semibold py-2 px-4 rounded-lg text-sm shadow hover:shadow-md transition duration-150"
+          class="w-full sm:w-auto bg-primaryNavy hover:bg-primaryNavy/90 text-white font-semibold py-2 px-4 rounded-lg text-xs shadow hover:shadow-md transition duration-150 text-center"
         >
           Close Incident
         </button>
@@ -269,6 +278,11 @@ const fetchDetails = async (isBackground = false) => {
     selectedAssignee.value = data.assignedTo?._id || null;
     selectedStatus.value = data.status;
 
+    // Refresh technicians list scoped to this event
+    if (authStore.isAdmin || authStore.isFTA) {
+      fetchTechnicians();
+    }
+
     // Only update diagnosis text if user is NOT currently editing
     if (!editingDiagnosis.value) {
       diagnosisText.value = data.diagnosis || '';
@@ -294,11 +308,23 @@ const fetchTechnicians = async () => {
     if (response.ok) {
       const allUsers = await response.json();
       console.log('All users fetched:', allUsers.length);
+      const eventCode = incident.value?.eventCode;
+      
       technicians.value = allUsers.filter(u => {
         const role = (u.role || '').toUpperCase();
-        return role === 'CSA' || role === 'FTA';
+        if (role !== 'CSA' && role !== 'FTA') return false;
+
+        // If incident event code is missing, allow all FTAs/CSAs
+        if (!eventCode) return true;
+
+        // User must be assigned to this specific event (assignedEventCode or in assignedEventCodes array)
+        const isAssignedToEvent =
+          u.assignedEventCode === eventCode ||
+          (Array.isArray(u.assignedEventCodes) && u.assignedEventCodes.includes(eventCode));
+
+        return isAssignedToEvent;
       });
-      console.log('Filtered technicians:', technicians.value.length);
+      console.log(`Filtered technicians for event ${eventCode}:`, technicians.value.length);
     } else {
       const errText = await response.text();
       console.error('Failed to fetch technicians:', response.status, errText);

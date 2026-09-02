@@ -10,23 +10,22 @@
         </div>
         
         <div v-if="suggestion && !loading" class="flex items-center space-x-2 text-xs">
-          <span class="text-gray-400 font-medium">Was this suggestion helpful?</span>
           <div class="flex items-center space-x-1">
             <button
               @click="rateSuggestion('HELPFUL')"
               :class="suggestion.rating === 'HELPFUL' ? 'bg-primaryTeal text-white border-primaryTeal' : 'bg-bgMain text-gray-300 hover:text-white border-gray-700'"
-              class="p-1 px-2 rounded border transition duration-150 text-xs font-semibold flex items-center shadow-sm"
+              class="p-1.5 px-2.5 rounded border transition duration-150 text-sm font-semibold flex items-center shadow-sm"
               title="Helpful"
             >
-              👍 Helpful
+              👍
             </button>
             <button
               @click="rateSuggestion('NOT_HELPFUL')"
               :class="suggestion.rating === 'NOT_HELPFUL' ? 'bg-accentCoral text-white border-accentCoral/30' : 'bg-bgMain text-gray-300 hover:text-white border-gray-700'"
-              class="p-1 px-2 rounded border transition duration-150 text-xs font-semibold flex items-center shadow-sm"
+              class="p-1.5 px-2.5 rounded border transition duration-150 text-sm font-semibold flex items-center shadow-sm"
               title="Reject suggestion"
             >
-              👎 Reject
+              👎
             </button>
           </div>
         </div>

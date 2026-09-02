@@ -111,9 +111,9 @@ const eventFilter = ref('ALL');
 const refreshInterval = ref(parseInt(localStorage.getItem('first_assist_refresh_rate')) || 15000);
 
 watch(() => authStore.user, (user) => {
-  if (user?.role === 'CSA' && user?.assignedEventCode) {
+  if (user?.assignedEventCode) {
     eventFilter.value = user.assignedEventCode;
-  } else if (user?.role === 'FTA' && user?.assignedEventCodes?.length > 0 && eventFilter.value === 'ALL') {
+  } else if (user?.assignedEventCodes?.length > 0 && eventFilter.value === 'ALL') {
     eventFilter.value = user.assignedEventCodes[0];
   }
 }, { immediate: true });
@@ -181,13 +181,9 @@ const fetchIncidents = async () => {
 
 onMounted(() => {
   fetchEvents();
-  // Role-based event active scoping:
-  // 1. CSA: Locked to single active assigned regional context
-  if (authStore.user?.role === 'CSA' && authStore.user?.assignedEventCode) {
+  if (authStore.user?.assignedEventCode) {
     eventFilter.value = authStore.user.assignedEventCode;
-  }
-  // 2. FTA: Has one active regional at a time, but retains multi-regional access & switching
-  else if (authStore.user?.role === 'FTA' && authStore.user?.assignedEventCodes?.length > 0) {
+  } else if (authStore.user?.assignedEventCodes?.length > 0) {
     eventFilter.value = authStore.user.assignedEventCodes[0];
   }
   fetchIncidents();

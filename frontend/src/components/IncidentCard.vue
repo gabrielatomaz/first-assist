@@ -10,11 +10,11 @@
 
       <div class="flex flex-col items-end space-y-1.5">
         <!-- Status Badge -->
-        <span :class="statusBadgeClass" class="px-2.5 py-0.5 rounded text-[10px] font-bold tracking-wider font-mono uppercase">
+        <span :class="statusBadgeClass" class="px-2.5 py-1 rounded text-xs font-bold tracking-wider font-mono uppercase">
           {{ incident.status }}
         </span>
         <!-- Priority Badge -->
-        <span :class="priorityBadgeClass" class="px-2 py-0.5 rounded text-[9px] font-extrabold tracking-widest font-mono uppercase">
+        <span :class="priorityBadgeClass" class="px-2.5 py-1 rounded text-xs font-bold tracking-wider font-mono uppercase">
           {{ incident.priority }}
         </span>
       </div>

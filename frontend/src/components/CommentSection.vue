@@ -38,9 +38,11 @@
       <button
         type="submit"
         :disabled="posting"
-        class="bg-primaryTeal hover:bg-primaryTeal/90 text-white font-semibold px-5 rounded-lg text-sm shadow hover:shadow-md transition duration-150 disabled:opacity-50"
+        class="bg-primaryTeal hover:bg-primaryTeal/90 text-white font-semibold px-4 rounded-lg text-base shadow hover:shadow-md transition duration-150 disabled:opacity-50 flex items-center justify-center"
+        title="Send Update"
       >
-        {{ posting ? 'Sending...' : 'Send' }}
+        <span v-if="posting" class="animate-spin text-sm">⏳</span>
+        <span v-else class="text-base">💬</span>
       </button>
     </form>
   </div>

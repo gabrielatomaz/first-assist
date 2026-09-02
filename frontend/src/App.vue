@@ -16,7 +16,7 @@
             </router-link>
             <!-- Active Event Context Indicator (Epic 11) -->
             <span v-if="activeEvent" class="block text-[10px] text-primaryTeal font-bold uppercase font-mono tracking-wider mt-0.5">
-              🏆 {{ activeEvent.name }} ({{ activeEvent.code }})
+              🏆 {{ activeEvent.code }}
             </span>
           </div>
           
@@ -39,29 +39,37 @@
           </div>
         </div>
 
-        <div class="flex items-center space-x-4">
-          <!-- Profile Badge -->
-          <router-link to="/profile" class="flex items-center space-x-3 bg-white/10 px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/15 transition duration-150">
-            <div class="w-2 h-2 rounded-full bg-primaryTeal animate-pulse"></div>
+        <div class="flex items-center space-x-3">
+          <!-- Report Incident Button (Icon Only) -->
+          <router-link
+            to="/create"
+            class="w-11 h-11 flex items-center justify-center bg-primaryTeal hover:bg-primaryTeal/90 text-white rounded-xl text-lg font-bold shadow hover:shadow-md transition duration-150 flex-shrink-0"
+            title="Report Incident"
+          >
+            ➕
+          </router-link>
+
+          <!-- Desktop-only Profile Badge (Matching h-11 Height) -->
+          <router-link to="/profile" class="hidden md:flex items-center space-x-2 bg-white/10 h-11 px-3.5 rounded-xl border border-white/10 hover:bg-white/15 transition duration-150 shadow-sm flex-shrink-0">
+            <span class="text-sm">🤖</span>
             <div class="text-left">
               <p class="text-xs font-bold leading-tight">{{ authStore.user?.name }}</p>
-              <p class="text-[9px] text-accentYellow font-mono tracking-widest uppercase leading-none">{{ authStore.user?.role }}</p>
+              <p class="text-[9px] text-accentYellow font-mono tracking-widest uppercase leading-none mt-0.5">{{ authStore.user?.role }}</p>
             </div>
           </router-link>
-          <!-- Mobile Hamburger Toggle Button (FEAT-019) -->
+
+          <!-- Mobile Hamburger Toggle Button (FEAT-019 - Bigger Touch Target) -->
           <button 
             @click="mobileMenuOpen = !mobileMenuOpen" 
-            class="md:hidden bg-white/10 p-2 rounded-lg border border-white/10 text-white hover:bg-white/15 focus:outline-none"
+            class="md:hidden w-11 h-11 flex items-center justify-center bg-white/10 rounded-xl border border-white/10 text-white hover:bg-white/15 focus:outline-none flex-shrink-0"
+            title="Toggle Menu"
           >
-            <span v-if="!mobileMenuOpen" class="text-base font-bold">☰</span>
-            <span v-else class="text-base font-bold">✕</span>
+            <span v-if="!mobileMenuOpen" class="text-xl font-bold">☰</span>
+            <span v-else class="text-xl font-bold">✕</span>
           </button>
 
-          <router-link to="/create" class="hidden sm:inline-block bg-primaryTeal hover:bg-primaryTeal/90 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow hover:shadow-md transition duration-150">
-            + Report Incident
-          </router-link>
-
-          <button @click="handleLogout" class="hidden sm:inline-block text-white/60 hover:text-accentCoral text-sm font-medium transition duration-150">
+          <!-- Desktop Logout Button -->
+          <button @click="handleLogout" class="hidden md:inline-block text-white/60 hover:text-accentCoral text-sm font-medium transition duration-150">
             Logout
           </button>
         </div>
@@ -69,9 +77,14 @@
 
       <!-- Mobile Dropdown Navigation Drawer (FEAT-019) -->
       <div v-if="mobileMenuOpen" class="md:hidden border-t border-gray-800 bg-primaryNavy p-4 space-y-3 animate-fadeIn">
-        <div v-if="activeEvent" class="p-2.5 bg-bgMain rounded-lg border border-gray-800 text-xs font-bold text-primaryTeal">
-          🏆 Active Event: {{ activeEvent.name }} ({{ activeEvent.code }})
-        </div>
+        <!-- Profile Badge Inside Mobile Hamburger Menu -->
+        <router-link @click="mobileMenuOpen = false" to="/profile" class="flex items-center space-x-3 p-3 rounded-xl bg-white/10 border border-white/10 hover:bg-white/15 transition shadow-sm mb-2">
+          <span class="text-2xl">🤖</span>
+          <div class="text-left">
+            <p class="text-sm font-bold text-white leading-tight">{{ authStore.user?.name }}</p>
+            <p class="text-[10px] text-accentYellow font-mono tracking-widest uppercase">{{ authStore.user?.role }}</p>
+          </div>
+        </router-link>
 
         <div class="flex flex-col space-y-2 text-sm font-bold">
           <router-link @click="mobileMenuOpen = false" to="/" class="py-2 px-3 rounded hover:bg-white/10 transition" active-class="text-accentYellow">
@@ -89,11 +102,9 @@
           <router-link v-if="authStore.isAdmin" @click="mobileMenuOpen = false" to="/users" class="py-2 px-3 rounded hover:bg-white/10 transition" active-class="text-accentYellow">
             👥 Technicians
           </router-link>
-          <router-link @click="mobileMenuOpen = false" to="/create" class="py-2 px-3 rounded bg-primaryTeal text-white font-bold text-center">
-            + Report Incident
-          </router-link>
-          <button @click="mobileMenuOpen = false; handleLogout()" class="py-2 px-3 rounded text-left text-accentCoral font-bold hover:bg-white/10">
-            🚪 Logout
+          <button @click="mobileMenuOpen = false; handleLogout()" class="py-2 px-3 rounded text-left text-accentCoral font-bold hover:bg-white/10 flex items-center space-x-2">
+            <span class="font-mono text-sm">➜]</span>
+            <span>Logout</span>
           </button>
         </div>
       </div>
