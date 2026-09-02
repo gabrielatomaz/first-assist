@@ -16,7 +16,8 @@
             </router-link>
             <!-- Active Event Context Indicator (Epic 11) -->
             <span v-if="activeEvent" class="block text-[10px] text-primaryTeal font-bold uppercase font-mono tracking-wider mt-0.5">
-              🏆 {{ activeEvent.code }}
+              <span class="md:hidden">🏆 {{ activeEvent.code }}</span>
+              <span class="hidden md:inline">🏆 {{ activeEvent.name }} ({{ activeEvent.code }})</span>
             </span>
           </div>
           

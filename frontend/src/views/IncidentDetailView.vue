@@ -12,73 +12,93 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between md:items-start gap-4">
       <div class="space-y-2">
-        <div class="flex items-center space-x-3">
-          <span :class="statusBadgeClass" class="px-2.5 py-1 rounded text-xs font-bold font-mono tracking-wider uppercase">
+        <div class="flex items-center space-x-3 flex-nowrap">
+          <span :class="statusBadgeClass" class="px-2.5 py-1 rounded text-xs font-bold font-mono tracking-wider uppercase flex-shrink-0">
             {{ incident.status }}
           </span>
-          <span :class="priorityBadgeClass" class="px-2.5 py-1 rounded text-xs font-bold font-mono tracking-wider uppercase">
+          <span :class="priorityBadgeClass" class="px-2.5 py-1 rounded text-xs font-bold font-mono tracking-wider uppercase flex-shrink-0">
             {{ incident.priority }}
           </span>
-          <h2 class="text-3xl font-extrabold text-primaryTeal tracking-tight">Team {{ incident.teamNumber }}</h2>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-primaryTeal tracking-tight whitespace-nowrap">Team {{ incident.teamNumber }}</h2>
         </div>
         <p class="text-sm text-gray-400 font-medium">
           Event: <span class="font-extrabold text-primaryTeal uppercase">{{ incident.eventCode || 'N/A' }}</span> | Match: <span class="font-bold text-gray-300">{{ incident.matchNumber || 'N/A' }}</span> | Reported: {{ formatTime(incident.createdAt) }}
         </p>
       </div>
 
-      <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 w-full md:w-auto">
-        <!-- 1. Technician selection dropdown -->
-        <div v-if="authStore.isAdmin || authStore.isFTA" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1 sm:space-x-1.5 w-full sm:w-auto">
-          <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Technician:</label>
+      <div class="flex flex-col sm:flex-row sm:flex-nowrap items-stretch sm:items-center gap-2.5 w-full md:w-auto">
+        <!-- 1. Technician selection dropdown (with "Assign to Me") -->
+        <div v-if="authStore.isAdmin || authStore.isFTA || authStore.user" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1 sm:space-x-1.5 w-full sm:w-auto flex-shrink-0">
+          <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">Technician:</label>
           <select
             v-model="selectedAssignee"
             @change="assignTechnician"
             class="w-full sm:w-auto px-3 py-2 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-xs bg-bgCard font-semibold text-textMain cursor-pointer shadow-sm hover:border-gray-600 transition"
           >
-            <option :value="null" class="bg-bgCard text-textMain">Unassigned</option>
-            <option v-for="user in technicians" :key="user._id" :value="user._id" class="bg-bgCard text-textMain">{{ user.name }} ({{ user.role }})</option>
+            <option :value="null" class="bg-bgCard text-textMain py-1.5 font-semibold">Unassigned</option>
+            <option 
+              v-if="authStore.user" 
+              :value="authStore.user._id" 
+              class="bg-bgCard text-accentYellow font-bold py-1.5"
+            >
+              Assign to Me ({{ userRoleLabel }})
+            </option>
+            <option 
+              v-for="user in technicians.filter(u => u._id !== authStore.user?._id)" 
+              :key="user._id" 
+              :value="user._id" 
+              class="bg-bgCard text-textMain py-1.5 font-semibold"
+            >
+              {{ user.name }} ({{ user.role }})
+            </option>
           </select>
         </div>
 
         <!-- 2. Status update select dropdown -->
-        <div v-if="authStore.isAdmin || authStore.isFTA || isAssignee" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1 sm:space-x-1.5 w-full sm:w-auto">
-          <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Status:</label>
+        <div v-if="authStore.isAdmin || authStore.isFTA || isAssignee" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1 sm:space-x-1.5 w-full sm:w-auto flex-shrink-0">
+          <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">Status:</label>
           <select
             v-model="selectedStatus"
             @change="updateStatus"
             class="w-full sm:w-auto px-3 py-2 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-xs bg-bgCard font-semibold text-textMain cursor-pointer shadow-sm hover:border-gray-600 transition"
           >
-            <option value="OPEN" class="bg-bgCard text-textMain">Open</option>
-            <option value="ASSIGNED" class="bg-bgCard text-textMain">Assigned</option>
-            <option value="IN_PROGRESS" class="bg-bgCard text-textMain">In Progress</option>
-            <option value="WAITING" class="bg-bgCard text-textMain">Waiting</option>
-            <option value="RESOLVED" disabled class="bg-bgCard text-gray-500">Resolved</option>
-            <option value="CLOSED" disabled class="bg-bgCard text-gray-500">Closed</option>
+            <option value="OPEN" class="bg-bgCard text-primaryTeal font-bold py-1.5">Open</option>
+            <option value="ASSIGNED" class="bg-bgCard text-accentYellow font-bold py-1.5">Assigned</option>
+            <option value="IN_PROGRESS" class="bg-bgCard text-accentPurple font-bold py-1.5">In Progress</option>
+            <option value="WAITING" class="bg-bgCard text-gray-400 font-semibold py-1.5">Waiting</option>
+            <option value="RESOLVED" disabled class="bg-bgCard text-green-500 font-bold py-1.5">Resolved</option>
+            <option value="CLOSED" disabled class="bg-bgCard text-gray-500 font-semibold py-1.5">Closed</option>
           </select>
         </div>
 
-        <!-- 3. Assign to Me action button (LAST) -->
+        <!-- 3. Icon-only Trash Delete button -->
         <button
-          v-if="incident.status !== 'RESOLVED' && incident.status !== 'CLOSED' && incident.assignedTo?._id !== authStore.user?._id"
-          @click="assignToMe"
-          class="w-full sm:w-auto bg-primaryTeal hover:bg-primaryTeal/90 text-white font-semibold py-2 px-3.5 rounded-lg text-xs shadow hover:shadow-md transition duration-150 text-center"
+          v-if="canDelete"
+          @click="showDeleteModal = true"
+          class="w-full sm:w-10 h-10 sm:h-9 flex items-center justify-center bg-accentCoral/20 hover:bg-accentCoral text-accentCoral hover:text-white border border-accentCoral/40 rounded-lg transition duration-150 flex-shrink-0"
+          title="Delete Incident"
         >
-          Assign to Me
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+          </svg>
         </button>
 
-        <!-- Action triggers (Resolve / Close) -->
+        <!-- 4. Action triggers (Resolve / Close) -->
         <button
           v-if="incident.status === 'ASSIGNED' || incident.status === 'IN_PROGRESS' || incident.status === 'WAITING'"
           @click="showResolveModal = true"
-          class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg text-xs shadow hover:shadow-md transition duration-150 text-center"
+          class="w-full sm:w-10 h-10 sm:h-9 flex items-center justify-center bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-150 flex-shrink-0 shadow hover:shadow-md"
+          title="Resolve Incident"
         >
-          Resolve
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+          </svg>
         </button>
 
         <button
           v-if="incident.status === 'RESOLVED' && (authStore.isAdmin || authStore.isFTA)"
           @click="closeIncident"
-          class="w-full sm:w-auto bg-primaryNavy hover:bg-primaryNavy/90 text-white font-semibold py-2 px-4 rounded-lg text-xs shadow hover:shadow-md transition duration-150 text-center"
+          class="w-full sm:w-auto bg-primaryNavy hover:bg-primaryNavy/90 text-white font-semibold py-2 px-4 rounded-lg text-xs shadow hover:shadow-md transition duration-150 text-center flex-shrink-0"
         >
           Close Incident
         </button>
@@ -206,16 +226,34 @@
       @close="showResolveModal = false"
       @resolved="handleIncidentResolved"
     />
+
+    <!-- Confirm Delete Modal overlay -->
+    <div v-if="showDeleteModal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 animate-fadeIn">
+      <div class="bg-bgCard border border-gray-700 p-6 rounded-2xl max-w-md w-full shadow-2xl space-y-4">
+        <div class="flex items-center space-x-3 text-accentCoral">
+          <span class="text-2xl">⚠️</span>
+          <h3 class="text-lg font-bold">Delete Incident</h3>
+        </div>
+        <p class="text-sm text-gray-300">Are you sure you want to permanently delete this incident ticket for <strong>Team {{ incident.teamNumber }}</strong>? This action cannot be undone.</p>
+        <div class="flex justify-end space-x-3 pt-2">
+          <button @click="showDeleteModal = false" class="px-4 py-2 rounded-xl text-xs font-semibold bg-bgMain text-gray-300 hover:text-white border border-gray-700">Cancel</button>
+          <button @click="handleDelete" :disabled="deleting" class="px-4 py-2 rounded-xl text-xs font-bold bg-accentCoral hover:bg-accentCoral/90 text-white shadow">
+            {{ deleting ? 'Deleting...' : 'Delete Incident' }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { CommentSection, AISuggestionPanel, ResolveIncidentModal } from '../components';
 import { getApiUrl } from '../config/api';
 
+const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 
@@ -224,6 +262,44 @@ const auditLogs = ref([]);
 const loading = ref(true);
 const error = ref(null);
 const showResolveModal = ref(false);
+const showDeleteModal = ref(false);
+const deleting = ref(false);
+
+const canDelete = computed(() => {
+  if (!incident.value || !authStore.user) return false;
+  if (authStore.isFTA || authStore.isAdmin) return true;
+  const creatorId = typeof incident.value.reportedBy === 'object' 
+    ? incident.value.reportedBy?._id 
+    : incident.value.reportedBy;
+  return creatorId === authStore.user._id;
+});
+
+const userRoleLabel = computed(() => {
+  const role = authStore.user?.role;
+  if (!role) return 'Admin';
+  if (role === 'ADMIN' || role.toLowerCase().includes('admin')) return 'Admin';
+  return role;
+});
+
+const handleDelete = async () => {
+  try {
+    deleting.value = true;
+    const response = await fetch(getApiUrl(`/incidents/${incident.value._id}`), {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${authStore.token}` }
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error || 'Failed to delete incident');
+    }
+    router.push('/');
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    deleting.value = false;
+    showDeleteModal.value = false;
+  }
+};
 
 const selectedAssignee = ref(null);
 const selectedStatus = ref('OPEN');

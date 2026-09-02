@@ -21,42 +21,53 @@
           🏆 Active Event: {{ authStore.user.assignedEventCode }}
         </div>
 
-        <!-- Status Filter (Epic 16) -->
-        <select v-model="statusFilter" @change="fetchIncidents" class="px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-xs bg-bgCard font-semibold text-textMain">
-          <option value="ALL">All Active Issues</option>
-          <option value="OPEN">Open Queue</option>
-          <option value="ASSIGNED">Assigned</option>
-          <option value="IN_PROGRESS">In Progress</option>
-          <option value="WAITING">Waiting</option>
-          <option value="RESOLVED">Resolved Tickets</option>
-          <option value="CLOSED">Closed Tickets</option>
+        <!-- Status Filter -->
+        <select v-model="statusFilter" @change="fetchIncidents" class="px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-xs bg-bgCard font-semibold text-textMain cursor-pointer shadow-sm hover:border-gray-600 transition">
+          <option value="ALL" class="bg-bgCard text-textMain py-1.5 font-semibold">All Active Issues</option>
+          <option value="OPEN" class="bg-bgCard text-primaryTeal font-bold py-1.5">Open Queue</option>
+          <option value="ASSIGNED" class="bg-bgCard text-accentYellow font-bold py-1.5">Assigned</option>
+          <option value="IN_PROGRESS" class="bg-bgCard text-accentPurple font-bold py-1.5">In Progress</option>
+          <option value="WAITING" class="bg-bgCard text-gray-400 font-semibold py-1.5">Waiting</option>
+          <option value="RESOLVED" class="bg-bgCard text-green-400 font-bold py-1.5">Resolved Tickets</option>
+          <option value="CLOSED" class="bg-bgCard text-gray-500 font-semibold py-1.5">Closed Tickets</option>
         </select>
 
-        <!-- Auto Refresh Interval Dropdown (FEAT-015) -->
-        <div class="flex items-center space-x-1.5 bg-bgCard px-3 py-1.5 rounded-lg border border-gray-700">
-          <span class="text-[10px] font-bold text-gray-400 uppercase">Auto Sync:</span>
+        <!-- Enhanced Single Unified Dropdown with Embedded Refresh Button -->
+        <div class="pl-2.5 pr-0 py-0 rounded-[1rem] border border-gray-700 bg-bgCard hover:border-gray-600 focus-within:ring-2 focus-within:ring-primaryTeal/20 focus-within:border-primaryTeal text-xs font-semibold text-textMain shadow-sm transition flex items-center cursor-pointer">
+          <!-- Refresh Icon Button with Hover & Active Feedback -->
+          <button
+            @click="fetchIncidents"
+            title="Refresh Incident Board Now"
+            class="text-primaryTeal hover:text-white hover:bg-gray-800 active:scale-95 transition p-1.5 rounded-md flex-shrink-0 cursor-pointer flex items-center justify-center mr-[0.45rem]"
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              class="w-4 h-4" 
+              :class="{ 'animate-spin': loading && !firstLoad }"
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor" 
+              stroke-width="2.5"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
+          </button>
+
+          <!-- Select Interval Dropdown -->
           <select 
             v-model.number="refreshInterval" 
             @change="updateRefreshInterval" 
-            class="text-xs bg-transparent focus:outline-none font-bold text-primaryTeal cursor-pointer"
+            class="bg-transparent focus:outline-none font-semibold text-textMain cursor-pointer text-xs flex-grow py-2 pl-4 pr-0"
           >
-            <option :value="0" class="bg-bgCard">Manual Only</option>
-            <option :value="5000" class="bg-bgCard">Every 5s</option>
-            <option :value="15000" class="bg-bgCard">Every 15s</option>
-            <option :value="30000" class="bg-bgCard">Every 30s</option>
-            <option :value="60000" class="bg-bgCard">Every 1 min</option>
-            <option :value="300000" class="bg-bgCard">Every 5 min</option>
-            <option :value="900000" class="bg-bgCard">Every 15 min</option>
+            <option :value="0" class="bg-bgCard text-textMain py-1.5 font-semibold">Manual Sync</option>
+            <option :value="5000" class="bg-bgCard text-primaryTeal font-bold py-1.5">Every 5s</option>
+            <option :value="15000" class="bg-bgCard text-primaryTeal font-bold py-1.5">Every 15s</option>
+            <option :value="30000" class="bg-bgCard text-textMain py-1.5 font-semibold">Every 30s</option>
+            <option :value="60000" class="bg-bgCard text-textMain py-1.5 font-semibold">Every 1 min</option>
+            <option :value="300000" class="bg-bgCard text-textMain py-1.5 font-semibold">Every 5 min</option>
+            <option :value="900000" class="bg-bgCard text-textMain py-1.5 font-semibold">Every 15 min</option>
           </select>
         </div>
-
-        <button
-          @click="fetchIncidents"
-          title="Refresh Incident Board"
-          class="bg-bgCard hover:bg-gray-800 text-textMain px-3 py-2 border border-gray-700 rounded-lg text-sm font-bold shadow-sm transition duration-150 cursor-pointer"
-        >
-          <span>&#8635;</span>
-        </button>
       </div>
     </div>
 

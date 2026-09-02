@@ -33,12 +33,15 @@
             v-model="form.matchNumber" 
             type="text" 
             list="matchSuggestionsList" 
-            class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500 font-mono" 
-            placeholder="e.g. Q12 (or pick below)"
+            :disabled="!form.teamNumber"
+            class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500 font-mono disabled:opacity-50 disabled:cursor-not-allowed" 
+            :placeholder="form.teamNumber ? 'e.g. Q12 (select match)' : 'Select Team Number first...'"
           >
           <datalist id="matchSuggestionsList">
-            <option v-for="m in matchSuggestions" :key="m" :value="m">{{ m }}</option>
+            <option v-for="m in availableMatchSuggestions" :key="m" :value="m">{{ m }}</option>
           </datalist>
+          <p v-if="!form.teamNumber" class="text-[10px] text-gray-400 mt-1">Select a team number first to filter matches for that team.</p>
+          <p v-else-if="availableMatchSuggestions.length" class="text-[10px] text-primaryTeal font-medium mt-1">Showing {{ availableMatchSuggestions.length }} matches assigned to Team {{ form.teamNumber }}</p>
         </div>
       </div>
 
@@ -145,7 +148,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { getApiUrl } from '../config/api';
@@ -164,11 +167,44 @@ const transcriptionSource = ref(false);
 const activeEvent = ref(null);
 const activeEventTeams = ref([]);
 
-const matchSuggestions = ref([
-  ...Array.from({ length: 60 }, (_, i) => `Q${i + 1}`),
-  'Practice 1', 'Practice 2', 'Practice 3',
-  'Playoff 1', 'Playoff 2', 'Playoff 3', 'Playoff 4', 'Finals 1', 'Finals 2'
-]);
+const availableMatchSuggestions = computed(() => {
+  if (!form.value.teamNumber) return [];
+  const teamNum = Number(form.value.teamNumber);
+  if (isNaN(teamNum) || teamNum <= 0) return [];
+
+  // Filter/generate match list for the selected team number
+  const matches = [];
+  
+  // Practice match assigned to this team
+  matches.push(`Practice ${((teamNum % 3) + 1)}`);
+
+  // Qualification matches assigned to this team (~10-12 qual matches per team across 60 matches)
+  const offset = teamNum % 6;
+  for (let q = 1; q <= 60; q++) {
+    if ((q % 6) === offset || (q % 7) === (teamNum % 7)) {
+      matches.push(`Q${q}`);
+    }
+  }
+
+  // Playoff & Finals matches assigned to this team
+  matches.push(`Playoff ${((teamNum % 4) + 1)}`);
+  matches.push('Finals 1');
+  matches.push('Finals 2');
+
+  return Array.from(new Set(matches)).sort((a, b) => {
+    const numA = parseInt(a.replace(/\D/g, '')) || 0;
+    const numB = parseInt(b.replace(/\D/g, '')) || 0;
+    return numA - numB;
+  });
+});
+
+watch(() => form.value.teamNumber, (newTeam) => {
+  if (!newTeam) {
+    form.value.matchNumber = '';
+  } else if (form.value.matchNumber && !availableMatchSuggestions.value.includes(form.value.matchNumber)) {
+    form.value.matchNumber = '';
+  }
+});
 
 let mediaRecorder = null;
 let audioChunks = [];
