@@ -7,9 +7,11 @@
       </div>
       <button
         @click="showCreateForm = !showCreateForm"
-        class="bg-primaryTeal hover:bg-primaryTeal/90 text-white font-semibold py-2.5 px-5 rounded-lg shadow-md hover:shadow-lg transition duration-200"
+        :class="showCreateForm ? 'w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white border border-gray-700 rounded-xl shadow transition duration-200 cursor-pointer flex-shrink-0' : 'bg-primaryTeal hover:bg-primaryTeal/90 text-white font-semibold py-2.5 px-4 rounded-xl shadow-md hover:shadow-lg transition duration-200 cursor-pointer flex items-center space-x-2 text-xs flex-shrink-0'"
+        :title="showCreateForm ? 'Cancel Registration' : 'Add New User'"
       >
-        {{ showCreateForm ? 'Cancel Registration' : 'Add New User' }}
+        <font-awesome-icon :icon="showCreateForm ? 'xmark' : 'user-plus'" class="text-xs" />
+        <span v-if="!showCreateForm">{{ (authStore.isFTA && !authStore.isAdmin) ? 'New CSA' : 'New User' }}</span>
       </button>
     </div>
 
@@ -31,7 +33,7 @@
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Temporary Password</label>
-            <input v-model="form.password" type="password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500">
+            <input v-model="form.password" type="password" required placeholder="****" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500 font-mono">
           </div>
           <div>
             <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">System Role</label>
@@ -52,7 +54,7 @@
           :disabled="creating"
           class="bg-primaryTeal hover:bg-primaryTeal/90 text-white font-semibold py-2.5 px-6 rounded-lg text-sm shadow hover:shadow-md transition duration-150 disabled:opacity-50"
         >
-          {{ creating ? 'Registering...' : 'Register User' }}
+          {{ creating ? 'Registering...' : 'Register' }}
         </button>
       </form>
     </div>

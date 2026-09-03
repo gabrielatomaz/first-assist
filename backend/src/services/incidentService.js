@@ -2,6 +2,7 @@ import { incidentRepository } from '../repositories/incidentRepository.js';
 import { aiSuggestionRepository } from '../repositories/aiSuggestionRepository.js';
 import { Incident } from '../models/Incident.js';
 import { logIncidentChange, createAssignmentNotification } from '../utils/auditLogger.js';
+import { generateDiagnosticSuggestion } from './aiService.js';
 
 export const incidentService = {
   getAllIncidents: async (filters = {}) => {
@@ -36,6 +37,31 @@ export const incidentService = {
       newValue: 'OPEN',
       details: `Incident created for Team ${newIncident.teamNumber}`
     });
+
+    // Generate AI diagnostic suggestion ONCE at creation time and store in DB
+    try {
+      let relatedIncidents = [];
+      try {
+        relatedIncidents = await Incident.find({
+          _id: { $ne: newIncident._id },
+          status: { $in: ['RESOLVED', 'CLOSED'] },
+          category: newIncident.category
+        }).limit(3);
+      } catch (e) {
+        console.warn('Could not fetch related tickets for initial AI context:', e.message);
+      }
+
+      const aiResult = await generateDiagnosticSuggestion(newIncident, relatedIncidents);
+
+      await aiSuggestionRepository.create({
+        incidentId: newIncident._id,
+        suggestedCause: aiResult.suggestedCause,
+        suggestedSolution: aiResult.suggestedSolution,
+        rating: 'UNRATED'
+      });
+    } catch (aiErr) {
+      console.error('Failed to generate initial AI diagnosis on creation:', aiErr.message || aiErr);
+    }
 
     return newIncident;
   },
@@ -192,17 +218,70 @@ export const incidentService = {
 
   getAISuggestionsForIncident: async (incidentId) => {
     let suggestion = await aiSuggestionRepository.findByIncidentId(incidentId);
-    
-    if (!suggestion) {
-      // Mock generate suggestions
-      suggestion = await aiSuggestionRepository.create({
-        incidentId,
-        suggestedCause: 'Loose cable connector plug inside driver station enclosure.',
-        suggestedSolution: 'Reconnect securely, tape or zip-tie connector logic to prevent event vibration drops.',
-        rating: 'UNRATED'
-      });
+
+    // Return stored suggestion from database directly if found
+    if (suggestion) {
+      return [suggestion];
     }
     
+    // Fallback only if incident was created prior to AI integration
+    const incident = await incidentRepository.findById(incidentId);
+    if (!incident) throw new Error('Incident not found');
+
+    let relatedIncidents = [];
+    try {
+      relatedIncidents = await Incident.find({
+        _id: { $ne: incidentId },
+        status: { $in: ['RESOLVED', 'CLOSED'] },
+        category: incident.category
+      }).limit(3);
+    } catch (err) {
+      console.warn('Could not fetch related tickets for AI context:', err.message);
+    }
+
+    const aiResult = await generateDiagnosticSuggestion(incident, relatedIncidents);
+
+    suggestion = await aiSuggestionRepository.create({
+      incidentId,
+      suggestedCause: aiResult.suggestedCause,
+      suggestedSolution: aiResult.suggestedSolution,
+      rating: 'UNRATED'
+    });
+    
     return [suggestion];
+  },
+
+  deleteIncident: async (incidentId, user) => {
+    const incident = await Incident.findById(incidentId);
+    if (!incident) throw new Error('Incident not found');
+
+    const creatorId = incident.reportedBy ? (incident.reportedBy._id || incident.reportedBy).toString() : null;
+    const isCreator = creatorId && creatorId === user._id.toString();
+    const isFTA = user.role === 'FTA' || user.role === 'ADMIN';
+
+    if (!isCreator && !isFTA) {
+      throw new Error('Forbidden: Only an FTA or the incident creator can delete this incident');
+    }
+
+    // Clean up associated AI suggestions
+    try {
+      const { AISuggestion } = await import('../models/AISuggestion.js');
+      await AISuggestion.deleteMany({ incidentId });
+    } catch (e) {
+      console.warn('Could not clean up AI suggestion on delete:', e.message);
+    }
+
+    await Incident.findByIdAndDelete(incidentId);
+
+    // Audit log
+    await logIncidentChange({
+      incidentId,
+      userId: user._id,
+      action: 'INCIDENT_DELETED',
+      newValue: 'DELETED',
+      details: `Incident for Team ${incident.teamNumber} was deleted by ${user.name} (${user.role})`
+    });
+
+    return incident;
   }
 };

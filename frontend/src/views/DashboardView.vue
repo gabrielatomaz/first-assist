@@ -18,18 +18,18 @@
 
         <!-- CSA Active Event Context Badge (CSAs have 1 event, no dropdown) -->
         <div v-else-if="authStore.user?.assignedEventCode" class="px-3.5 py-2 rounded-lg border border-primaryTeal/40 bg-primaryTeal/10 text-primaryTeal text-xs font-bold font-mono">
-          🏆 Active Event: {{ authStore.user.assignedEventCode }}
+          <font-awesome-icon icon="trophy" class="mr-1 text-accentYellow" /> Active Event: {{ authStore.user.assignedEventCode }}
         </div>
 
         <!-- Status Filter -->
         <select v-model="statusFilter" @change="fetchIncidents" class="px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-xs bg-bgCard font-semibold text-textMain cursor-pointer shadow-sm hover:border-gray-600 transition">
-          <option value="ALL" class="bg-bgCard text-textMain py-1.5 font-semibold">All Active Issues</option>
-          <option value="OPEN" class="bg-bgCard text-primaryTeal font-bold py-1.5">Open Queue</option>
+          <option value="ALL" class="bg-bgCard text-textMain py-1.5 font-semibold">Active</option>
+          <option value="OPEN" class="bg-bgCard text-primaryTeal font-bold py-1.5">Open</option>
           <option value="ASSIGNED" class="bg-bgCard text-accentYellow font-bold py-1.5">Assigned</option>
           <option value="IN_PROGRESS" class="bg-bgCard text-accentPurple font-bold py-1.5">In Progress</option>
           <option value="WAITING" class="bg-bgCard text-gray-400 font-semibold py-1.5">Waiting</option>
-          <option value="RESOLVED" class="bg-bgCard text-green-400 font-bold py-1.5">Resolved Tickets</option>
-          <option value="CLOSED" class="bg-bgCard text-gray-500 font-semibold py-1.5">Closed Tickets</option>
+          <option value="RESOLVED" class="bg-bgCard text-green-400 font-bold py-1.5">Resolved</option>
+          <option value="CLOSED" class="bg-bgCard text-gray-500 font-semibold py-1.5">Closed</option>
         </select>
 
         <!-- Enhanced Single Unified Dropdown with Embedded Refresh Button -->
@@ -40,17 +40,7 @@
             title="Refresh Incident Board Now"
             class="text-primaryTeal hover:text-white hover:bg-gray-800 active:scale-95 transition p-1.5 rounded-md flex-shrink-0 cursor-pointer flex items-center justify-center mr-[0.45rem]"
           >
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              class="w-4 h-4" 
-              :class="{ 'animate-spin': loading && !firstLoad }"
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor" 
-              stroke-width="2.5"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-            </svg>
+            <font-awesome-icon icon="arrows-rotate" :spin="loading && !firstLoad" class="text-sm" />
           </button>
 
           <!-- Select Interval Dropdown -->
@@ -93,7 +83,7 @@
         </router-link>
         
         <div v-if="incidents.length === 0" class="col-span-full text-center py-16 px-6 bg-bgCard rounded-2xl border border-dashed border-gray-800 space-y-3">
-          <div class="text-4xl">📋</div>
+          <div><font-awesome-icon icon="clipboard-list" class="text-4xl text-gray-500 mb-2" /></div>
           <h3 class="text-base font-extrabold text-white">No Technical Incidents Reported</h3>
           <p class="text-xs text-gray-400 font-medium max-w-md mx-auto">
             There are currently no active or reported technical incidents matching this event context. The competition field is clear!

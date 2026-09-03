@@ -10,10 +10,10 @@
       <!-- Navigation Dropdown / Tab Selector -->
       <div class="flex items-center space-x-2 w-full md:w-auto">
         <select v-model="activeTab" class="w-full md:w-auto px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs font-bold shadow-sm">
-          <option value="manage-teams">📋 Manage Event Teams</option>
-          <option value="add-team">🤖 Register Team (TBA Sync)</option>
-          <option value="add-event">🏆 Register Event (TBA Sync)</option>
-          <option value="csa-assignment">🎯 Assign CSA Event Contexts</option>
+          <option value="manage-teams" class="bg-bgCard text-textMain py-1.5 font-semibold">Manage Event Teams</option>
+          <option value="add-team" class="bg-bgCard text-textMain py-1.5 font-semibold">Register Team (TBA Sync)</option>
+          <option value="add-event" class="bg-bgCard text-textMain py-1.5 font-semibold">Register Event (TBA Sync)</option>
+          <option value="csa-assignment" class="bg-bgCard text-textMain py-1.5 font-semibold">Assign CSA Event Contexts</option>
         </select>
       </div>
     </div>
@@ -35,7 +35,7 @@
           </p>
         </div>
         <div class="p-3 bg-bgMain rounded-xl border border-gray-800 text-[11px] text-accentYellow font-mono font-bold animate-pulse">
-          ⚡ Please wait — Do not close or refresh this browser tab
+          <font-awesome-icon icon="bolt" class="mr-1 text-accentYellow" /> Please wait — Do not close or refresh this browser tab
         </div>
       </div>
     </div>
@@ -49,7 +49,7 @@
             <div class="flex items-center space-x-2 w-full min-w-0">
               <select v-model="selectedEventCode" @change="loadEventTeams(1)" class="w-full min-w-0 flex-1 px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs font-bold truncate">
                 <option v-for="ev in availableFTAEvents" :key="ev._id" :value="ev.code">
-                  {{ ev.name }} ({{ ev.code }}) {{ ev.isActive ? '★ Active' : '' }}
+                  {{ ev.name }} ({{ ev.code }}) {{ ev.isActive ? '(Active)' : '' }}
                 </option>
               </select>
               <button 
@@ -58,7 +58,7 @@
                 title="Set Active Competition Event"
                 class="flex-shrink-0 bg-accentYellow/20 hover:bg-accentYellow/30 text-accentYellow border border-accentYellow/40 px-3 py-2 rounded-lg transition cursor-pointer flex items-center justify-center shadow-sm"
               >
-                <span class="text-lg font-extrabold leading-none">★</span>
+                <font-awesome-icon icon="star" class="text-accentYellow text-sm" />
               </button>
             </div>
           </div>
@@ -72,15 +72,19 @@
               required
               class="w-28 px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs placeholder-gray-500"
             >
-            <button type="submit" class="bg-primaryTeal hover:bg-primaryTeal/90 text-white text-xs font-bold px-3 py-2 rounded-lg transition">
-              + Add to Roster
+            <button 
+              type="submit" 
+              title="Add Team to Roster" 
+              class="w-9 h-9 flex items-center justify-center bg-primaryTeal hover:bg-primaryTeal/90 text-white rounded-lg transition shadow-sm cursor-pointer flex-shrink-0"
+            >
+              <font-awesome-icon icon="plus" class="text-sm" />
             </button>
           </form>
         </div>
 
         <!-- Search Bar -->
         <div class="flex items-center space-x-3 bg-bgMain px-4 py-2.5 rounded-xl border border-gray-800">
-          <span class="text-gray-400">🔍</span>
+          <font-awesome-icon icon="magnifying-glass" class="text-gray-400" />
           <input 
             v-model="teamSearchQuery" 
             type="text" 
@@ -135,16 +139,18 @@
             <button 
               :disabled="currentPage === 1" 
               @click="loadEventTeams(currentPage - 1)" 
-              class="px-3 py-1.5 rounded bg-bgMain border border-gray-700 disabled:opacity-40 font-bold"
+              class="w-8 h-8 rounded-lg bg-bgMain border border-gray-700 disabled:opacity-40 font-bold flex items-center justify-center text-textMain hover:border-gray-500 transition cursor-pointer"
+              title="Previous Page"
             >
-              ← Prev
+              <font-awesome-icon icon="chevron-left" class="text-xs" />
             </button>
             <button 
               :disabled="currentPage === totalPages" 
               @click="loadEventTeams(currentPage + 1)" 
-              class="px-3 py-1.5 rounded bg-bgMain border border-gray-700 disabled:opacity-40 font-bold"
+              class="w-8 h-8 rounded-lg bg-bgMain border border-gray-700 disabled:opacity-40 font-bold flex items-center justify-center text-textMain hover:border-gray-500 transition cursor-pointer"
+              title="Next Page"
             >
-              Next →
+              <font-awesome-icon icon="chevron-right" class="text-xs" />
             </button>
           </div>
         </div>
@@ -165,7 +171,7 @@
             <div class="flex space-x-2">
               <input v-model.number="teamForm.number" type="number" required placeholder="e.g. 254" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-sm">
               <button type="button" @click="fetchFromTBA" :disabled="fetchingTBA" class="bg-accentPurple/20 hover:bg-accentPurple/30 text-accentPurple border border-accentPurple/30 font-bold px-4 py-2.5 rounded-lg text-xs whitespace-nowrap transition">
-                {{ fetchingTBA ? 'Syncing...' : '⚡ Lookup TBA' }}
+                <font-awesome-icon icon="bolt" class="mr-1" /> {{ fetchingTBA ? 'Syncing...' : 'Lookup TBA' }}
               </button>
             </div>
           </div>
@@ -206,7 +212,7 @@
               title="Import Event and Attending Teams from TBA"
               class="bg-primaryTeal hover:bg-primaryTeal/90 text-white font-extrabold px-3.5 py-2 rounded-lg text-sm transition cursor-pointer flex items-center justify-center shadow-sm"
             >
-              📥
+              <font-awesome-icon icon="download" />
             </button>
           </div>
         </div>

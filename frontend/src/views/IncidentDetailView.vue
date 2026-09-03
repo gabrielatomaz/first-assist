@@ -21,7 +21,7 @@
           </span>
           <h2 class="text-2xl sm:text-3xl font-extrabold text-primaryTeal tracking-tight whitespace-nowrap">Team {{ incident.teamNumber }}</h2>
         </div>
-        <p class="text-sm text-gray-400 font-medium">
+        <p class="text-sm text-gray-400 font-medium sm:whitespace-nowrap">
           Event: <span class="font-extrabold text-primaryTeal uppercase">{{ incident.eventCode || 'N/A' }}</span> | Match: <span class="font-bold text-gray-300">{{ incident.matchNumber || 'N/A' }}</span> | Reported: {{ formatTime(incident.createdAt) }}
         </p>
       </div>
@@ -71,42 +71,55 @@
           </select>
         </div>
 
-        <!-- 3. Icon-only Trash Delete button -->
-        <button
-          v-if="canDelete"
-          @click="showDeleteModal = true"
-          class="w-full sm:w-10 h-10 sm:h-9 flex items-center justify-center bg-accentCoral/20 hover:bg-accentCoral text-accentCoral hover:text-white border border-accentCoral/40 rounded-lg transition duration-150 flex-shrink-0"
-          title="Delete Incident"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-          </svg>
-        </button>
+        <!-- 3 & 4. Action icon buttons group (Expanded on mobile, compact on desktop) -->
+        <div v-if="canDelete || (incident.status === 'ASSIGNED' || incident.status === 'IN_PROGRESS' || incident.status === 'WAITING')" class="flex items-center space-x-2 w-full sm:w-auto flex-shrink-0">
+          <button
+            v-if="canDelete"
+            @click="showDeleteModal = true"
+            class="flex-1 sm:flex-initial h-9 sm:w-8 sm:h-8 flex items-center justify-center bg-accentCoral/20 hover:bg-accentCoral text-accentCoral hover:text-white border border-accentCoral/40 rounded-lg transition duration-150 cursor-pointer"
+            title="Delete Incident"
+          >
+            <font-awesome-icon icon="trash-can" class="text-xs" />
+          </button>
 
-        <!-- 4. Action triggers (Resolve / Close) -->
-        <button
-          v-if="incident.status === 'ASSIGNED' || incident.status === 'IN_PROGRESS' || incident.status === 'WAITING'"
-          @click="showResolveModal = true"
-          class="w-full sm:w-10 h-10 sm:h-9 flex items-center justify-center bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-150 flex-shrink-0 shadow hover:shadow-md"
-          title="Resolve Incident"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-          </svg>
-        </button>
+          <button
+            v-if="incident.status === 'ASSIGNED' || incident.status === 'IN_PROGRESS' || incident.status === 'WAITING'"
+            @click="showResolveModal = true"
+            class="flex-1 sm:flex-initial h-9 sm:w-8 sm:h-8 flex items-center justify-center bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-150 shadow hover:shadow-md cursor-pointer"
+            title="Resolve Incident"
+          >
+            <font-awesome-icon icon="check" class="text-xs" />
+          </button>
+        </div>
 
         <button
           v-if="incident.status === 'RESOLVED' && (authStore.isAdmin || authStore.isFTA)"
           @click="closeIncident"
-          class="w-full sm:w-auto bg-primaryNavy hover:bg-primaryNavy/90 text-white font-semibold py-2 px-4 rounded-lg text-xs shadow hover:shadow-md transition duration-150 text-center flex-shrink-0"
+          class="w-full sm:w-auto bg-primaryNavy hover:bg-primaryNavy/90 text-white font-semibold py-1.5 px-3 rounded-lg text-[11px] shadow hover:shadow-md transition duration-150 text-center flex-shrink-0 flex items-center justify-center space-x-1 cursor-pointer"
         >
-          Close Incident
+          <font-awesome-icon icon="circle-xmark" class="mr-1 text-xs" />
+          <span>Close Incident</span>
         </button>
       </div>
     </div>
 
     <!-- Detail Box -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Mobile Technical Assignee Header Card (Visible on mobile only, above Issue Description) -->
+      <div class="block md:hidden bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-4">
+        <h3 class="text-xs font-bold text-primaryTeal uppercase tracking-wider border-b border-gray-800 pb-2">Technical Assignee</h3>
+        <div v-if="incident.assignedTo" class="flex items-center space-x-3 pt-2">
+          <div class="w-10 h-10 rounded-full bg-primaryTeal/10 flex items-center justify-center font-bold text-primaryTeal text-sm uppercase">
+            {{ incident.assignedTo?.name?.charAt(0) || '?' }}
+          </div>
+          <div>
+            <p class="text-sm font-bold text-white leading-tight">{{ incident.assignedTo?.name }}</p>
+            <p class="text-[10px] text-gray-400 font-mono uppercase tracking-wider">{{ incident.assignedTo?.role }}</p>
+          </div>
+        </div>
+        <p v-else class="text-xs text-gray-400 font-medium">Unassigned queue</p>
+      </div>
+
       <div class="md:col-span-2 space-y-6">
         <!-- Description -->
         <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-3">
@@ -162,9 +175,10 @@
         </div>
       </div>
 
-      <!-- Assignee Card info -->
+      <!-- Desktop Sidebar Column -->
       <div class="space-y-6">
-        <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-4">
+        <!-- Desktop Assignee Card info -->
+        <div class="hidden md:block bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-4">
           <h3 class="text-xs font-bold text-primaryTeal uppercase tracking-wider border-b border-gray-800 pb-2">Technical Assignee</h3>
           <div v-if="incident.assignedTo" class="flex items-center space-x-3 pt-2">
             <div class="w-10 h-10 rounded-full bg-primaryTeal/10 flex items-center justify-center font-bold text-primaryTeal text-sm uppercase">
@@ -178,6 +192,7 @@
           <p v-else class="text-xs text-gray-400 font-medium">Unassigned queue</p>
         </div>
 
+        <!-- Resolution Details Card -->
         <div v-if="incident.status === 'RESOLVED' || incident.status === 'CLOSED'" class="bg-green-950/20 border border-green-900/30 p-6 rounded-2xl space-y-4">
           <h3 class="text-xs font-bold text-green-400 uppercase tracking-wider border-b border-green-900/30 pb-2">Resolution details</h3>
           <div>
@@ -189,32 +204,64 @@
             <p class="text-xs text-textMain leading-relaxed font-medium bg-bgMain p-2.5 rounded border border-green-900/30">{{ incident.appliedSolution }}</p>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Audit Timeline (Epic 15 / US-AUDIT-001) -->
-    <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-4 mt-6">
-      <h3 class="text-xs font-bold text-primaryTeal uppercase tracking-wider border-b border-gray-800 pb-2">Incident Event Timeline</h3>
-      <div class="space-y-3 max-h-60 overflow-y-auto pr-1">
-        <div v-if="auditLogs.length === 0" class="text-center py-6 text-xs text-gray-400">
-          No events logged yet.
-        </div>
-        <div 
-          v-for="log in auditLogs" 
-          :key="log._id" 
-          class="flex items-start justify-between space-x-3 text-xs leading-relaxed p-2.5 rounded-lg bg-bgMain border border-gray-800 hover:shadow-sm transition"
-        >
-          <div class="flex items-start space-x-3">
-            <div class="w-1.5 h-1.5 rounded-full bg-primaryTeal mt-1.5 flex-shrink-0 animate-pulse"></div>
-            <div class="flex-grow">
-              <span class="font-extrabold text-textMain">{{ log.userId?.name || 'System' }}</span>
-              <span class="text-[9px] bg-gray-800 text-gray-400 font-extrabold uppercase font-mono px-1 rounded ml-1">
-                {{ log.userId?.role || 'SYSTEM' }}
+        <!-- Collapsible Audit Timeline spanning edge to edge when closed -->
+        <div class="bg-bgCard rounded-2xl shadow border border-gray-800 overflow-hidden transition">
+          <button 
+            @click="isAuditTimelineOpen = !isAuditTimelineOpen"
+            class="w-full px-6 py-4 flex justify-between items-center text-left hover:bg-gray-800/30 transition cursor-pointer group select-none"
+          >
+            <div class="flex items-center space-x-2">
+              <h3 class="text-xs font-bold text-primaryTeal uppercase tracking-wider">Audit Timeline</h3>
+              <span v-if="auditLogs.length" class="text-[10px] bg-bgMain text-primaryTeal px-1.5 py-0.5 rounded font-mono font-bold border border-gray-800">
+                {{ auditLogs.length }}
               </span>
-              <span class="text-gray-300 font-medium ml-2">{{ log.details }}</span>
+            </div>
+            <font-awesome-icon 
+              icon="chevron-down" 
+              class="w-3.5 h-3.5 text-gray-400 group-hover:text-primaryTeal transition-transform duration-200"
+              :class="{ 'rotate-180': isAuditTimelineOpen }"
+            />
+          </button>
+
+          <!-- Collapsible Content with Vertical Timeline Line -->
+          <div v-show="isAuditTimelineOpen" class="px-6 pb-6 pt-3 border-t border-gray-800 space-y-4">
+            <div v-if="auditLogs.length === 0" class="text-center py-4 text-xs text-gray-400 font-medium">
+              No events logged yet for this incident.
+            </div>
+
+            <!-- Vertical Timeline Track -->
+            <div v-else class="relative border-l-2 border-primaryTeal/30 ml-2.5 space-y-4 my-1">
+              <div 
+                v-for="log in auditLogs" 
+                :key="log._id" 
+                class="relative pl-5 text-xs group/log"
+              >
+                <!-- Timeline Dot Node -->
+                <div class="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-primaryTeal ring-4 ring-bgCard shadow-sm transition group-hover/log:scale-125"></div>
+
+                <!-- Event Log Item Card -->
+                <div class="bg-bgMain border border-gray-800 hover:border-gray-700 p-3 rounded-xl shadow-sm transition space-y-1">
+                  <div class="flex items-center justify-between">
+                    <span 
+                      class="font-extrabold text-xs"
+                      :class="{
+                        'text-accentYellow': log.userId?.role === 'ADMIN',
+                        'text-primaryTeal': log.userId?.role === 'FTA',
+                        'text-accentPurple': log.userId?.role === 'CSA',
+                        'text-gray-300': !['ADMIN', 'FTA', 'CSA'].includes(log.userId?.role)
+                      }"
+                    >
+                      {{ log.userId?.name || 'System' }}
+                    </span>
+                    <span class="text-[10px] text-gray-400 font-mono">{{ formatTime(log.timestamp) }}</span>
+                  </div>
+
+                  <p class="text-xs text-gray-300 font-medium leading-normal pt-0.5">{{ log.details }}</p>
+                </div>
+              </div>
             </div>
           </div>
-          <span class="text-[10px] text-gray-400 font-mono">{{ formatTime(log.timestamp) }}</span>
         </div>
       </div>
     </div>
@@ -231,7 +278,7 @@
     <div v-if="showDeleteModal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 animate-fadeIn">
       <div class="bg-bgCard border border-gray-700 p-6 rounded-2xl max-w-md w-full shadow-2xl space-y-4">
         <div class="flex items-center space-x-3 text-accentCoral">
-          <span class="text-2xl">⚠️</span>
+          <font-awesome-icon icon="triangle-exclamation" class="text-2xl text-accentCoral" />
           <h3 class="text-lg font-bold">Delete Incident</h3>
         </div>
         <p class="text-sm text-gray-300">Are you sure you want to permanently delete this incident ticket for <strong>Team {{ incident.teamNumber }}</strong>? This action cannot be undone.</p>
@@ -308,6 +355,7 @@ const technicians = ref([]);
 const diagnosisText = ref('');
 const editingDiagnosis = ref(false);
 const savingDiagnosis = ref(false);
+const isAuditTimelineOpen = ref(false);
 
 const isAssignee = computed(() => {
   return incident.value?.assignedTo?._id === authStore.user?._id;

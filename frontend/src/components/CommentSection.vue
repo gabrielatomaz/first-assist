@@ -16,9 +16,16 @@
         <!-- Header / Author Info -->
         <div class="flex justify-between items-center text-xs">
           <div class="flex items-center space-x-2">
-            <span class="font-bold text-white">{{ comment.authorId?.name || 'Volunteer' }}</span>
-            <span class="text-[9px] bg-bgCard text-primaryTeal px-1.5 py-0.5 rounded font-mono uppercase tracking-wider font-bold border border-gray-800">
-              {{ comment.authorId?.role || 'CSA' }}
+            <span 
+              class="font-extrabold text-xs"
+              :class="{
+                'text-accentYellow': comment.authorId?.role === 'ADMIN',
+                'text-primaryTeal': comment.authorId?.role === 'FTA',
+                'text-accentPurple': comment.authorId?.role === 'CSA',
+                'text-white': !['ADMIN', 'FTA', 'CSA'].includes(comment.authorId?.role)
+              }"
+            >
+              {{ comment.authorId?.name || 'Volunteer' }}
             </span>
           </div>
           
@@ -32,18 +39,14 @@
                 class="text-gray-400 hover:text-primaryTeal transition p-1" 
                 title="Edit Comment"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                </svg>
+                <font-awesome-icon icon="pen-to-square" class="w-3.5 h-3.5" />
               </button>
               <button 
                 @click="openDeleteModal(comment._id)" 
                 class="text-gray-400 hover:text-accentCoral transition p-1" 
                 title="Delete Comment"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                </svg>
+                <font-awesome-icon icon="trash-can" class="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
@@ -80,7 +83,7 @@
                 @click="editImageUrl = null" 
                 class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow"
               >
-                ✕
+                <font-awesome-icon icon="xmark" />
               </button>
             </div>
 
@@ -116,7 +119,7 @@
         class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow hover:bg-red-700"
         title="Remove Picture"
       >
-        ✕
+        <font-awesome-icon icon="xmark" />
       </button>
     </div>
 
@@ -129,9 +132,7 @@
         class="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-primaryTeal bg-bgMain border border-gray-700 hover:border-gray-600 rounded-lg transition flex-shrink-0 cursor-pointer"
         title="Attach Picture"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32a1.5 1.5 0 01-2.121-2.121l9.963-9.964" />
-        </svg>
+        <font-awesome-icon icon="paperclip" class="w-4 h-4" />
       </button>
       <input 
         type="file" 
@@ -156,10 +157,8 @@
         class="w-9 h-9 flex items-center justify-center bg-primaryTeal/25 hover:bg-primaryTeal text-primaryTeal hover:text-white border border-primaryTeal/40 rounded-lg transition duration-150 disabled:opacity-30 flex-shrink-0 shadow-sm cursor-pointer"
         title="Send Update"
       >
-        <span v-if="posting" class="animate-spin text-xs">⏳</span>
-        <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-        </svg>
+        <font-awesome-icon v-if="posting" icon="spinner" spin class="text-xs" />
+        <font-awesome-icon v-else icon="paper-plane" class="w-4 h-4" />
       </button>
     </form>
 
@@ -175,17 +174,17 @@
           @click.stop="expandedImage = null" 
           class="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm font-bold shadow"
         >
-          ✕
+          <font-awesome-icon icon="xmark" />
         </button>
       </div>
     </div>
 
-    <!-- Styled Delete Confirmation Modal -->
+    <!-- Styled Delete Confirmation Modal Overlay -->
     <div v-if="deleteModalCommentId" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 animate-fadeIn">
       <div class="bg-bgCard border border-gray-700 p-6 rounded-2xl max-w-md w-full shadow-2xl space-y-4">
         <div class="flex items-center space-x-3 text-accentCoral">
-          <span class="text-2xl">⚠️</span>
-          <h3 class="text-lg font-bold text-white">Delete Update</h3>
+          <font-awesome-icon icon="triangle-exclamation" class="text-2xl text-accentCoral" />
+          <h3 class="text-lg font-bold">Delete Update</h3>
         </div>
         <p class="text-sm text-gray-300">Are you sure you want to permanently delete this update comment? This action cannot be undone.</p>
         <div class="flex justify-end space-x-3 pt-2">

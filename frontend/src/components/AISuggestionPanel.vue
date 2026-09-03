@@ -5,7 +5,7 @@
       <div class="flex justify-between items-center border-b border-gray-200/50 pb-3">
         <div class="flex items-center space-x-2">
           <!-- AI Icon -->
-          <span class="text-accentPurple text-xl">🤖</span>
+          <font-awesome-icon icon="robot" class="text-accentPurple text-xl" />
           <h3 class="text-lg font-bold text-accentPurple font-sans tracking-tight">AI Assistant Diagnosis</h3>
         </div>
         
@@ -17,7 +17,7 @@
               class="p-1.5 px-2.5 rounded border transition duration-150 text-sm font-semibold flex items-center shadow-sm"
               title="Helpful"
             >
-              👍
+              <font-awesome-icon icon="thumbs-up" />
             </button>
             <button
               @click="rateSuggestion('NOT_HELPFUL')"
@@ -25,7 +25,7 @@
               class="p-1.5 px-2.5 rounded border transition duration-150 text-sm font-semibold flex items-center shadow-sm"
               title="Reject suggestion"
             >
-              👎
+              <font-awesome-icon icon="thumbs-down" />
             </button>
           </div>
         </div>
@@ -33,7 +33,7 @@
 
       <!-- Graceful Fallback Notice (US-AI-006) -->
       <div v-if="error" class="bg-amber-950/40 border border-amber-900/50 p-4 rounded-xl text-amber-300 text-xs flex flex-col space-y-1">
-        <span class="font-bold">⚠️ AI Diagnostics Offline</span>
+        <span class="font-bold"><font-awesome-icon icon="triangle-exclamation" class="mr-1" /> AI Diagnostics Offline</span>
         <span>The AI analysis helper is currently unavailable. Please continue investigating the incident manually.</span>
       </div>
 
@@ -66,7 +66,7 @@
     <!-- Related Historical Incidents (US-AI-004) -->
     <div v-if="relatedIncidents.length > 0" class="bg-bgCard p-6 rounded-2xl border border-gray-700 shadow space-y-4">
       <div class="flex items-center space-x-2 border-b border-gray-700 pb-3">
-        <span class="text-lg">📚</span>
+        <font-awesome-icon icon="book" class="text-lg text-primaryTeal" />
         <h4 class="text-base font-bold text-primaryTeal tracking-tight">Related Resolved Tickets</h4>
       </div>
       

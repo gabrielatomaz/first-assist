@@ -38,7 +38,7 @@
           :disabled="updatingProfile"
           class="bg-primaryTeal hover:bg-primaryTeal/90 text-white font-semibold py-2.5 px-6 rounded-lg text-sm shadow hover:shadow-md transition duration-150 disabled:opacity-50"
         >
-          {{ updatingProfile ? 'Saving...' : 'Save Profile Changes' }}
+          {{ updatingProfile ? 'Saving...' : 'Save' }}
         </button>
       </form>
     </div>
@@ -50,17 +50,17 @@
       <form @submit.prevent="handlePasswordChange" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Current Password</label>
-          <input v-model="passwordForm.currentPassword" type="password" required class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500">
+          <input v-model="passwordForm.currentPassword" type="password" required placeholder="****" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500 font-mono">
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">New Password</label>
-            <input v-model="passwordForm.newPassword" type="password" required class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500">
+            <input v-model="passwordForm.newPassword" type="password" required placeholder="****" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500 font-mono">
           </div>
           <div>
             <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Confirm New Password</label>
-            <input v-model="passwordForm.confirmPassword" type="password" required class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500">
+            <input v-model="passwordForm.confirmPassword" type="password" required placeholder="****" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500 font-mono">
           </div>
         </div>
 
@@ -76,7 +76,7 @@
           :disabled="changingPassword"
           class="bg-primaryTeal hover:bg-primaryTeal/90 text-white font-semibold py-2.5 px-6 rounded-lg text-sm shadow hover:shadow-md transition duration-150 disabled:opacity-50"
         >
-          {{ changingPassword ? 'Updating...' : 'Update Password' }}
+          {{ changingPassword ? 'Updating...' : 'Update' }}
         </button>
       </form>
     </div>

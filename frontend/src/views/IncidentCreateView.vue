@@ -5,7 +5,7 @@
 
     <!-- Active Event Banner -->
     <div v-if="activeEvent" class="bg-bgMain border border-gray-800 p-3 rounded-lg text-xs font-semibold text-gray-400 mb-4 flex items-center space-x-1.5 shadow-sm">
-      <span class="text-accentYellow font-black">🏆</span>
+      <font-awesome-icon icon="trophy" class="text-accentYellow font-black mr-1" />
       <span class="text-primaryTeal font-extrabold">{{ activeEvent.name }} ({{ activeEvent.code }})</span>
     </div>
     
@@ -85,7 +85,7 @@
           <span>Recording microphone audio... Speak clearly.</span>
         </div>
         <button type="button" @click="stopRecording" class="bg-accentCoral text-white text-base p-2 px-3 rounded-lg shadow hover:bg-opacity-90" title="Stop Recording">
-          ⏹️
+          <font-awesome-icon icon="stop" />
         </button>
       </div>
 
@@ -128,9 +128,7 @@
           class="w-12 h-12 flex items-center justify-center rounded-xl text-primaryTeal hover:bg-primaryTeal/10 disabled:opacity-50 transition border border-primaryTeal/30 shadow-sm flex-shrink-0"
           title="Voice Record"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-          </svg>
+          <font-awesome-icon icon="microphone" class="text-lg" />
         </button>
 
         <button
@@ -139,7 +137,7 @@
           class="h-12 px-6 bg-primaryTeal hover:bg-primaryTeal/90 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition duration-150 disabled:opacity-50 text-sm flex items-center justify-center space-x-2 flex-shrink-0"
           title="Submit Ticket"
         >
-          <span v-if="submitting" class="animate-spin text-base">⏳</span>
+          <font-awesome-icon v-if="submitting" icon="spinner" spin class="text-base" />
           <span>{{ submitting ? 'Submitting...' : 'Submit' }}</span>
         </button>
       </div>

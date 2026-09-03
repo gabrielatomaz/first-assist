@@ -8,7 +8,7 @@
     <!-- Search & Filters Container -->
     <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-4">
       <div class="flex items-center space-x-3 bg-bgMain px-4 py-3 rounded-xl border border-gray-700 focus-within:ring-2 focus-within:ring-primaryTeal/30 focus-within:border-primaryTeal transition-all shadow-inner">
-        <span class="text-primaryTeal text-base">🔍</span>
+        <font-awesome-icon icon="magnifying-glass" class="text-primaryTeal text-base" />
         <input
           v-model="searchQuery"
           type="text"
@@ -17,7 +17,7 @@
           class="w-full bg-transparent border-none focus:outline-none text-sm text-textMain placeholder-gray-500 font-medium"
         >
         <button v-if="searchQuery" @click="clearSearch" class="text-xs text-accentYellow hover:underline font-bold transition whitespace-nowrap">
-          ✕ Clear
+          <font-awesome-icon icon="xmark" class="mr-1" /> Clear
         </button>
       </div>
 
@@ -86,7 +86,7 @@
                 {{ formatCategory(incident.category) }}
               </span>
               <span v-if="incident.eventCode" class="bg-accentPurple/10 text-accentPurple px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider font-mono border border-accentPurple/20">
-                🏆 {{ incident.eventCode }}
+                <font-awesome-icon icon="trophy" class="mr-1 text-accentYellow" /> {{ incident.eventCode }}
               </span>
             </div>
             <p class="text-xs text-gray-400 font-medium">Match: {{ incident.matchNumber || 'N/A' }} | Resolved on {{ formatDate(incident.resolvedAt) }}</p>
@@ -123,16 +123,18 @@
           <button 
             :disabled="currentPage === 1" 
             @click="executeSearch(currentPage - 1)"
-            class="px-3 py-1.5 rounded bg-bgMain border border-gray-700 disabled:opacity-40 font-bold hover:bg-gray-800 transition"
+            class="w-8 h-8 rounded-lg bg-bgMain border border-gray-700 disabled:opacity-40 font-bold hover:bg-gray-800 transition flex items-center justify-center text-textMain cursor-pointer"
+            title="Previous Page"
           >
-            ← Prev
+            <font-awesome-icon icon="chevron-left" class="text-xs" />
           </button>
           <button 
             :disabled="currentPage === totalPages" 
             @click="executeSearch(currentPage + 1)"
-            class="px-3 py-1.5 rounded bg-bgMain border border-gray-700 disabled:opacity-40 font-bold hover:bg-gray-800 transition"
+            class="w-8 h-8 rounded-lg bg-bgMain border border-gray-700 disabled:opacity-40 font-bold hover:bg-gray-800 transition flex items-center justify-center text-textMain cursor-pointer"
+            title="Next Page"
           >
-            Next →
+            <font-awesome-icon icon="chevron-right" class="text-xs" />
           </button>
         </div>
       </div>

@@ -18,6 +18,7 @@ router.post('/:id/close', requireRole(['ADMIN', 'FTA']), incidentController.clos
 router.get('/:id/ai-suggestions', incidentController.getAISuggestions);
 router.get('/:id/related', incidentController.getRelatedIncidents);
 router.get('/:id/audit-logs', incidentController.getIncidentAuditLogs);
+router.delete('/:id', incidentController.deleteIncident);
 
 // Transcription route accepting binary audio file
 router.post('/transcribe', upload.single('audio'), incidentController.transcribeAudio);
@@ -25,5 +26,7 @@ router.post('/transcribe', upload.single('audio'), incidentController.transcribe
 // Comments routes nested under incidents
 router.get('/:id/comments', commentController.getComments);
 router.post('/:id/comments', commentController.createComment);
+router.put('/comments/:commentId', commentController.updateComment);
+router.delete('/comments/:commentId', commentController.deleteComment);
 
 export default router;

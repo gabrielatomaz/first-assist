@@ -6,8 +6,8 @@
         <h2 class="text-3xl font-extrabold text-primaryTeal tracking-tight">System Logs & Monitoring</h2>
         <p class="text-sm text-gray-400 font-medium mt-1">Audit trail tracking, application security, and server health diagnostics</p>
       </div>
-      <router-link to="/users" class="bg-primaryTeal hover:bg-primaryTeal/90 text-white font-bold px-4 py-2 rounded-lg text-xs transition">
-        👥 Manage Users
+      <router-link to="/users" class="w-10 h-10 flex items-center justify-center bg-primaryTeal hover:bg-primaryTeal/90 text-white rounded-xl transition shadow cursor-pointer flex-shrink-0" title="Manage Users">
+        <font-awesome-icon icon="users-gear" class="text-sm" />
       </router-link>
     </div>
 

@@ -154,5 +154,20 @@ export const incidentController = {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
+  },
+
+  deleteIncident: async (req, res) => {
+    try {
+      const deleted = await incidentService.deleteIncident(req.params.id, req.user);
+      res.json({ message: 'Incident deleted successfully', incident: deleted });
+    } catch (error) {
+      if (error.message.includes('Forbidden') || error.message.includes('not authorized')) {
+        return res.status(403).json({ error: error.message });
+      }
+      if (error.message.includes('not found')) {
+        return res.status(404).json({ error: error.message });
+      }
+      res.status(500).json({ error: error.message });
+    }
   }
 };

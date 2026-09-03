@@ -3,7 +3,7 @@
     
     <!-- System Offline Banner (Epic 17) -->
     <div v-if="isOffline" class="bg-accentCoral text-white text-center text-xs font-extrabold py-2 shadow-inner animate-pulse z-50">
-      ⚠️ Connection Lost. You are currently offline. FIRST Assist is running in offline resilient cache shell.
+      <font-awesome-icon icon="triangle-exclamation" class="mr-1.5" /> Connection Lost. You are currently offline. FIRST Assist is running in offline resilient cache shell.
     </div>
 
     <!-- Main Header -->
@@ -16,8 +16,8 @@
             </router-link>
             <!-- Active Event Context Indicator (Epic 11) -->
             <span v-if="activeEvent" class="block text-[10px] text-primaryTeal font-bold uppercase font-mono tracking-wider mt-0.5">
-              <span class="md:hidden">🏆 {{ activeEvent.code }}</span>
-              <span class="hidden md:inline">🏆 {{ activeEvent.name }} ({{ activeEvent.code }})</span>
+              <span class="md:hidden"><font-awesome-icon icon="trophy" class="mr-1.5 text-accentYellow" />{{ activeEvent.code }}</span>
+              <span class="hidden md:inline"><font-awesome-icon icon="trophy" class="mr-1.5 text-accentYellow" />{{ activeEvent.name }} ({{ activeEvent.code }})</span>
             </span>
           </div>
           
@@ -41,18 +41,18 @@
         </div>
 
         <div class="flex items-center space-x-3">
-          <!-- Report Incident Button (Icon Only) -->
+          <!-- Report Incident Button (Solid Emerald Green Icon-Only + with Lift) -->
           <router-link
             to="/create"
-            class="w-11 h-11 flex items-center justify-center bg-primaryTeal hover:bg-primaryTeal/90 text-white rounded-xl text-lg font-bold shadow hover:shadow-md transition duration-150 flex-shrink-0"
-            title="Report Incident"
+            class="w-11 h-11 flex items-center justify-center bg-emerald-400 hover:bg-emerald-300 text-slate-950 rounded-xl text-lg font-black shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex-shrink-0 cursor-pointer"
+            title="Report Technical Incident"
           >
-            ➕
+            <font-awesome-icon icon="plus" />
           </router-link>
 
           <!-- Desktop-only Profile Badge (Matching h-11 Height) -->
           <router-link to="/profile" class="hidden md:flex items-center space-x-2 bg-white/10 h-11 px-3.5 rounded-xl border border-white/10 hover:bg-white/15 transition duration-150 shadow-sm flex-shrink-0">
-            <span class="text-sm">🤖</span>
+            <font-awesome-icon icon="robot" class="text-sm text-primaryTeal" />
             <div class="text-left">
               <p class="text-xs font-bold leading-tight">{{ authStore.user?.name }}</p>
               <p class="text-[9px] text-accentYellow font-mono tracking-widest uppercase leading-none mt-0.5">{{ authStore.user?.role }}</p>
@@ -65,8 +65,8 @@
             class="md:hidden w-11 h-11 flex items-center justify-center bg-white/10 rounded-xl border border-white/10 text-white hover:bg-white/15 focus:outline-none flex-shrink-0"
             title="Toggle Menu"
           >
-            <span v-if="!mobileMenuOpen" class="text-xl font-bold">☰</span>
-            <span v-else class="text-xl font-bold">✕</span>
+            <font-awesome-icon v-if="!mobileMenuOpen" icon="bars" class="text-lg" />
+            <font-awesome-icon v-else icon="xmark" class="text-lg" />
           </button>
 
           <!-- Desktop Logout Button -->
@@ -80,7 +80,7 @@
       <div v-if="mobileMenuOpen" class="md:hidden border-t border-gray-800 bg-primaryNavy p-4 space-y-3 animate-fadeIn">
         <!-- Profile Badge Inside Mobile Hamburger Menu -->
         <router-link @click="mobileMenuOpen = false" to="/profile" class="flex items-center space-x-3 p-3 rounded-xl bg-white/10 border border-white/10 hover:bg-white/15 transition shadow-sm mb-2">
-          <span class="text-2xl">🤖</span>
+          <font-awesome-icon icon="robot" class="text-2xl text-primaryTeal" />
           <div class="text-left">
             <p class="text-sm font-bold text-white leading-tight">{{ authStore.user?.name }}</p>
             <p class="text-[10px] text-accentYellow font-mono tracking-widest uppercase">{{ authStore.user?.role }}</p>
@@ -88,23 +88,23 @@
         </router-link>
 
         <div class="flex flex-col space-y-2 text-sm font-bold">
-          <router-link @click="mobileMenuOpen = false" to="/" class="py-2 px-3 rounded hover:bg-white/10 transition" active-class="text-accentYellow">
-            📊 Dashboard
+          <router-link @click="mobileMenuOpen = false" to="/" class="py-2 px-3 rounded hover:bg-white/10 transition flex items-center" active-class="text-accentYellow">
+            <font-awesome-icon icon="chart-simple" class="w-4 mr-2.5 text-primaryTeal" /> Dashboard
           </router-link>
-          <router-link @click="mobileMenuOpen = false" to="/knowledge-base" class="py-2 px-3 rounded hover:bg-white/10 transition" active-class="text-accentYellow">
-            📚 Knowledge Base
+          <router-link @click="mobileMenuOpen = false" to="/knowledge-base" class="py-2 px-3 rounded hover:bg-white/10 transition flex items-center" active-class="text-accentYellow">
+            <font-awesome-icon icon="book" class="w-4 mr-2.5 text-primaryTeal" /> Knowledge Base
           </router-link>
-          <router-link v-if="authStore.isAdmin || authStore.isFTA" @click="mobileMenuOpen = false" to="/fta" class="py-2 px-3 rounded hover:bg-white/10 transition" active-class="text-accentYellow">
-            🛠️ FTA Panel
+          <router-link v-if="authStore.isAdmin || authStore.isFTA" @click="mobileMenuOpen = false" to="/fta" class="py-2 px-3 rounded hover:bg-white/10 transition flex items-center" active-class="text-accentYellow">
+            <font-awesome-icon icon="wrench" class="w-4 mr-2.5 text-primaryTeal" /> FTA Panel
           </router-link>
-          <router-link v-if="authStore.isAdmin" @click="mobileMenuOpen = false" to="/admin" class="py-2 px-3 rounded hover:bg-white/10 transition" active-class="text-accentYellow">
-            📋 System Logs
+          <router-link v-if="authStore.isAdmin" @click="mobileMenuOpen = false" to="/admin" class="py-2 px-3 rounded hover:bg-white/10 transition flex items-center" active-class="text-accentYellow">
+            <font-awesome-icon icon="clipboard-list" class="w-4 mr-2.5 text-primaryTeal" /> System Logs
           </router-link>
-          <router-link v-if="authStore.isAdmin" @click="mobileMenuOpen = false" to="/users" class="py-2 px-3 rounded hover:bg-white/10 transition" active-class="text-accentYellow">
-            👥 Technicians
+          <router-link v-if="authStore.isAdmin" @click="mobileMenuOpen = false" to="/users" class="py-2 px-3 rounded hover:bg-white/10 transition flex items-center" active-class="text-accentYellow">
+            <font-awesome-icon icon="users" class="w-4 mr-2.5 text-primaryTeal" /> Technicians
           </router-link>
-          <button @click="mobileMenuOpen = false; handleLogout()" class="py-2 px-3 rounded text-left text-accentCoral font-bold hover:bg-white/10 flex items-center space-x-2">
-            <span class="font-mono text-sm">➜]</span>
+          <button @click="mobileMenuOpen = false; handleLogout()" class="py-2 px-3 rounded text-left text-accentCoral font-bold hover:bg-white/10 flex items-center">
+            <font-awesome-icon icon="right-from-bracket" class="w-4 mr-2.5 text-accentCoral" />
             <span>Logout</span>
           </button>
         </div>
@@ -118,7 +118,7 @@
 
     <!-- Footer -->
     <footer class="bg-primaryNavy border-t border-gray-800 py-4 text-center text-xs text-gray-500">
-      <p>&copy; 2026 FIRST Assist. Built for FIRST Robotics Competition technical support.</p>
+      <p>&copy; 2026 FIRST Assist</p>
     </footer>
   </div>
 </template>
