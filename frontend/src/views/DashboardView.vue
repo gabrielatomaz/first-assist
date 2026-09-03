@@ -30,20 +30,21 @@
           class="w-full sm:w-36"
         />
 
-        <!-- Refresh Controls with CustomSelect -->
-        <div class="flex items-center space-x-1 sm:w-auto">
+        <!-- Unified Refresh & Auto-Sync Control -->
+        <div class="relative flex items-stretch w-full sm:w-auto rounded-lg border border-gray-700 bg-bgCard hover:border-gray-600 shadow-sm">
           <button
             @click="fetchIncidents"
             title="Refresh Incident Board Now"
-            class="h-9 px-2.5 bg-bgCard hover:bg-gray-800 text-primaryTeal border border-gray-700 hover:border-gray-600 rounded-lg transition text-xs font-bold shadow-sm flex items-center justify-center cursor-pointer"
+            class="px-3.5 py-2 text-textMain hover:bg-white/10 text-xs font-semibold transition flex items-center justify-center cursor-pointer border-r border-gray-700 rounded-l-lg flex-shrink-0"
           >
-            <font-awesome-icon icon="arrows-rotate" :spin="loading && !firstLoad" class="text-xs" />
+            <font-awesome-icon icon="arrows-rotate" :spin="loading && !firstLoad" class="text-xs text-gray-400" />
           </button>
           <CustomSelect
-            v-model.number="refreshInterval"
+            v-model="refreshInterval"
             :options="refreshOptions"
             @change="updateRefreshInterval"
-            class="w-36"
+            button-class="!border-0 !bg-transparent rounded-r-lg rounded-l-none px-3 py-2 text-xs font-semibold !shadow-none"
+            class="w-full sm:w-32 flex-1"
           />
         </div>
       </div>
@@ -55,28 +56,25 @@
       <p class="text-gray-500 mt-3 text-sm">Loading incident board...</p>
     </div>
 
-    <div v-else-if="error" class="bg-red-50 text-accentCoral p-4 rounded-xl text-center text-sm font-medium">
+    <div v-else-if="error" class="bg-red-950/40 text-accentCoral p-4 rounded-xl border border-red-900/30 text-xs text-center font-medium">
       {{ error }}
     </div>
 
-    <div v-else>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn">
-        <router-link
-          v-for="incident in incidents"
-          :key="incident._id"
-          :to="`/incidents/${incident._id}`"
-          class="block hover:scale-[1.02] active:scale-[0.98] transition duration-200"
-        >
-          <IncidentCard :incident="incident" />
-        </router-link>
-        
-        <div v-if="incidents.length === 0" class="col-span-full text-center py-16 px-6 bg-bgCard rounded-2xl border border-dashed border-gray-800 space-y-3">
-          <div><font-awesome-icon icon="clipboard-list" class="text-4xl text-gray-500 mb-2" /></div>
-          <h3 class="text-base font-extrabold text-white">No Technical Incidents Reported</h3>
-          <p class="text-xs text-gray-400 font-medium max-w-md mx-auto">
-            There are currently no active or reported technical incidents matching this event context. The competition field is clear!
-          </p>
-        </div>
+    <div v-else-if="incidents.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <IncidentCard
+        v-for="incident in incidents"
+        :key="incident._id"
+        :incident="incident"
+      />
+    </div>
+
+    <div v-else class="text-center py-20 bg-bgCard rounded-2xl border border-gray-800 shadow">
+      <div class="max-w-md mx-auto space-y-3">
+        <font-awesome-icon icon="check-circle" class="text-4xl text-primaryTeal/40" />
+        <h3 class="text-base font-extrabold text-white">No Technical Incidents Reported</h3>
+        <p class="text-xs text-gray-400 font-medium max-w-md mx-auto">
+          There are currently no active or reported technical incidents matching this event context. The competition field is clear!
+        </p>
       </div>
     </div>
   </div>
@@ -100,19 +98,19 @@ const eventFilter = ref('ALL');
 const refreshInterval = ref(parseInt(localStorage.getItem('first_assist_refresh_rate')) || 15000);
 
 const statusOptions = [
-  { value: 'ALL', label: 'Active', class: 'text-textMain font-semibold' },
-  { value: 'OPEN', label: 'Open', class: 'text-primaryTeal font-bold' },
-  { value: 'ASSIGNED', label: 'Assigned', class: 'text-accentYellow font-bold' },
-  { value: 'IN_PROGRESS', label: 'In Progress', class: 'text-accentPurple font-bold' },
-  { value: 'WAITING', label: 'Waiting', class: 'text-gray-400 font-semibold' },
-  { value: 'RESOLVED', label: 'Resolved', class: 'text-green-400 font-bold' },
-  { value: 'CLOSED', label: 'Closed', class: 'text-gray-500 font-semibold' }
+  { value: 'ALL', label: 'Active' },
+  { value: 'OPEN', label: 'Open' },
+  { value: 'ASSIGNED', label: 'Assigned' },
+  { value: 'IN_PROGRESS', label: 'In Progress' },
+  { value: 'WAITING', label: 'Waiting' },
+  { value: 'RESOLVED', label: 'Resolved' },
+  { value: 'CLOSED', label: 'Closed' }
 ];
 
 const refreshOptions = [
   { value: 0, label: 'Manual Sync' },
-  { value: 5000, label: 'Every 5s', class: 'text-primaryTeal font-bold' },
-  { value: 15000, label: 'Every 15s', class: 'text-primaryTeal font-bold' },
+  { value: 5000, label: 'Every 5s' },
+  { value: 15000, label: 'Every 15s' },
   { value: 30000, label: 'Every 30s' },
   { value: 60000, label: 'Every 1 min' },
   { value: 300000, label: 'Every 5 min' },
@@ -131,7 +129,7 @@ const availableEvents = computed(() => {
 });
 
 const eventOptions = computed(() => [
-  { value: 'ALL', label: authStore.isAdmin ? 'All Competitions' : 'All My Regionals' },
+  { value: 'ALL', label: 'All Events' },
   ...availableEvents.value.map(e => ({ value: e.code, label: `${e.name} (${e.code})` }))
 ]);
 

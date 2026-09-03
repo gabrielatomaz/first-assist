@@ -178,7 +178,7 @@ const roleOptions = computed(() => {
 });
 
 const csaUserEventOptions = computed(() => [
-  { value: null, label: 'Global (All Events)' },
+  { value: null, label: 'All Events' },
   ...events.value.map(ev => ({ value: ev.code, label: `${ev.name} (${ev.code})` }))
 ]);
 

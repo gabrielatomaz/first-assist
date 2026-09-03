@@ -33,11 +33,11 @@
           :class="[
             'block w-full px-4 py-2.5 text-left text-xs font-medium transition cursor-pointer flex items-center justify-between',
             opt.disabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-white/10 text-textMain',
-            modelValue === opt.value ? 'bg-primaryTeal/15 font-bold' : 'text-textMain'
+            isSelected(opt.value) ? 'bg-primaryTeal/15 font-bold' : 'text-textMain'
           ]"
         >
           <span class="text-textMain">{{ opt.label }}</span>
-          <font-awesome-icon v-if="modelValue === opt.value" icon="check" class="text-xs text-primaryTeal ml-2 flex-shrink-0" />
+          <font-awesome-icon v-if="isSelected(opt.value)" icon="check" class="text-xs text-primaryTeal ml-2 flex-shrink-0" />
         </button>
       </div>
     </transition>
@@ -68,8 +68,16 @@ const emit = defineEmits(['update:modelValue', 'change']);
 const isOpen = ref(false);
 const dropdownRef = ref(null);
 
+const isSelected = (optValue) => {
+  if (optValue === props.modelValue) return true;
+  if (optValue != null && props.modelValue != null) {
+    return String(optValue) === String(props.modelValue);
+  }
+  return false;
+};
+
 const selectedOption = computed(() => {
-  return props.options.find(o => o.value === props.modelValue);
+  return props.options.find(o => isSelected(o.value));
 });
 
 const selectedLabel = computed(() => {

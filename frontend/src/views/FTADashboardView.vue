@@ -328,7 +328,7 @@ const ftaEventOptions = computed(() =>
 );
 
 const csaEventOptions = computed(() => [
-  { value: null, label: 'Global (All Events)' },
+  { value: null, label: 'All Events' },
   ...availableFTAEvents.value.map(ev => ({
     value: ev.code,
     label: `${ev.name} (${ev.code})`

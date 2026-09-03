@@ -166,7 +166,7 @@ const priorityOptions = [
 ];
 
 const eventOptions = computed(() => [
-  { value: '', label: 'All Regionals / Events' },
+  { value: '', label: 'All Events' },
   ...events.value.map(ev => ({ value: ev.code, label: `${ev.name} (${ev.code})` }))
 ]);
 

@@ -283,12 +283,12 @@ const route = useRoute();
 const authStore = useAuthStore();
 
 const statusOptions = [
-  { value: 'OPEN', label: 'Open', class: 'text-primaryTeal font-bold' },
-  { value: 'ASSIGNED', label: 'Assigned', class: 'text-accentYellow font-bold' },
-  { value: 'IN_PROGRESS', label: 'In Progress', class: 'text-accentPurple font-bold' },
-  { value: 'WAITING', label: 'Waiting', class: 'text-gray-400 font-semibold' },
-  { value: 'RESOLVED', label: 'Resolved', disabled: true, class: 'text-green-500 font-bold' },
-  { value: 'CLOSED', label: 'Closed', disabled: true, class: 'text-gray-500 font-semibold' }
+  { value: 'OPEN', label: 'Open' },
+  { value: 'ASSIGNED', label: 'Assigned' },
+  { value: 'IN_PROGRESS', label: 'In Progress' },
+  { value: 'WAITING', label: 'Waiting' },
+  { value: 'RESOLVED', label: 'Resolved', disabled: true },
+  { value: 'CLOSED', label: 'Closed', disabled: true }
 ];
 
 const technicianOptions = computed(() => {
