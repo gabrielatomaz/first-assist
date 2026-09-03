@@ -9,12 +9,13 @@
       <!-- Filters (Status & Event) -->
       <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 w-full md:w-auto">
         <!-- Event Code Filter (Visible ONLY for Admin and FTA) -->
-        <select v-if="authStore.isAdmin || authStore.isFTA" v-model="eventFilter" @change="fetchIncidents" class="px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-xs bg-bgCard font-semibold text-textMain">
-          <option value="ALL">{{ authStore.isAdmin ? 'All Competitions' : 'All My Regionals' }}</option>
-          <option v-for="ev in availableEvents" :key="ev._id" :value="ev.code">
-            {{ ev.name }} ({{ ev.code }})
-          </option>
-        </select>
+        <CustomSelect
+          v-if="authStore.isAdmin || authStore.isFTA"
+          v-model="eventFilter"
+          :options="eventOptions"
+          @change="fetchIncidents"
+          class="w-full sm:w-64"
+        />
 
         <!-- CSA Active Event Context Badge (CSAs have 1 event, no dropdown) -->
         <div v-else-if="authStore.user?.assignedEventCode" class="px-3.5 py-2 rounded-lg border border-primaryTeal/40 bg-primaryTeal/10 text-primaryTeal text-xs font-bold font-mono">
@@ -22,41 +23,28 @@
         </div>
 
         <!-- Status Filter -->
-        <select v-model="statusFilter" @change="fetchIncidents" class="px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-xs bg-bgCard font-semibold text-textMain cursor-pointer shadow-sm hover:border-gray-600 transition">
-          <option value="ALL" class="bg-bgCard text-textMain py-1.5 font-semibold">Active</option>
-          <option value="OPEN" class="bg-bgCard text-primaryTeal font-bold py-1.5">Open</option>
-          <option value="ASSIGNED" class="bg-bgCard text-accentYellow font-bold py-1.5">Assigned</option>
-          <option value="IN_PROGRESS" class="bg-bgCard text-accentPurple font-bold py-1.5">In Progress</option>
-          <option value="WAITING" class="bg-bgCard text-gray-400 font-semibold py-1.5">Waiting</option>
-          <option value="RESOLVED" class="bg-bgCard text-green-400 font-bold py-1.5">Resolved</option>
-          <option value="CLOSED" class="bg-bgCard text-gray-500 font-semibold py-1.5">Closed</option>
-        </select>
+        <CustomSelect
+          v-model="statusFilter"
+          :options="statusOptions"
+          @change="fetchIncidents"
+          class="w-full sm:w-36"
+        />
 
-        <!-- Enhanced Single Unified Dropdown with Embedded Refresh Button -->
-        <div class="pl-2.5 pr-0 py-0 rounded-[1rem] border border-gray-700 bg-bgCard hover:border-gray-600 focus-within:ring-2 focus-within:ring-primaryTeal/20 focus-within:border-primaryTeal text-xs font-semibold text-textMain shadow-sm transition flex items-center cursor-pointer">
-          <!-- Refresh Icon Button with Hover & Active Feedback -->
+        <!-- Refresh Controls with CustomSelect -->
+        <div class="flex items-center space-x-1 sm:w-auto">
           <button
             @click="fetchIncidents"
             title="Refresh Incident Board Now"
-            class="text-primaryTeal hover:text-white hover:bg-gray-800 active:scale-95 transition p-1.5 rounded-md flex-shrink-0 cursor-pointer flex items-center justify-center mr-[0.45rem]"
+            class="h-9 px-2.5 bg-bgCard hover:bg-gray-800 text-primaryTeal border border-gray-700 hover:border-gray-600 rounded-lg transition text-xs font-bold shadow-sm flex items-center justify-center cursor-pointer"
           >
-            <font-awesome-icon icon="arrows-rotate" :spin="loading && !firstLoad" class="text-sm" />
+            <font-awesome-icon icon="arrows-rotate" :spin="loading && !firstLoad" class="text-xs" />
           </button>
-
-          <!-- Select Interval Dropdown -->
-          <select 
-            v-model.number="refreshInterval" 
-            @change="updateRefreshInterval" 
-            class="bg-transparent focus:outline-none font-semibold text-textMain cursor-pointer text-xs flex-grow py-2 pl-4 pr-0"
-          >
-            <option :value="0" class="bg-bgCard text-textMain py-1.5 font-semibold">Manual Sync</option>
-            <option :value="5000" class="bg-bgCard text-primaryTeal font-bold py-1.5">Every 5s</option>
-            <option :value="15000" class="bg-bgCard text-primaryTeal font-bold py-1.5">Every 15s</option>
-            <option :value="30000" class="bg-bgCard text-textMain py-1.5 font-semibold">Every 30s</option>
-            <option :value="60000" class="bg-bgCard text-textMain py-1.5 font-semibold">Every 1 min</option>
-            <option :value="300000" class="bg-bgCard text-textMain py-1.5 font-semibold">Every 5 min</option>
-            <option :value="900000" class="bg-bgCard text-textMain py-1.5 font-semibold">Every 15 min</option>
-          </select>
+          <CustomSelect
+            v-model.number="refreshInterval"
+            :options="refreshOptions"
+            @change="updateRefreshInterval"
+            class="w-36"
+          />
         </div>
       </div>
     </div>
@@ -97,7 +85,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
-import { IncidentCard } from '../components';
+import { IncidentCard, CustomSelect } from '../components';
 import { getApiUrl } from '../config/api';
 
 const authStore = useAuthStore();
@@ -111,13 +99,25 @@ const statusFilter = ref('ALL');
 const eventFilter = ref('ALL');
 const refreshInterval = ref(parseInt(localStorage.getItem('first_assist_refresh_rate')) || 15000);
 
-watch(() => authStore.user, (user) => {
-  if (user?.assignedEventCode) {
-    eventFilter.value = user.assignedEventCode;
-  } else if (user?.assignedEventCodes?.length > 0 && eventFilter.value === 'ALL') {
-    eventFilter.value = user.assignedEventCodes[0];
-  }
-}, { immediate: true });
+const statusOptions = [
+  { value: 'ALL', label: 'Active', class: 'text-textMain font-semibold' },
+  { value: 'OPEN', label: 'Open', class: 'text-primaryTeal font-bold' },
+  { value: 'ASSIGNED', label: 'Assigned', class: 'text-accentYellow font-bold' },
+  { value: 'IN_PROGRESS', label: 'In Progress', class: 'text-accentPurple font-bold' },
+  { value: 'WAITING', label: 'Waiting', class: 'text-gray-400 font-semibold' },
+  { value: 'RESOLVED', label: 'Resolved', class: 'text-green-400 font-bold' },
+  { value: 'CLOSED', label: 'Closed', class: 'text-gray-500 font-semibold' }
+];
+
+const refreshOptions = [
+  { value: 0, label: 'Manual Sync' },
+  { value: 5000, label: 'Every 5s', class: 'text-primaryTeal font-bold' },
+  { value: 15000, label: 'Every 15s', class: 'text-primaryTeal font-bold' },
+  { value: 30000, label: 'Every 30s' },
+  { value: 60000, label: 'Every 1 min' },
+  { value: 300000, label: 'Every 5 min' },
+  { value: 900000, label: 'Every 15 min' }
+];
 
 const availableEvents = computed(() => {
   if (authStore.isAdmin) return events.value;
@@ -129,6 +129,11 @@ const availableEvents = computed(() => {
   }
   return events.value;
 });
+
+const eventOptions = computed(() => [
+  { value: 'ALL', label: authStore.isAdmin ? 'All Competitions' : 'All My Regionals' },
+  ...availableEvents.value.map(e => ({ value: e.code, label: `${e.name} (${e.code})` }))
+]);
 
 let pollInterval = null;
 

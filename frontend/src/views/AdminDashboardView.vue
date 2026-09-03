@@ -35,15 +35,11 @@
         <!-- Filter Selector -->
         <div class="flex items-center space-x-2">
           <label class="text-xs font-bold text-gray-400 uppercase">Action Filter:</label>
-          <select v-model="actionFilter" class="px-3 py-1.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs font-bold">
-            <option value="ALL">All Actions</option>
-            <option value="TBA_EVENT_IMPORT">TBA Event Import</option>
-            <option value="EVENT_CREATION">Event Creation</option>
-            <option value="EVENT_ACTIVATION">Event Activation</option>
-            <option value="EVENT_TEAM_ADDED">Team Added to Event</option>
-            <option value="EVENT_TEAM_REMOVED">Team Removed from Event</option>
-            <option value="INCIDENT_STATUS_CHANGE">Status Changes</option>
-          </select>
+          <CustomSelect
+            v-model="actionFilter"
+            :options="actionOptions"
+            class="w-52 font-bold"
+          />
         </div>
       </div>
 
@@ -77,11 +73,22 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { CustomSelect } from '../components';
 import { getApiUrl } from '../config/api';
 
 const authStore = useAuthStore();
 const auditLogs = ref([]);
 const actionFilter = ref('ALL');
+
+const actionOptions = [
+  { value: 'ALL', label: 'All Actions' },
+  { value: 'TBA_EVENT_IMPORT', label: 'TBA Event Import' },
+  { value: 'EVENT_CREATION', label: 'Event Creation' },
+  { value: 'EVENT_ACTIVATION', label: 'Event Activation' },
+  { value: 'EVENT_TEAM_ADDED', label: 'Team Added to Event' },
+  { value: 'EVENT_TEAM_REMOVED', label: 'Team Removed from Event' },
+  { value: 'INCIDENT_STATUS_CHANGE', label: 'Status Changes' }
+];
 
 const fetchAuditLogs = async () => {
   try {

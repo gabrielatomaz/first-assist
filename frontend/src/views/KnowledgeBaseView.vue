@@ -25,36 +25,29 @@
       <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div>
           <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5">Category</label>
-          <select v-model="filters.category" @change="executeSearch(1)" class="w-full px-3 py-2 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 text-xs bg-bgCard font-semibold text-textMain">
-            <option value="" class="bg-bgCard">All Categories</option>
-            <option value="RADIO_COMMS" class="bg-bgCard">Radio & Comms</option>
-            <option value="ROBOTIC_POWER" class="bg-bgCard">Robot Power Path</option>
-            <option value="CAN_BUS" class="bg-bgCard">CAN Bus Connection</option>
-            <option value="MECHANICAL" class="bg-bgCard">Mechanical Issue</option>
-            <option value="CODE_EXCEPTION" class="bg-bgCard">Robot User Code</option>
-            <option value="OTHER" class="bg-bgCard">Other Issues</option>
-          </select>
+          <CustomSelect
+            v-model="filters.category"
+            :options="categoryOptions"
+            @change="executeSearch(1)"
+          />
         </div>
 
         <div>
           <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5">Priority</label>
-          <select v-model="filters.priority" @change="executeSearch(1)" class="w-full px-3 py-2 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 text-xs bg-bgCard font-semibold text-textMain">
-            <option value="" class="bg-bgCard">All Priorities</option>
-            <option value="LOW" class="bg-bgCard">Low</option>
-            <option value="MEDIUM" class="bg-bgCard">Medium</option>
-            <option value="HIGH" class="bg-bgCard">High</option>
-            <option value="CRITICAL" class="bg-bgCard">Critical</option>
-          </select>
+          <CustomSelect
+            v-model="filters.priority"
+            :options="priorityOptions"
+            @change="executeSearch(1)"
+          />
         </div>
 
         <div>
           <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5">Event Context</label>
-          <select v-model="filters.eventCode" @change="executeSearch(1)" class="w-full px-3 py-2 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 text-xs bg-bgCard font-semibold text-textMain">
-            <option value="" class="bg-bgCard">All Regionals / Events</option>
-            <option v-for="ev in events" :key="ev._id" :value="ev.code" class="bg-bgCard">
-              {{ ev.name }} ({{ ev.code }})
-            </option>
-          </select>
+          <CustomSelect
+            v-model="filters.eventCode"
+            :options="eventOptions"
+            @change="executeSearch(1)"
+          />
         </div>
 
         <div>
@@ -143,8 +136,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { CustomSelect } from '../components';
 import { getApiUrl } from '../config/api';
 
 const authStore = useAuthStore();
@@ -152,6 +146,29 @@ const authStore = useAuthStore();
 const searchQuery = ref('');
 const filters = ref({ category: '', priority: '', teamNumber: null, eventCode: '' });
 const events = ref([]);
+
+const categoryOptions = [
+  { value: '', label: 'All Categories' },
+  { value: 'RADIO_COMMS', label: 'Radio & Comms' },
+  { value: 'ROBOTIC_POWER', label: 'Robot Power Path' },
+  { value: 'CAN_BUS', label: 'CAN Bus Connection' },
+  { value: 'MECHANICAL', label: 'Mechanical Issue' },
+  { value: 'CODE_EXCEPTION', label: 'Robot User Code' },
+  { value: 'OTHER', label: 'Other Issues' }
+];
+
+const priorityOptions = [
+  { value: '', label: 'All Priorities' },
+  { value: 'LOW', label: 'Low' },
+  { value: 'MEDIUM', label: 'Medium' },
+  { value: 'HIGH', label: 'High' },
+  { value: 'CRITICAL', label: 'Critical', class: 'text-accentCoral font-bold' }
+];
+
+const eventOptions = computed(() => [
+  { value: '', label: 'All Regionals / Events' },
+  ...events.value.map(ev => ({ value: ev.code, label: `${ev.name} (${ev.code})` }))
+]);
 
 const results = ref([]);
 const searching = ref(true);

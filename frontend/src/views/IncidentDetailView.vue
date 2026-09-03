@@ -30,45 +30,23 @@
         <!-- 1. Technician selection dropdown (with "Assign to Me") -->
         <div v-if="authStore.isAdmin || authStore.isFTA || authStore.user" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1 sm:space-x-1.5 w-full sm:w-auto flex-shrink-0">
           <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">Technician:</label>
-          <select
+          <CustomSelect
             v-model="selectedAssignee"
+            :options="technicianOptions"
             @change="assignTechnician"
-            class="w-full sm:w-auto px-3 py-2 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-xs bg-bgCard font-semibold text-textMain cursor-pointer shadow-sm hover:border-gray-600 transition"
-          >
-            <option :value="null" class="bg-bgCard text-textMain py-1.5 font-semibold">Unassigned</option>
-            <option 
-              v-if="authStore.user" 
-              :value="authStore.user._id" 
-              class="bg-bgCard text-accentYellow font-bold py-1.5"
-            >
-              Assign to Me ({{ userRoleLabel }})
-            </option>
-            <option 
-              v-for="user in technicians.filter(u => u._id !== authStore.user?._id)" 
-              :key="user._id" 
-              :value="user._id" 
-              class="bg-bgCard text-textMain py-1.5 font-semibold"
-            >
-              {{ user.name }} ({{ user.role }})
-            </option>
-          </select>
+            class="w-full sm:w-44 text-xs font-semibold"
+          />
         </div>
 
         <!-- 2. Status update select dropdown -->
         <div v-if="authStore.isAdmin || authStore.isFTA || isAssignee" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1 sm:space-x-1.5 w-full sm:w-auto flex-shrink-0">
           <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">Status:</label>
-          <select
+          <CustomSelect
             v-model="selectedStatus"
+            :options="statusOptions"
             @change="updateStatus"
-            class="w-full sm:w-auto px-3 py-2 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-xs bg-bgCard font-semibold text-textMain cursor-pointer shadow-sm hover:border-gray-600 transition"
-          >
-            <option value="OPEN" class="bg-bgCard text-primaryTeal font-bold py-1.5">Open</option>
-            <option value="ASSIGNED" class="bg-bgCard text-accentYellow font-bold py-1.5">Assigned</option>
-            <option value="IN_PROGRESS" class="bg-bgCard text-accentPurple font-bold py-1.5">In Progress</option>
-            <option value="WAITING" class="bg-bgCard text-gray-400 font-semibold py-1.5">Waiting</option>
-            <option value="RESOLVED" disabled class="bg-bgCard text-green-500 font-bold py-1.5">Resolved</option>
-            <option value="CLOSED" disabled class="bg-bgCard text-gray-500 font-semibold py-1.5">Closed</option>
-          </select>
+            class="w-full sm:w-36 text-xs font-semibold"
+          />
         </div>
 
         <!-- 3 & 4. Action icon buttons group (Expanded on mobile, compact on desktop) -->
@@ -297,12 +275,41 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
-import { CommentSection, AISuggestionPanel, ResolveIncidentModal } from '../components';
+import { CommentSection, AISuggestionPanel, ResolveIncidentModal, CustomSelect } from '../components';
 import { getApiUrl } from '../config/api';
 
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
+
+const statusOptions = [
+  { value: 'OPEN', label: 'Open', class: 'text-primaryTeal font-bold' },
+  { value: 'ASSIGNED', label: 'Assigned', class: 'text-accentYellow font-bold' },
+  { value: 'IN_PROGRESS', label: 'In Progress', class: 'text-accentPurple font-bold' },
+  { value: 'WAITING', label: 'Waiting', class: 'text-gray-400 font-semibold' },
+  { value: 'RESOLVED', label: 'Resolved', disabled: true, class: 'text-green-500 font-bold' },
+  { value: 'CLOSED', label: 'Closed', disabled: true, class: 'text-gray-500 font-semibold' }
+];
+
+const technicianOptions = computed(() => {
+  const options = [{ value: null, label: 'Unassigned' }];
+  if (authStore.user) {
+    options.push({
+      value: authStore.user._id,
+      label: `Assign to Me (${userRoleLabel.value})`,
+      class: 'text-accentYellow font-bold'
+    });
+  }
+  technicians.value
+    .filter(u => u._id !== authStore.user?._id)
+    .forEach(u => {
+      options.push({
+        value: u._id,
+        label: `${u.name} (${u.role})`
+      });
+    });
+  return options;
+});
 
 const incident = ref(null);
 const auditLogs = ref([]);

@@ -9,12 +9,11 @@
 
       <!-- Navigation Dropdown / Tab Selector -->
       <div class="flex items-center space-x-2 w-full md:w-auto">
-        <select v-model="activeTab" class="w-full md:w-auto px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs font-bold shadow-sm">
-          <option value="manage-teams" class="bg-bgCard text-textMain py-1.5 font-semibold">Manage Event Teams</option>
-          <option value="add-team" class="bg-bgCard text-textMain py-1.5 font-semibold">Register Team (TBA Sync)</option>
-          <option value="add-event" class="bg-bgCard text-textMain py-1.5 font-semibold">Register Event (TBA Sync)</option>
-          <option value="csa-assignment" class="bg-bgCard text-textMain py-1.5 font-semibold">Assign CSA Event Contexts</option>
-        </select>
+        <CustomSelect
+          v-model="activeTab"
+          :options="tabOptions"
+          class="w-full md:w-60 font-bold"
+        />
       </div>
     </div>
 
@@ -47,11 +46,12 @@
           <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto max-w-full">
             <label class="text-xs font-bold text-gray-400 uppercase">Select Event:</label>
             <div class="flex items-center space-x-2 w-full min-w-0">
-              <select v-model="selectedEventCode" @change="loadEventTeams(1)" class="w-full min-w-0 flex-1 px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs font-bold truncate">
-                <option v-for="ev in availableFTAEvents" :key="ev._id" :value="ev.code">
-                  {{ ev.name }} ({{ ev.code }}) {{ ev.isActive ? '(Active)' : '' }}
-                </option>
-              </select>
+              <CustomSelect
+                v-model="selectedEventCode"
+                :options="ftaEventOptions"
+                @change="loadEventTeams(1)"
+                class="w-full sm:w-72 font-bold"
+              />
               <button 
                 v-if="selectedEventCode" 
                 @click="handleSetActiveEvent(selectedEventCode)" 
@@ -273,12 +273,11 @@
                   </span>
                 </td>
                 <td class="px-4 py-3">
-                  <select v-model="csa.assignedEventCode" class="px-3 py-1.5 rounded border border-gray-700 bg-bgMain text-textMain text-xs font-bold">
-                    <option :value="null">Global (All Events)</option>
-                    <option v-for="ev in availableFTAEvents" :key="ev._id" :value="ev.code">
-                      {{ ev.name }} ({{ ev.code }})
-                    </option>
-                  </select>
+                  <CustomSelect
+                    v-model="csa.assignedEventCode"
+                    :options="csaEventOptions"
+                    class="w-60 font-bold"
+                  />
                 </td>
                 <td class="px-4 py-3 text-right">
                   <button @click="saveCSAEventAssignment(csa)" class="bg-primaryTeal text-white font-bold px-3 py-1 rounded text-xs hover:bg-opacity-90 transition">
@@ -297,10 +296,44 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { CustomSelect } from '../components';
 import { getApiUrl } from '../config/api';
 
 const authStore = useAuthStore();
 const activeTab = ref('manage-teams');
+
+const tabOptions = [
+  { value: 'manage-teams', label: 'Manage Event Teams' },
+  { value: 'add-team', label: 'Register Team (TBA Sync)' },
+  { value: 'add-event', label: 'Register Event (TBA Sync)' },
+  { value: 'csa-assignment', label: 'Assign CSA Event Contexts' }
+];
+
+const availableFTAEvents = computed(() => {
+  if (authStore.isAdmin) return events.value;
+  if (authStore.isFTA) {
+    const assigned = authStore.user?.assignedEventCodes || [];
+    if (assigned.length > 0) {
+      return events.value.filter(e => assigned.includes(e.code));
+    }
+  }
+  return events.value;
+});
+
+const ftaEventOptions = computed(() => 
+  availableFTAEvents.value.map(ev => ({
+    value: ev.code,
+    label: `${ev.name} (${ev.code}) ${ev.isActive ? '(Active)' : ''}`
+  }))
+);
+
+const csaEventOptions = computed(() => [
+  { value: null, label: 'Global (All Events)' },
+  ...availableFTAEvents.value.map(ev => ({
+    value: ev.code,
+    label: `${ev.name} (${ev.code})`
+  }))
+]);
 
 const alertMessage = ref(null);
 const alertType = ref('success');
@@ -322,17 +355,6 @@ const totalTeamsCount = ref(0);
 const teamSearchQuery = ref('');
 const newTeamNumber = ref('');
 let debounceTimer = null;
-
-const availableFTAEvents = computed(() => {
-  if (authStore.isAdmin) return events.value;
-  if (authStore.isFTA) {
-    const assigned = authStore.user?.assignedEventCodes || [];
-    if (assigned.length > 0) {
-      return events.value.filter(e => assigned.includes(e.code));
-    }
-  }
-  return events.value;
-});
 
 // Forms
 const teamForm = ref({ number: '', name: '', rookieYear: '' });

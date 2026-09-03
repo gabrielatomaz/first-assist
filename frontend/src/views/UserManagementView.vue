@@ -37,11 +37,11 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">System Role</label>
-            <select v-model="form.role" required class="w-full px-4 py-2.5 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm bg-bgCard text-textMain">
-              <option value="CSA" class="bg-bgCard">Control System Advisor (CSA)</option>
-              <option value="FTA" class="bg-bgCard">FIRST Technical Advisor (FTA)</option>
-              <option v-if="authStore.isAdmin" value="ADMIN" class="bg-bgCard">Administrator</option>
-            </select>
+            <CustomSelect
+              v-model="form.role"
+              :options="roleOptions"
+              button-class="py-2.5 px-4 text-sm"
+            />
           </div>
         </div>
 
@@ -100,23 +100,23 @@
               <td class="px-6 py-4">
                 <!-- Single active regional dropdown for CSA -->
                 <div v-if="user.role === 'CSA'" class="flex items-center space-x-2">
-                  <select v-model="user.assignedEventCode" @change="saveUserEventAssignment(user)" class="px-3 py-1.5 rounded border border-gray-700 bg-bgMain text-textMain text-xs font-bold">
-                    <option :value="null">Global (All Events)</option>
-                    <option v-for="ev in availableEvents" :key="ev._id" :value="ev.code">
-                      {{ ev.name }} ({{ ev.code }})
-                    </option>
-                  </select>
+                  <CustomSelect
+                    v-model="user.assignedEventCode"
+                    :options="csaUserEventOptions"
+                    @change="saveUserEventAssignment(user)"
+                    class="w-56 font-bold"
+                  />
                 </div>
 
                 <!-- Multi-regional assignment for FTA (Editable by Admin) -->
                 <div v-else-if="user.role === 'FTA'" class="space-y-2 max-w-xs">
                   <div v-if="authStore.isAdmin" class="flex items-center space-x-2">
-                    <select @change="addFTARegional(user, $event)" class="px-2.5 py-1 rounded border border-gray-700 bg-bgMain text-textMain text-xs font-bold">
-                      <option value="">+ Add Regional to FTA</option>
-                      <option v-for="ev in events" :key="ev._id" :value="ev.code">
-                        {{ ev.name }} ({{ ev.code }})
-                      </option>
-                    </select>
+                    <CustomSelect
+                      :model-value="''"
+                      :options="ftaAddRegionalOptions"
+                      @change="addFTARegionalValue(user, $event)"
+                      class="w-56 font-bold"
+                    />
                   </div>
                   <div class="flex flex-wrap gap-1.5">
                     <span v-for="code in user.assignedEventCodes" :key="code" class="inline-flex items-center space-x-1 px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-accentYellow/15 text-accentYellow border border-accentYellow/30">
@@ -161,9 +161,40 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { CustomSelect } from '../components';
 import { getApiUrl } from '../config/api';
 
 const authStore = useAuthStore();
+
+const roleOptions = computed(() => {
+  const opts = [
+    { value: 'CSA', label: 'Control System Advisor (CSA)' },
+    { value: 'FTA', label: 'FIRST Technical Advisor (FTA)' }
+  ];
+  if (authStore.isAdmin) {
+    opts.push({ value: 'ADMIN', label: 'Administrator' });
+  }
+  return opts;
+});
+
+const csaUserEventOptions = computed(() => [
+  { value: null, label: 'Global (All Events)' },
+  ...events.value.map(ev => ({ value: ev.code, label: `${ev.name} (${ev.code})` }))
+]);
+
+const ftaAddRegionalOptions = computed(() => [
+  { value: '', label: '+ Add Regional to FTA' },
+  ...events.value.map(ev => ({ value: ev.code, label: `${ev.name} (${ev.code})` }))
+]);
+
+const addFTARegionalValue = async (user, code) => {
+  if (!code) return;
+  if (!user.assignedEventCodes) user.assignedEventCodes = [];
+  if (!user.assignedEventCodes.includes(code)) {
+    user.assignedEventCodes.push(code);
+    await saveUserEventAssignment(user);
+  }
+};
 
 const users = ref([]);
 const events = ref([]);

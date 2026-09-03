@@ -48,23 +48,19 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Category</label>
-          <select v-model="form.category" required class="w-full px-4 py-2.5 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm bg-bgCard text-textMain">
-            <option value="RADIO_COMMS" class="bg-bgCard">Radio & Comms</option>
-            <option value="ROBOTIC_POWER" class="bg-bgCard">Robot Power Path</option>
-            <option value="CAN_BUS" class="bg-bgCard">CAN Bus Connection</option>
-            <option value="MECHANICAL" class="bg-bgCard">Mechanical Issue</option>
-            <option value="CODE_EXCEPTION" class="bg-bgCard">Robot User Code</option>
-            <option value="OTHER" class="bg-bgCard">Other Issues</option>
-          </select>
+          <CustomSelect
+            v-model="form.category"
+            :options="categoryOptions"
+            button-class="py-2.5 px-4 text-sm"
+          />
         </div>
         <div>
           <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Priority</label>
-          <select v-model="form.priority" required class="w-full px-4 py-2.5 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm bg-bgCard text-textMain">
-            <option value="LOW" class="bg-bgCard">Low Priority</option>
-            <option value="MEDIUM" class="bg-bgCard">Medium Priority</option>
-            <option value="HIGH" class="bg-bgCard">High Priority</option>
-            <option value="CRITICAL" class="bg-bgCard">Critical Alert</option>
-          </select>
+          <CustomSelect
+            v-model="form.priority"
+            :options="priorityOptions"
+            button-class="py-2.5 px-4 text-sm"
+          />
         </div>
       </div>
       
@@ -149,10 +145,27 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { CustomSelect } from '../components';
 import { getApiUrl } from '../config/api';
 
 const router = useRouter();
 const authStore = useAuthStore();
+
+const categoryOptions = [
+  { value: 'RADIO_COMMS', label: 'Radio & Comms' },
+  { value: 'ROBOTIC_POWER', label: 'Robot Power Path' },
+  { value: 'CAN_BUS', label: 'CAN Bus Connection' },
+  { value: 'MECHANICAL', label: 'Mechanical Issue' },
+  { value: 'CODE_EXCEPTION', label: 'Robot User Code' },
+  { value: 'OTHER', label: 'Other Issues' }
+];
+
+const priorityOptions = [
+  { value: 'LOW', label: 'Low Priority' },
+  { value: 'MEDIUM', label: 'Medium Priority' },
+  { value: 'HIGH', label: 'High Priority' },
+  { value: 'CRITICAL', label: 'Critical Alert', class: 'text-accentCoral font-bold' }
+];
 
 const form = ref({ teamNumber: null, matchNumber: '', eventCode: '', description: '', category: 'OTHER', priority: 'MEDIUM' });
 const submitting = ref(false);
