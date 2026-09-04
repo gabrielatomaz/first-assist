@@ -18,10 +18,10 @@ export const userController = {
         return res.status(400).json({ error: 'All fields are required' });
       }
 
-      // FTAs cannot register ADMIN users
+      // FTAs can ONLY register CSA users
       const reqRole = (req.user?.role || '').toUpperCase();
-      if (reqRole === 'FTA' && role.toUpperCase() === 'ADMIN') {
-        return res.status(403).json({ error: 'FTAs do not have permission to register ADMIN users' });
+      if (reqRole === 'FTA' && role.toUpperCase() !== 'CSA') {
+        return res.status(403).json({ error: 'FTAs are only permitted to register CSA users' });
       }
 
       const existingUser = await User.findOne({ email: email.toLowerCase() });

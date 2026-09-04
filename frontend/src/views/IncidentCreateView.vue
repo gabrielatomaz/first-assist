@@ -261,9 +261,19 @@ const fetchActiveEvent = async () => {
     });
     if (activeRes.ok) {
       const data = await activeRes.json();
-      activeEvent.value = data;
-      form.value.eventCode = data.code;
-      fetchActiveEventTeams(data.code);
+      if (data && data.code) {
+        activeEvent.value = data;
+        form.value.eventCode = data.code;
+        fetchActiveEventTeams(data.code);
+        return;
+      }
+    }
+
+    // 6. Fallback: if no active event set, use first registered event so eventCode is never empty
+    if (events && events.length > 0) {
+      activeEvent.value = events[0];
+      form.value.eventCode = events[0].code;
+      fetchActiveEventTeams(events[0].code);
     }
   } catch (err) {
     console.error('Failed to load active event:', err);

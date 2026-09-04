@@ -7,8 +7,8 @@ import { logIncidentChange } from '../utils/auditLogger.js';
 
 const router = express.Router();
 
-// Require FTA or Admin role for TBA imports
-router.use(requireRole(['ADMIN', 'FTA']));
+// Require Admin role for TBA imports
+router.use(requireRole(['ADMIN']));
 
 // GET /api/tba/teams/:teamNumber - Lookup team info from TBA
 router.get('/teams/:teamNumber', async (req, res) => {

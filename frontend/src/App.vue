@@ -28,14 +28,11 @@
             <router-link to="/knowledge-base" class="hover:text-accentYellow transition duration-150" active-class="text-accentYellow">
               Knowledge Base
             </router-link>
-            <router-link v-if="authStore.isAdmin || authStore.isFTA" to="/users" class="hover:text-accentYellow transition duration-150" active-class="text-accentYellow">
-              Technicians
-            </router-link>
             <router-link v-if="authStore.isAdmin || authStore.isFTA" to="/fta" class="hover:text-accentYellow transition duration-150" active-class="text-accentYellow">
               FTA Panel
             </router-link>
             <router-link v-if="authStore.isAdmin" to="/admin" class="hover:text-accentYellow transition duration-150" active-class="text-accentYellow">
-              System Logs
+              Admin Panel
             </router-link>
           </div>
         </div>
@@ -55,7 +52,9 @@
             <font-awesome-icon icon="robot" class="text-sm text-primaryTeal" />
             <div class="text-left">
               <p class="text-xs font-bold leading-tight">{{ authStore.user?.name }}</p>
-              <p class="text-[9px] text-accentYellow font-mono tracking-widest uppercase leading-none mt-0.5">{{ authStore.user?.role }}</p>
+              <p :class="roleTextColor" class="text-[9px] font-mono font-bold tracking-widest uppercase leading-none mt-0.5">
+                {{ authStore.user?.role }}
+              </p>
             </div>
           </router-link>
 
@@ -83,7 +82,9 @@
           <font-awesome-icon icon="robot" class="text-2xl text-primaryTeal" />
           <div class="text-left">
             <p class="text-sm font-bold text-white leading-tight">{{ authStore.user?.name }}</p>
-            <p class="text-[10px] text-accentYellow font-mono tracking-widest uppercase">{{ authStore.user?.role }}</p>
+            <p :class="roleTextColor" class="text-[10px] font-mono font-bold tracking-widest uppercase mt-0.5">
+              {{ authStore.user?.role }}
+            </p>
           </div>
         </router-link>
 
@@ -98,10 +99,7 @@
             <font-awesome-icon icon="wrench" class="w-4 mr-2.5 text-primaryTeal" /> FTA Panel
           </router-link>
           <router-link v-if="authStore.isAdmin" @click="mobileMenuOpen = false" to="/admin" class="py-2 px-3 rounded hover:bg-white/10 transition flex items-center" active-class="text-accentYellow">
-            <font-awesome-icon icon="clipboard-list" class="w-4 mr-2.5 text-primaryTeal" /> System Logs
-          </router-link>
-          <router-link v-if="authStore.isAdmin" @click="mobileMenuOpen = false" to="/users" class="py-2 px-3 rounded hover:bg-white/10 transition flex items-center" active-class="text-accentYellow">
-            <font-awesome-icon icon="users" class="w-4 mr-2.5 text-primaryTeal" /> Technicians
+            <font-awesome-icon icon="user-shield" class="w-4 mr-2.5 text-primaryTeal" /> Admin Panel
           </router-link>
           <button @click="mobileMenuOpen = false; handleLogout()" class="py-2 px-3 rounded text-left text-accentCoral font-bold hover:bg-white/10 flex items-center">
             <font-awesome-icon icon="right-from-bracket" class="w-4 mr-2.5 text-accentCoral" />
@@ -135,6 +133,13 @@ const authStore = useAuthStore();
 const isOffline = ref(!navigator.onLine);
 const activeEvent = ref(null);
 const mobileMenuOpen = ref(false);
+
+const roleTextColor = computed(() => {
+  const r = (authStore.user?.role || '').toUpperCase();
+  if (r === 'ADMIN') return 'text-accentYellow';
+  if (r === 'FTA') return 'text-purple-300';
+  return 'text-primaryTeal'; // CSA
+});
 
 const handleLogout = () => {
   authStore.logout();

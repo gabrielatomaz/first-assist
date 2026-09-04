@@ -38,9 +38,7 @@ export default [
   },
   {
     path: '/users',
-    name: 'users',
-    component: UserManagementView,
-    meta: { requiresAuth: true, roles: ['ADMIN', 'FTA'] }
+    redirect: '/admin'
   },
   {
     path: '/incidents/:id',

@@ -49,14 +49,25 @@ router.get('/:number/history', async (req, res) => {
   }
 });
 
-// Register team (Admin and FTA only)
-router.post('/', requireRole(['ADMIN', 'FTA']), async (req, res) => {
+// Register team (Admin only)
+router.post('/', requireRole(['ADMIN']), async (req, res) => {
   try {
     const { number, name, rookieYear } = req.body;
     if (!number || !name) {
       return res.status(400).json({ error: 'Team number and name are required' });
     }
-    const newTeam = await Team.create({ number: Number(number), name, rookieYear: Number(rookieYear) || undefined });
+
+    const num = Number(number);
+    if (isNaN(num)) {
+      return res.status(400).json({ error: 'Valid team number is required' });
+    }
+
+    const existing = await Team.findOne({ number: num });
+    if (existing) {
+      return res.status(409).json({ error: `Team ${num} ("${existing.name}") is already registered in the system` });
+    }
+
+    const newTeam = await Team.create({ number: num, name: name.trim(), rookieYear: Number(rookieYear) || undefined });
     res.status(201).json(newTeam);
   } catch (error) {
     if (error.code === 11000) {

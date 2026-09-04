@@ -61,11 +61,14 @@
     </div>
 
     <div v-else-if="incidents.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <IncidentCard
+      <router-link
         v-for="incident in incidents"
         :key="incident._id"
-        :incident="incident"
-      />
+        :to="`/incidents/${incident._id}`"
+        class="block hover:scale-[1.01] active:scale-[0.99] transition duration-150 cursor-pointer"
+      >
+        <IncidentCard :incident="incident" />
+      </router-link>
     </div>
 
     <div v-else class="text-center py-20 bg-bgCard rounded-2xl border border-gray-800 shadow">

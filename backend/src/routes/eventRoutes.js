@@ -29,12 +29,18 @@ router.get('/active', async (req, res) => {
   }
 });
 
-// Create new event (Admin and FTA allowed - Epic 11 / TCC management)
-router.post('/', requireRole(['ADMIN', 'FTA']), async (req, res) => {
+// Create new event (Admin only - Epic 11 / TCC management)
+router.post('/', requireRole(['ADMIN']), async (req, res) => {
   try {
     const { code, name, location, isActive } = req.body;
     if (!code || !name) {
       return res.status(400).json({ error: 'Event code and name are required' });
+    }
+
+    const cleanCode = code.trim().toLowerCase();
+    const existing = await Event.findOne({ code: cleanCode });
+    if (existing) {
+      return res.status(409).json({ error: `Event "${existing.name}" (${cleanCode}) is already registered in the system` });
     }
 
     // If making this event active, deactivate other events
@@ -42,14 +48,14 @@ router.post('/', requireRole(['ADMIN', 'FTA']), async (req, res) => {
       await Event.updateMany({}, { isActive: false });
     }
 
-    const newEvent = await Event.create({ code, name, location, isActive: !!isActive });
+    const newEvent = await Event.create({ code: cleanCode, name: name.trim(), location, isActive: !!isActive });
     
     // Log audit timeline
     await logIncidentChange({
       userId: req.user._id,
       action: 'EVENT_CREATION',
-      newValue: code,
-      details: `Event "${name}" (${code}) created`
+      newValue: cleanCode,
+      details: `Event "${name}" (${cleanCode}) created`
     });
 
     res.status(201).json(newEvent);

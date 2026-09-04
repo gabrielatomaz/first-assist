@@ -74,8 +74,9 @@
             >
             <button 
               type="submit" 
+              :disabled="!newTeamNumber || !selectedEventCode"
               title="Add Team to Roster" 
-              class="w-9 h-9 flex items-center justify-center bg-primaryTeal hover:bg-primaryTeal/90 text-white rounded-lg transition shadow-sm cursor-pointer flex-shrink-0"
+              class="w-9 h-9 flex items-center justify-center bg-primaryTeal hover:bg-primaryTeal/90 text-white rounded-lg transition shadow-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
             >
               <font-awesome-icon icon="plus" class="text-sm" />
             </button>
@@ -122,7 +123,7 @@
                 <td class="px-4 py-3 text-right">
                   <button 
                     @click="handleRemoveTeamFromEvent(team.number)"
-                    class="bg-red-950/40 hover:bg-red-900/60 text-accentCoral border border-red-900/30 px-2.5 py-1 rounded text-[10px] font-bold transition"
+                    class="text-xs font-semibold text-accentCoral hover:text-accentCoral/80 hover:underline transition cursor-pointer"
                   >
                     Remove
                   </button>
@@ -157,99 +158,63 @@
       </div>
     </div>
 
-    <!-- SUB-VIEW 2: ADD TEAM (TBA SYNC) -->
-    <div v-if="activeTab === 'add-team'" class="max-w-xl mx-auto">
-      <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-6">
-        <div class="border-b border-gray-800 pb-3 flex justify-between items-center">
-          <h3 class="text-lg font-bold text-primaryTeal">Register FRC Team</h3>
-          <span class="text-[10px] bg-primaryTeal/10 text-primaryTeal font-bold px-2 py-0.5 rounded font-mono">TBA API Enabled</span>
-        </div>
 
-        <form @submit.prevent="handleRegisterTeam" class="space-y-4">
-          <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5">Team Number</label>
-            <div class="flex space-x-2">
-              <input v-model.number="teamForm.number" type="number" required placeholder="e.g. 254" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-sm">
-              <button type="button" @click="fetchFromTBA" :disabled="fetchingTBA" class="bg-accentPurple/20 hover:bg-accentPurple/30 text-accentPurple border border-accentPurple/30 font-bold px-4 py-2.5 rounded-lg text-xs whitespace-nowrap transition">
-                <font-awesome-icon icon="bolt" class="mr-1" /> {{ fetchingTBA ? 'Syncing...' : 'Lookup TBA' }}
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5">Team Name / Nickname</label>
-            <input v-model="teamForm.name" type="text" required placeholder="e.g. The Cheesy Poofs" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-sm">
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5">Rookie Year</label>
-            <input v-model.number="teamForm.rookieYear" type="number" placeholder="e.g. 1999" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-sm">
-          </div>
-
-          <button type="submit" class="w-full bg-primaryTeal hover:bg-primaryTeal/90 text-white font-bold py-3 rounded-lg shadow text-sm transition">
-            Save Team to System
-          </button>
-        </form>
-      </div>
-    </div>
-
-    <!-- SUB-VIEW 3: ADD EVENT (TBA SYNC) -->
-    <div v-if="activeTab === 'add-event'" class="max-w-xl mx-auto space-y-6">
-      <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-6">
-        <div class="border-b border-gray-800 pb-3 flex justify-between items-center">
-          <h3 class="text-lg font-bold text-primaryTeal">Register FRC Event Context</h3>
-          <span class="text-[10px] bg-accentPurple/10 text-accentPurple font-bold px-2 py-0.5 rounded font-mono">TBA 1-Click Import</span>
-        </div>
-
-        <!-- TBA Event Import Section -->
-        <div class="p-4 bg-bgMain rounded-xl border border-gray-800 space-y-3">
-          <label class="block text-xs font-bold text-primaryTeal uppercase">Import Event & Roster from TBA</label>
-          <div class="flex space-x-2">
-            <input v-model="tbaEventKey" type="text" placeholder="Enter TBA Event Key (e.g. 2026brsp)" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgCard text-textMain text-xs font-mono">
-            <button 
-              @click="handleImportTBAEvent" 
-              :disabled="importingTBAEvent" 
-              title="Import Event and Attending Teams from TBA"
-              class="bg-primaryTeal hover:bg-primaryTeal/90 text-white font-extrabold px-3.5 py-2 rounded-lg text-sm transition cursor-pointer flex items-center justify-center shadow-sm"
-            >
-              <font-awesome-icon icon="download" />
-            </button>
-          </div>
-        </div>
-
-        <div class="text-center text-xs text-gray-500 font-bold uppercase">— OR Manual Creation —</div>
-
-        <form @submit.prevent="handleCreateEvent" class="space-y-4">
-          <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5">Event Key/Code</label>
-            <input v-model="eventForm.code" type="text" required placeholder="e.g. 2026brsp" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-sm">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5">Event Name</label>
-            <input v-model="eventForm.name" type="text" required placeholder="e.g. Brazil Regional" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-sm">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5">Location</label>
-            <input v-model="eventForm.location" type="text" placeholder="e.g. Sao Paulo, Brazil" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-sm">
-          </div>
-          <div class="flex items-center space-x-2">
-            <input v-model="eventForm.isActive" type="checkbox" id="isActiveEvent" class="rounded text-primaryTeal focus:ring-primaryTeal">
-            <label for="isActiveEvent" class="text-xs text-gray-300 font-medium">Set as Active Competition Event</label>
-          </div>
-
-          <button type="submit" class="w-full bg-primaryTeal hover:bg-primaryTeal/90 text-white font-bold py-3 rounded-lg shadow text-sm transition">
-            Create Event Record
-          </button>
-        </form>
-      </div>
-    </div>
 
     <!-- SUB-VIEW 4: ASSIGN CSA EVENT CONTEXTS -->
     <div v-if="activeTab === 'csa-assignment'" class="space-y-6">
       <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-6">
-        <div class="border-b border-gray-800 pb-3">
-          <h3 class="text-lg font-bold text-primaryTeal">Assign Active Event Contexts to CSAs</h3>
-          <p class="text-xs text-gray-400 mt-1">Set specific competition events for Control System Advisors so their dashboards filter to their assigned venue.</p>
+        <div class="border-b border-gray-800 pb-3 flex justify-between items-center">
+          <div>
+            <h3 class="text-lg font-bold text-primaryTeal">Manage CSAs & Event Assignments</h3>
+            <p class="text-xs text-gray-400 mt-1">Register Control System Advisors and assign specific competition event contexts.</p>
+          </div>
+          <button
+            @click="showCreateCsaForm = !showCreateCsaForm"
+            :class="showCreateCsaForm ? 'w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 rounded-lg transition cursor-pointer flex-shrink-0' : 'bg-primaryTeal hover:bg-primaryTeal/90 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center space-x-1.5 shadow-sm'"
+            :title="showCreateCsaForm ? 'Cancel' : 'Register New CSA'"
+          >
+            <font-awesome-icon :icon="showCreateCsaForm ? 'xmark' : 'user-plus'" class="text-xs" />
+            <span v-if="!showCreateCsaForm">Register</span>
+          </button>
+        </div>
+
+        <!-- Inline Register CSA Form -->
+        <div v-if="showCreateCsaForm" class="p-5 bg-bgMain rounded-xl border border-gray-800 space-y-4 animate-fadeIn">
+          <h4 class="text-xs font-bold text-primaryTeal uppercase tracking-wider">Register Control System Advisor (CSA)</h4>
+          <form @submit.prevent="handleRegisterCSA" class="space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Name</label>
+                <input v-model="csaForm.name" type="text" required placeholder="e.g. John Doe" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgCard text-textMain text-xs">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Email</label>
+                <input v-model="csaForm.email" type="email" required placeholder="csa@first.org" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgCard text-textMain text-xs">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Temporary Password</label>
+                <input v-model="csaForm.password" type="password" required placeholder="****" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgCard text-textMain text-xs font-mono">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Confirm Password</label>
+                <input v-model="csaForm.confirmPassword" type="password" required placeholder="****" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgCard text-textMain text-xs font-mono">
+              </div>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Assigned Event Context</label>
+              <CustomSelect v-model="csaForm.assignedEventCode" :options="csaEventOptions" button-class="py-2 px-3 text-xs" />
+            </div>
+
+            <div class="flex justify-end pt-2">
+              <button 
+                type="submit" 
+                :disabled="registeringCSA || !csaForm.name || !csaForm.email || !csaForm.password || !csaForm.confirmPassword" 
+                class="bg-primaryTeal hover:bg-primaryTeal/90 text-white font-bold px-5 py-2 rounded-lg text-xs transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {{ registeringCSA ? 'Registering...' : 'Register' }}
+              </button>
+            </div>
+          </form>
         </div>
 
         <div class="overflow-x-auto">
@@ -259,6 +224,7 @@
                 <th class="px-4 py-3">CSA Name</th>
                 <th class="px-4 py-3">Email</th>
                 <th class="px-4 py-3">Role</th>
+                <th class="px-4 py-3">Status</th>
                 <th class="px-4 py-3">Assigned Event Context</th>
                 <th class="px-4 py-3 text-right">Actions</th>
               </tr>
@@ -268,20 +234,34 @@
                 <td class="px-4 py-3 font-bold text-white">{{ csa.name }}</td>
                 <td class="px-4 py-3 text-gray-400 font-mono">{{ csa.email }}</td>
                 <td class="px-4 py-3">
-                  <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase font-mono bg-primaryTeal/10 text-primaryTeal border border-primaryTeal/20">
+                  <span class="px-2.5 py-1 rounded-md text-xs font-bold uppercase font-mono bg-primaryTeal/15 text-primaryTeal border border-primaryTeal/25">
                     {{ csa.role }}
+                  </span>
+                </td>
+                <td class="px-4 py-3">
+                  <span :class="{
+                    'bg-emerald-950/40 text-emerald-400 border border-emerald-900/30': csa.status === 'ACTIVE',
+                    'bg-red-950/40 text-accentCoral border border-red-900/30': csa.status === 'INACTIVE'
+                  }" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase font-mono">
+                    {{ csa.status || 'ACTIVE' }}
                   </span>
                 </td>
                 <td class="px-4 py-3">
                   <CustomSelect
                     v-model="csa.assignedEventCode"
                     :options="csaEventOptions"
+                    @change="saveCSAEventAssignment(csa)"
                     class="w-60 font-bold"
                   />
                 </td>
-                <td class="px-4 py-3 text-right">
-                  <button @click="saveCSAEventAssignment(csa)" class="bg-primaryTeal text-white font-bold px-3 py-1 rounded text-xs hover:bg-opacity-90 transition">
-                    Save
+                <td class="px-4 py-3 text-right whitespace-nowrap">
+                  <button
+                    @click="toggleCSAStatus(csa)"
+                    :disabled="updatingCsaStatus === csa._id"
+                    :class="csa.status === 'ACTIVE' ? 'text-accentCoral hover:text-accentCoral/80' : 'text-green-600 hover:text-green-700'"
+                    class="text-xs font-semibold hover:underline disabled:opacity-50 transition cursor-pointer"
+                  >
+                    {{ csa.status === 'ACTIVE' ? 'Deactivate' : 'Reactivate' }}
                   </button>
                 </td>
               </tr>
@@ -304,20 +284,22 @@ const activeTab = ref('manage-teams');
 
 const tabOptions = [
   { value: 'manage-teams', label: 'Manage Event Teams' },
-  { value: 'add-team', label: 'Register Team (TBA Sync)' },
-  { value: 'add-event', label: 'Register Event (TBA Sync)' },
-  { value: 'csa-assignment', label: 'Assign CSA Event Contexts' }
+  { value: 'csa-assignment', label: 'Manage CSAs' }
 ];
 
 const availableFTAEvents = computed(() => {
   if (authStore.isAdmin) return events.value;
-  if (authStore.isFTA) {
-    const assigned = authStore.user?.assignedEventCodes || [];
-    if (assigned.length > 0) {
-      return events.value.filter(e => assigned.includes(e.code));
-    }
+  
+  const assigned = [];
+  if (authStore.user?.assignedEventCode) {
+    assigned.push(authStore.user.assignedEventCode);
   }
-  return events.value;
+  if (Array.isArray(authStore.user?.assignedEventCodes)) {
+    assigned.push(...authStore.user.assignedEventCodes);
+  }
+  const uniqueAssigned = Array.from(new Set(assigned.filter(Boolean)));
+
+  return events.value.filter(e => uniqueAssigned.includes(e.code));
 });
 
 const ftaEventOptions = computed(() => 
@@ -328,7 +310,7 @@ const ftaEventOptions = computed(() =>
 );
 
 const csaEventOptions = computed(() => [
-  { value: null, label: 'All Events' },
+  { value: null, label: 'Unassigned' },
   ...availableFTAEvents.value.map(ev => ({
     value: ev.code,
     label: `${ev.name} (${ev.code})`
@@ -589,6 +571,83 @@ const loadCSAUsers = async () => {
     }
   } catch (err) {
     console.error('Failed to load users:', err);
+  }
+};
+
+const showCreateCsaForm = ref(false);
+const registeringCSA = ref(false);
+const updatingCsaStatus = ref(null);
+const csaForm = ref({ name: '', email: '', password: '', confirmPassword: '', assignedEventCode: null });
+
+const handleRegisterCSA = async () => {
+  if (!csaForm.value.name || !csaForm.value.email || !csaForm.value.password) return;
+  if (csaForm.value.password !== csaForm.value.confirmPassword) {
+    return showAlert('Passwords do not match', 'error');
+  }
+
+  registeringCSA.value = true;
+  try {
+    const payload = {
+      name: csaForm.value.name,
+      email: csaForm.value.email,
+      password: csaForm.value.password,
+      role: 'CSA',
+      assignedEventCode: csaForm.value.assignedEventCode || null
+    };
+
+    const res = await fetch(getApiUrl('/users'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authStore.token}`
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to register CSA');
+
+    if (csaForm.value.assignedEventCode) {
+      await fetch(getApiUrl(`/users/${data._id}/assigned-event`), {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authStore.token}`
+        },
+        body: JSON.stringify({ assignedEventCode: csaForm.value.assignedEventCode })
+      });
+    }
+
+    showAlert(`CSA ${data.name} (${data.email}) registered successfully!`);
+    csaForm.value = { name: '', email: '', password: '', confirmPassword: '', assignedEventCode: null };
+    showCreateCsaForm.value = false;
+    await loadCSAUsers();
+  } catch (err) {
+    showAlert(err.message, 'error');
+  } finally {
+    registeringCSA.value = false;
+  }
+};
+
+const toggleCSAStatus = async (csaUser) => {
+  updatingCsaStatus.value = csaUser._id;
+  const newStatus = csaUser.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+  try {
+    const res = await fetch(getApiUrl(`/users/${csaUser._id}/status`), {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${authStore.token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status: newStatus })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to update account status');
+    csaUser.status = data.status;
+    showAlert(`CSA ${csaUser.name} account ${data.status.toLowerCase()}!`);
+  } catch (err) {
+    showAlert(err.message, 'error');
+  } finally {
+    updatingCsaStatus.value = null;
   }
 };
 

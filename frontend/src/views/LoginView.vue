@@ -59,10 +59,26 @@
         </button>
       </form>
 
-      <div class="mt-8 text-center text-xs text-gray-400 border-t pt-6">
+      <div class="mt-8 text-center text-xs text-gray-400 border-t border-gray-800 pt-6 space-y-3">
         <p>If you need account access, please see the FTA or event Administrator.</p>
+        <div>
+          <button 
+            type="button" 
+            @click="showRequestModal = true"
+            class="text-xs font-bold text-primaryTeal hover:underline inline-flex items-center space-x-1 cursor-pointer"
+          >
+            <font-awesome-icon icon="id-card" class="text-xs" />
+            <span>Request FTA Event Access</span>
+          </button>
+        </div>
       </div>
     </div>
+
+    <!-- Access Request Modal -->
+    <AccessRequestModal 
+      v-if="showRequestModal" 
+      @close="showRequestModal = false" 
+    />
   </div>
 </template>
 
@@ -70,6 +86,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { AccessRequestModal } from '../components';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -78,6 +95,7 @@ const email = ref('');
 const password = ref('');
 const loading = ref(false);
 const error = ref(null);
+const showRequestModal = ref(false);
 
 const handleLogin = async () => {
   loading.value = true;

@@ -1,6 +1,8 @@
 import { incidentRepository } from '../repositories/incidentRepository.js';
 import { aiSuggestionRepository } from '../repositories/aiSuggestionRepository.js';
 import { Incident } from '../models/Incident.js';
+import { Event } from '../models/Event.js';
+import { User } from '../models/User.js';
 import { logIncidentChange, createAssignmentNotification } from '../utils/auditLogger.js';
 import { generateDiagnosticSuggestion } from './aiService.js';
 
@@ -11,7 +13,18 @@ export const incidentService = {
     if (filters.category) query.category = filters.category;
     if (filters.priority) query.priority = filters.priority;
     if (filters.teamNumber) query.teamNumber = Number(filters.teamNumber);
-    if (filters.eventCode) query.eventCode = filters.eventCode;
+    
+    if (filters.eventCode) {
+      const targetEvent = await Event.findOne({ code: filters.eventCode });
+      const eventTeams = targetEvent?.teams || [];
+      query.$or = [
+        { eventCode: filters.eventCode },
+        {
+          eventCode: { $in: [null, '', undefined] },
+          teamNumber: { $in: eventTeams }
+        }
+      ];
+    }
     return await incidentRepository.findAll(query);
   },
 
@@ -23,8 +36,31 @@ export const incidentService = {
     if (!data.teamNumber || !data.description) {
       throw new Error("teamNumber and description are required");
     }
+
+    let resolvedEventCode = data.eventCode || null;
+
+    if (!resolvedEventCode) {
+      const activeEv = await Event.findOne({ isActive: true });
+      if (activeEv) {
+        resolvedEventCode = activeEv.code;
+      } else {
+        const teamEv = await Event.findOne({ teams: Number(data.teamNumber) });
+        if (teamEv) {
+          resolvedEventCode = teamEv.code;
+        } else if (userId) {
+          const user = await User.findById(userId);
+          if (user?.assignedEventCode) {
+            resolvedEventCode = user.assignedEventCode;
+          } else if (user?.assignedEventCodes?.length > 0) {
+            resolvedEventCode = user.assignedEventCodes[0];
+          }
+        }
+      }
+    }
+
     const incidentData = {
       ...data,
+      eventCode: resolvedEventCode,
       reportedBy: userId
     };
     const newIncident = await incidentRepository.create(incidentData);

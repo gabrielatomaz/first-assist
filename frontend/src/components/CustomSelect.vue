@@ -12,40 +12,43 @@
       <font-awesome-icon icon="chevron-down" class="text-[10px] text-gray-400 flex-shrink-0 transition-transform duration-200" :class="{ 'rotate-180': isOpen }" />
     </button>
 
-    <transition
-      enter-active-class="transition ease-out duration-100"
-      enter-from-class="transform opacity-0 scale-95"
-      enter-to-class="transform opacity-100 scale-100"
-      leave-active-class="transition ease-in duration-75"
-      leave-from-class="transform opacity-100 scale-100"
-      leave-to-class="transform opacity-0 scale-95"
-    >
-      <div
-        v-if="isOpen"
-        class="absolute right-0 z-50 mt-1.5 min-w-[12rem] w-full rounded-xl bg-bgCard shadow-2xl border border-gray-800 py-1 overflow-hidden max-h-60 overflow-y-auto custom-scrollbar"
+    <Teleport to="body">
+      <transition
+        enter-active-class="transition ease-out duration-100"
+        enter-from-class="transform opacity-0 scale-95"
+        enter-to-class="transform opacity-100 scale-100"
+        leave-active-class="transition ease-in duration-75"
+        leave-from-class="transform opacity-100 scale-100"
+        leave-to-class="transform opacity-0 scale-95"
       >
-        <button
-          v-for="opt in options"
-          :key="opt.value"
-          type="button"
-          :disabled="opt.disabled"
-          @click="selectOption(opt)"
-          :class="[
-            'block w-full px-4 py-2.5 text-left text-xs font-medium transition cursor-pointer flex items-center justify-between',
-            opt.disabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-white/10 text-textMain',
-            isSelected(opt.value) ? 'bg-primaryTeal/15 font-bold' : 'text-textMain'
-          ]"
+        <div
+          v-if="isOpen"
+          :style="menuStyle"
+          class="fixed z-[99999] rounded-xl bg-bgCard shadow-2xl border border-gray-700 py-1 max-h-60 overflow-y-auto custom-scrollbar"
         >
-          <span class="text-textMain">{{ opt.label }}</span>
-          <font-awesome-icon v-if="isSelected(opt.value)" icon="check" class="text-xs text-primaryTeal ml-2 flex-shrink-0" />
-        </button>
-      </div>
-    </transition>
+          <button
+            v-for="opt in options"
+            :key="opt.value"
+            type="button"
+            :disabled="opt.disabled"
+            @click="selectOption(opt)"
+            :class="[
+              'block w-full px-4 py-2.5 text-left text-xs font-semibold transition cursor-pointer flex items-center justify-between',
+              opt.disabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-white/15 text-white',
+              isSelected(opt.value) ? 'bg-primaryTeal/25 text-primaryTeal font-bold' : 'text-gray-200'
+            ]"
+          >
+            <span class="truncate">{{ opt.label }}</span>
+            <font-awesome-icon v-if="isSelected(opt.value)" icon="check" class="text-xs text-primaryTeal ml-2 flex-shrink-0" />
+          </button>
+        </div>
+      </transition>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 
 const props = defineProps({
   modelValue: [String, Number, Object],
@@ -67,6 +70,7 @@ const emit = defineEmits(['update:modelValue', 'change']);
 
 const isOpen = ref(false);
 const dropdownRef = ref(null);
+const menuStyle = ref({});
 
 const isSelected = (optValue) => {
   if (optValue === props.modelValue) return true;
@@ -84,8 +88,27 @@ const selectedLabel = computed(() => {
   return selectedOption.value ? selectedOption.value.label : props.placeholder;
 });
 
-const toggleDropdown = () => {
+const updateMenuPosition = () => {
+  if (dropdownRef.value) {
+    const rect = dropdownRef.value.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const menuMaxHeight = 240;
+    const showAbove = spaceBelow < menuMaxHeight && rect.top > menuMaxHeight;
+
+    menuStyle.value = {
+      top: showAbove ? `${Math.max(10, rect.top - menuMaxHeight)}px` : `${rect.bottom + 4}px`,
+      left: `${rect.left}px`,
+      width: `${Math.max(rect.width, 240)}px`
+    };
+  }
+};
+
+const toggleDropdown = async () => {
   isOpen.value = !isOpen.value;
+  if (isOpen.value) {
+    await nextTick();
+    updateMenuPosition();
+  }
 };
 
 const selectOption = (opt) => {
@@ -101,11 +124,21 @@ const handleClickOutside = (event) => {
   }
 };
 
+const handleScrollOrResize = () => {
+  if (isOpen.value) {
+    updateMenuPosition();
+  }
+};
+
 onMounted(() => {
   document.addEventListener('click', handleClickOutside);
+  window.addEventListener('scroll', handleScrollOrResize, true);
+  window.addEventListener('resize', handleScrollOrResize);
 });
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
+  window.removeEventListener('scroll', handleScrollOrResize, true);
+  window.removeEventListener('resize', handleScrollOrResize);
 });
 </script>

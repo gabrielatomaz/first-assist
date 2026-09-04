@@ -7,16 +7,16 @@
       </div>
       <button
         @click="showCreateForm = !showCreateForm"
-        :class="showCreateForm ? 'w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white border border-gray-700 rounded-xl shadow transition duration-200 cursor-pointer flex-shrink-0' : 'bg-primaryTeal hover:bg-primaryTeal/90 text-white font-semibold py-2.5 px-4 rounded-xl shadow-md hover:shadow-lg transition duration-200 cursor-pointer flex items-center space-x-2 text-xs flex-shrink-0'"
-        :title="showCreateForm ? 'Cancel Registration' : 'Add New User'"
+        :class="showCreateForm ? 'w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 rounded-lg transition cursor-pointer flex-shrink-0' : 'bg-primaryTeal hover:bg-primaryTeal/90 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center space-x-1.5 shadow-sm'"
+        :title="showCreateForm ? 'Cancel' : 'Register'"
       >
         <font-awesome-icon :icon="showCreateForm ? 'xmark' : 'user-plus'" class="text-xs" />
-        <span v-if="!showCreateForm">{{ (authStore.isFTA && !authStore.isAdmin) ? 'New CSA' : 'New User' }}</span>
+        <span v-if="!showCreateForm">Register</span>
       </button>
     </div>
 
     <!-- Create User Card -->
-    <div v-if="showCreateForm" class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 max-w-xl animate-fadeIn">
+    <div v-if="showCreateForm" class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 animate-fadeIn">
       <h3 class="text-lg font-bold text-primaryTeal mb-4">Register Authorized Volunteer</h3>
       <form @submit.prevent="handleCreateUser" class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
@@ -88,10 +88,10 @@
               <td class="px-6 py-4 font-mono text-xs">{{ user.email }}</td>
               <td class="px-6 py-4">
                 <span :class="{
-                  'bg-primaryTeal/10 text-primaryTeal': user.role === 'CSA',
-                  'bg-accentYellow/10 text-accentYellow': user.role === 'FTA',
-                  'bg-accentPurple/10 text-accentPurple': user.role === 'ADMIN'
-                }" class="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase font-mono">
+                  'bg-primaryTeal/15 text-primaryTeal border border-primaryTeal/25': user.role === 'CSA',
+                  'bg-accentYellow/15 text-accentYellow border border-accentYellow/25': user.role === 'FTA',
+                  'bg-accentPurple/15 text-purple-300 border border-accentPurple/25': user.role === 'ADMIN'
+                }" class="px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase font-mono">
                   {{ user.role }}
                 </span>
               </td>
@@ -119,22 +119,22 @@
                     />
                   </div>
                   <div class="flex flex-wrap gap-1.5">
-                    <span v-for="code in user.assignedEventCodes" :key="code" class="inline-flex items-center space-x-1 px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-accentYellow/15 text-accentYellow border border-accentYellow/30">
+                    <span v-for="code in user.assignedEventCodes" :key="code" class="inline-flex items-center space-x-1 px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-accentYellow/15 text-accentYellow border border-accentYellow/25">
                       <span>{{ code }}</span>
                       <button v-if="authStore.isAdmin" @click="removeFTARegional(user, code)" class="text-xs hover:text-red-400 font-bold ml-1 cursor-pointer">✕</button>
                     </span>
-                    <span v-if="!user.assignedEventCodes || user.assignedEventCodes.length === 0" class="text-[10px] text-gray-500 italic">No regionals assigned</span>
+                    <span v-if="!user.assignedEventCodes || user.assignedEventCodes.length === 0" class="text-[10px] text-gray-400 italic">No regionals assigned</span>
                   </div>
                 </div>
 
-                <span v-else class="text-xs text-gray-500 italic">N/A (Admin)</span>
+                <span v-else class="text-xs text-gray-400 italic">N/A (Admin)</span>
               </td>
 
               <td class="px-6 py-4">
                 <span :class="{
-                  'bg-green-950/40 text-green-400 border border-green-900/30': user.status === 'ACTIVE',
+                  'bg-emerald-950/40 text-emerald-400 border border-emerald-900/30': user.status === 'ACTIVE',
                   'bg-red-950/40 text-accentCoral border border-red-900/30': user.status === 'INACTIVE'
-                }" class="px-2.5 py-0.5 rounded text-xs font-medium uppercase font-mono tracking-wider">
+                }" class="px-2.5 py-1 rounded-md text-xs font-bold uppercase font-mono tracking-wider">
                   {{ user.status }}
                 </span>
               </td>
@@ -167,6 +167,11 @@ import { getApiUrl } from '../config/api';
 const authStore = useAuthStore();
 
 const roleOptions = computed(() => {
+  if (authStore.isFTA && !authStore.isAdmin) {
+    return [
+      { value: 'CSA', label: 'Control System Advisor (CSA)' }
+    ];
+  }
   const opts = [
     { value: 'CSA', label: 'Control System Advisor (CSA)' },
     { value: 'FTA', label: 'FIRST Technical Advisor (FTA)' }
@@ -177,9 +182,18 @@ const roleOptions = computed(() => {
   return opts;
 });
 
+const availableEventsForUser = computed(() => {
+  if (authStore.isAdmin) return events.value;
+  const assigned = [];
+  if (authStore.user?.assignedEventCode) assigned.push(authStore.user.assignedEventCode);
+  if (Array.isArray(authStore.user?.assignedEventCodes)) assigned.push(...authStore.user.assignedEventCodes);
+  const uniqueAssigned = Array.from(new Set(assigned.filter(Boolean)));
+  return events.value.filter(e => uniqueAssigned.includes(e.code));
+});
+
 const csaUserEventOptions = computed(() => [
-  { value: null, label: 'All Events' },
-  ...events.value.map(ev => ({ value: ev.code, label: `${ev.name} (${ev.code})` }))
+  { value: null, label: 'Unassigned' },
+  ...availableEventsForUser.value.map(ev => ({ value: ev.code, label: `${ev.name} (${ev.code})` }))
 ]);
 
 const ftaAddRegionalOptions = computed(() => [

@@ -23,7 +23,7 @@
 
         <div>
           <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Designated Role</label>
-          <input :value="profile.role" type="text" disabled class="w-full px-4 py-2.5 rounded-lg border border-gray-800 bg-bgMain/60 text-gray-400 text-sm font-mono uppercase tracking-wider">
+          <input :value="profile.role" type="text" disabled :class="roleTextColor" class="w-full px-4 py-2.5 rounded-lg border border-gray-800 bg-bgMain/60 text-sm font-mono font-bold uppercase tracking-wider">
         </div>
 
         <div v-if="profileError" class="text-accentCoral text-xs font-medium p-3 bg-red-950/40 rounded">
@@ -84,11 +84,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { getApiUrl } from '../config/api';
 
 const authStore = useAuthStore();
+
+const roleTextColor = computed(() => {
+  const r = (profile.value?.role || '').toUpperCase();
+  if (r === 'ADMIN') return 'text-accentYellow';
+  if (r === 'FTA') return 'text-purple-300';
+  return 'text-primaryTeal'; // CSA
+});
 
 const profile = ref({ name: '', email: '', role: '' });
 const loading = ref(true);

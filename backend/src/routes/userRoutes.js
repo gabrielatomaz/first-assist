@@ -98,7 +98,21 @@ router.patch('/:id/assigned-event', requireRole(['ADMIN', 'FTA']), async (req, r
       return res.status(403).json({ error: 'Only Administrators can assign regional events to FTAs' });
     }
 
-    if (assignedEventCode !== undefined) targetUser.assignedEventCode = assignedEventCode || null;
+    if (assignedEventCode !== undefined) {
+      // FTAs can only assign CSAs to events that the FTA is registered for
+      if (reqRole === 'FTA') {
+        if (targetUser.role !== 'CSA') {
+          return res.status(403).json({ error: 'FTAs can only assign competition events to CSAs' });
+        }
+        if (assignedEventCode) {
+          const ftaAssignedCodes = req.user?.assignedEventCodes || (req.user?.assignedEventCode ? [req.user.assignedEventCode] : []);
+          if (!ftaAssignedCodes.includes(assignedEventCode)) {
+            return res.status(403).json({ error: 'FTAs can only assign CSAs to competition events they are registered for' });
+          }
+        }
+      }
+      targetUser.assignedEventCode = assignedEventCode || null;
+    }
     if (assignedEventCodes !== undefined) targetUser.assignedEventCodes = Array.isArray(assignedEventCodes) ? assignedEventCodes : [];
 
     await targetUser.save();
