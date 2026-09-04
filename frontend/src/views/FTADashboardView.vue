@@ -44,19 +44,19 @@
       <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-6">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-800 pb-4">
           <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto max-w-full">
-            <label class="text-xs font-bold text-gray-400 uppercase">Select Event:</label>
+            <label class="text-xs font-bold text-gray-400 uppercase flex-shrink-0">Select Event:</label>
             <div class="flex items-center space-x-2 w-full min-w-0">
               <CustomSelect
                 v-model="selectedEventCode"
                 :options="ftaEventOptions"
                 @change="loadEventTeams(1)"
-                class="w-full sm:w-72 font-bold"
+                class="flex-1 min-w-0 sm:flex-initial sm:w-72 font-bold"
               />
               <button 
                 v-if="selectedEventCode" 
                 @click="handleSetActiveEvent(selectedEventCode)" 
                 title="Set Active Competition Event"
-                class="flex-shrink-0 bg-accentYellow/20 hover:bg-accentYellow/30 text-accentYellow border border-accentYellow/40 px-3 py-2 rounded-lg transition cursor-pointer flex items-center justify-center shadow-sm"
+                class="flex-shrink-0 bg-accentYellow/20 hover:bg-accentYellow/30 text-accentYellow border border-accentYellow/40 w-9 h-9 rounded-lg transition cursor-pointer flex items-center justify-center shadow-sm"
               >
                 <font-awesome-icon icon="star" class="text-accentYellow text-sm" />
               </button>
@@ -70,7 +70,7 @@
               type="number" 
               placeholder="Team #" 
               required
-              class="w-28 px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs placeholder-gray-500"
+              class="flex-1 min-w-0 sm:w-28 px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs placeholder-gray-500"
             >
             <button 
               type="submit" 
