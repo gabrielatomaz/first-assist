@@ -99,15 +99,16 @@ router.patch('/:id/assigned-event', requireRole(['ADMIN', 'FTA']), async (req, r
     }
 
     if (assignedEventCode !== undefined) {
-      // FTAs can only assign CSAs to events that the FTA is registered for
+      const isSelf = targetUser._id.toString() === req.user._id.toString();
+      // FTAs can assign CSAs or update their own active event context
       if (reqRole === 'FTA') {
-        if (targetUser.role !== 'CSA') {
+        if (!isSelf && targetUser.role !== 'CSA') {
           return res.status(403).json({ error: 'FTAs can only assign competition events to CSAs' });
         }
         if (assignedEventCode) {
           const ftaAssignedCodes = req.user?.assignedEventCodes || (req.user?.assignedEventCode ? [req.user.assignedEventCode] : []);
-          if (!ftaAssignedCodes.includes(assignedEventCode)) {
-            return res.status(403).json({ error: 'FTAs can only assign CSAs to competition events they are registered for' });
+          if (ftaAssignedCodes.length > 0 && !ftaAssignedCodes.includes(assignedEventCode)) {
+            return res.status(403).json({ error: 'FTAs can only assign or select competition events they are registered for' });
           }
         }
       }

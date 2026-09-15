@@ -543,13 +543,18 @@ const handleSetActiveEvent = async (code) => {
       },
       body: JSON.stringify({ assignedEventCode: code })
     });
-    if (!userRes.ok) throw new Error('Failed to update user assigned event context');
+    const userData = await userRes.json();
+    if (!userRes.ok) throw new Error(userData.error || 'Failed to update user assigned event context');
 
     // 2. Mark event active in database
-    await fetch(getApiUrl(`/events/${code}/active`), {
+    const eventRes = await fetch(getApiUrl(`/events/${code}/active`), {
       method: 'PATCH',
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     });
+    if (!eventRes.ok) {
+      const eventData = await eventRes.json();
+      throw new Error(eventData.error || 'Failed to set active competition event');
+    }
 
     showAlert(`Active competition event context set to ${code}!`);
     await authStore.fetchCurrentUser();
@@ -661,7 +666,8 @@ const saveCSAEventAssignment = async (csaUser) => {
       },
       body: JSON.stringify({ assignedEventCode: csaUser.assignedEventCode || null })
     });
-    if (!res.ok) throw new Error('Failed to update assigned event context');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to update assigned event context');
     showAlert(`Assigned event context updated for ${csaUser.name}!`);
   } catch (err) {
     showAlert(err.message, 'error');
