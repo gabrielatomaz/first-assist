@@ -9,7 +9,14 @@
           <h3 class="text-lg font-bold text-accentPurple font-sans tracking-tight">AI Assistant Diagnosis</h3>
         </div>
         
-        <div v-if="suggestion && !loading" class="flex items-center space-x-2 text-xs">
+        <div v-if="suggestion && !loading && !generating" class="flex items-center space-x-2 text-xs">
+          <button
+            @click="generateDiagnosis"
+            class="px-2.5 py-1 bg-bgMain text-gray-300 hover:text-white border border-gray-700 rounded transition duration-150 text-xs font-semibold flex items-center shadow-sm"
+            title="Re-generate AI diagnosis"
+          >
+            <font-awesome-icon icon="rotate" class="mr-1.5" /> Re-generate
+          </button>
           <div class="flex items-center space-x-1">
             <button
               @click="rateSuggestion('HELPFUL')"
@@ -33,14 +40,16 @@
 
       <!-- Graceful Fallback Notice (US-AI-006) -->
       <div v-if="error" class="bg-amber-950/40 border border-amber-900/50 p-4 rounded-xl text-amber-300 text-xs flex flex-col space-y-1">
-        <span class="font-bold"><font-awesome-icon icon="triangle-exclamation" class="mr-1" /> AI Diagnostics Offline</span>
-        <span>The AI analysis helper is currently unavailable. Please continue investigating the incident manually.</span>
+        <span class="font-bold"><font-awesome-icon icon="triangle-exclamation" class="mr-1" /> AI Diagnostics Notice</span>
+        <span>{{ error }}</span>
       </div>
 
-      <!-- Loading State -->
-      <div v-else-if="loading" class="text-center py-6">
+      <!-- Initial Loading / Generating State -->
+      <div v-else-if="loading || generating" class="text-center py-6">
         <div class="inline-block animate-spin rounded-full h-6 w-6 border-2 border-accentPurple border-t-transparent"></div>
-        <p class="text-xs text-accentPurple/60 mt-2">Generating diagnostic recommendation...</p>
+        <p class="text-xs text-accentPurple/80 mt-2 font-medium">
+          {{ generating ? 'Analyzing incident details with AI...' : 'Checking AI diagnosis status...' }}
+        </p>
       </div>
 
       <!-- Main suggestions -->
@@ -60,6 +69,19 @@
             </p>
           </div>
         </div>
+      </div>
+
+      <!-- On-Demand Trigger Button State (when no suggestion generated yet) -->
+      <div v-else-if="!suggestion" class="text-center py-4 space-y-3">
+        <p class="text-xs text-gray-300 font-medium">No AI diagnostic recommendation generated yet for this incident.</p>
+        <button
+          @click="generateDiagnosis"
+          :disabled="generating"
+          class="px-4 py-2 bg-accentPurple hover:bg-accentPurple/90 text-white text-xs font-bold rounded-xl transition duration-150 flex items-center justify-center space-x-2 mx-auto shadow-md"
+        >
+          <font-awesome-icon icon="wand-magic-sparkles" class="mr-1" />
+          <span>Generate AI Diagnosis</span>
+        </button>
       </div>
     </div>
 
@@ -114,6 +136,7 @@ const authStore = useAuthStore();
 const suggestion = ref(null);
 const relatedIncidents = ref([]);
 const loading = ref(true);
+const generating = ref(false);
 const error = ref(null);
 
 const fetchSuggestions = async () => {
@@ -132,6 +155,34 @@ const fetchSuggestions = async () => {
     error.value = err.message;
   } finally {
     loading.value = false;
+  }
+};
+
+const generateDiagnosis = async () => {
+  generating.value = true;
+  error.value = null;
+  try {
+    const response = await fetch(getApiUrl(`/incidents/${props.incidentId}/ai-suggestions`), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authStore.token}`
+      }
+    });
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error || 'Failed to generate AI diagnosis');
+    }
+    const data = await response.json();
+    if (data.suggestion) {
+      suggestion.value = data.suggestion;
+    } else if (data.suggestions && data.suggestions.length > 0) {
+      suggestion.value = data.suggestions[0];
+    }
+  } catch (err) {
+    error.value = err.message;
+  } finally {
+    generating.value = false;
   }
 };
 

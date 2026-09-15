@@ -9,8 +9,8 @@ Provides automated diagnostic suggestions based on reported issue descriptions t
 ## User Stories
 
 ### US-AI-001 — Get Suggestions
-* **Story**: As a CSA investigating an incident, I want the system to automatically analyze the incident description and suggest possible causes using AI so that I have a starting point for my diagnosis.
-* **Acceptance Criteria**: Renders cause and solution text suggestions.
+* **Story**: As a CSA investigating an incident, I want to trigger AI diagnosis recommendations on-demand using a button on the incident details page so that incident creation is instant and AI diagnosis is generated only when explicitly requested.
+* **Acceptance Criteria**: Renders cause and solution text suggestions after user initiates generation via button click on incident details by ID.
 
 ### US-AI-002 — Rate Suggestions
 * **Story**: As a CSA, I want to rate or provide feedback on the AI's suggestions so that the model can improve its accuracy for future events.

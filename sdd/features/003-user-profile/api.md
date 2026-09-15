@@ -10,7 +10,9 @@ All routes require `Authorization: Bearer <Token>`.
   {
     "name": "Jane Miller",
     "email": "jane.miller@first.org",
-    "role": "CSA"
+    "role": "CSA",
+    "avatarIcon": "robot",
+    "avatarColor": "#E85B2F"
   }
   ```
 
@@ -19,7 +21,9 @@ All routes require `Authorization: Bearer <Token>`.
   ```json
   {
     "name": "Jane A. Miller",
-    "email": "jane.miller@first.org"
+    "email": "jane.miller@first.org",
+    "avatarIcon": "robot",
+    "avatarColor": "#E85B2F"
   }
   ```
 

@@ -8,7 +8,7 @@
     {{ error }}
   </div>
 
-  <div v-else-if="incident" class="space-y-8 animate-fadeIn max-w-4xl mx-auto">
+  <div v-else-if="incident" class="space-y-8 animate-fadeIn max-w-5xl mx-auto">
     <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between md:items-start gap-4">
       <div class="space-y-2">
@@ -87,12 +87,15 @@
       <div class="block md:hidden bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-4">
         <h3 class="text-xs font-bold text-primaryTeal uppercase tracking-wider border-b border-gray-800 pb-2">Technical Assignee</h3>
         <div v-if="incident.assignedTo" class="flex items-center space-x-3 pt-2">
-          <div class="w-10 h-10 rounded-full bg-primaryTeal/10 flex items-center justify-center font-bold text-primaryTeal text-sm uppercase">
-            {{ incident.assignedTo?.name?.charAt(0) || '?' }}
-          </div>
+          <UserAvatar :icon="incident.assignedTo?.avatarIcon" :color="incident.assignedTo?.avatarColor" size="md" />
           <div>
             <p class="text-sm font-bold text-white leading-tight">{{ incident.assignedTo?.name }}</p>
-            <p class="text-[10px] text-gray-400 font-mono uppercase tracking-wider">{{ incident.assignedTo?.role }}</p>
+            <span
+              class="px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase tracking-wider inline-block mt-1"
+              :class="roleBadgeClass(incident.assignedTo?.role)"
+            >
+              {{ incident.assignedTo?.role }}
+            </span>
           </div>
         </div>
         <p v-else class="text-xs text-gray-400 font-medium">Unassigned queue</p>
@@ -159,12 +162,15 @@
         <div class="hidden md:block bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-4">
           <h3 class="text-xs font-bold text-primaryTeal uppercase tracking-wider border-b border-gray-800 pb-2">Technical Assignee</h3>
           <div v-if="incident.assignedTo" class="flex items-center space-x-3 pt-2">
-            <div class="w-10 h-10 rounded-full bg-primaryTeal/10 flex items-center justify-center font-bold text-primaryTeal text-sm uppercase">
-              {{ incident.assignedTo?.name?.charAt(0) || '?' }}
-            </div>
+            <UserAvatar :icon="incident.assignedTo?.avatarIcon" :color="incident.assignedTo?.avatarColor" size="md" />
             <div>
               <p class="text-sm font-bold text-white leading-tight">{{ incident.assignedTo?.name }}</p>
-              <p class="text-[10px] text-gray-400 font-mono uppercase tracking-wider">{{ incident.assignedTo?.role }}</p>
+              <span
+                class="px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase tracking-wider inline-block mt-1"
+                :class="roleBadgeClass(incident.assignedTo?.role)"
+              >
+                {{ incident.assignedTo?.role }}
+              </span>
             </div>
           </div>
           <p v-else class="text-xs text-gray-400 font-medium">Unassigned queue</p>
@@ -263,7 +269,7 @@
         <div class="flex justify-end space-x-3 pt-2">
           <button @click="showDeleteModal = false" class="px-4 py-2 rounded-xl text-xs font-semibold bg-bgMain text-gray-300 hover:text-white border border-gray-700">Cancel</button>
           <button @click="handleDelete" :disabled="deleting" class="px-4 py-2 rounded-xl text-xs font-bold bg-accentCoral hover:bg-accentCoral/90 text-white shadow">
-            {{ deleting ? 'Deleting...' : 'Delete Incident' }}
+            {{ deleting ? 'Deleting...' : 'Delete' }}
           </button>
         </div>
       </div>
@@ -275,7 +281,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
-import { CommentSection, AISuggestionPanel, ResolveIncidentModal, CustomSelect } from '../components';
+import { CommentSection, AISuggestionPanel, ResolveIncidentModal, CustomSelect, UserAvatar } from '../components';
 import { getApiUrl } from '../config/api';
 
 const router = useRouter();
@@ -391,6 +397,16 @@ const priorityBadgeClass = computed(() => {
     default: return 'bg-gray-800 text-gray-400 border border-gray-700';
   }
 });
+
+const roleBadgeClass = (role) => {
+  const r = (role || '').toUpperCase();
+  switch (r) {
+    case 'ADMIN': return 'bg-accentYellow/15 text-accentYellow border border-accentYellow/25';
+    case 'FTA': return 'bg-accentPurple/15 text-purple-300 border border-accentPurple/25';
+    case 'CSA': return 'bg-primaryTeal/15 text-primaryTeal border border-primaryTeal/25';
+    default: return 'bg-gray-800 text-gray-400 border border-gray-700';
+  }
+};
 
 const fetchDetails = async (isBackground = false) => {
   if (!isBackground) {

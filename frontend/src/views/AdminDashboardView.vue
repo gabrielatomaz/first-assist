@@ -175,7 +175,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Temporary Password</label>
-              <input v-model="userForm.password" type="password" required placeholder="****" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-sm font-mono">
+              <input v-model="userForm.password" type="password" required placeholder="******" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-sm font-mono">
             </div>
             <div>
               <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">System Role</label>

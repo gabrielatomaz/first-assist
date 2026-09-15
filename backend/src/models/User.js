@@ -8,7 +8,9 @@ const userSchema = new mongoose.Schema({
   passwordHash: { type: String, required: true },
   status: { type: String, enum: ['ACTIVE', 'INACTIVE'], default: 'ACTIVE' },
   assignedEventCode: { type: String, default: null },
-  assignedEventCodes: { type: [String], default: [] }
+  assignedEventCodes: { type: [String], default: [] },
+  avatarIcon: { type: String, default: 'user' },
+  avatarColor: { type: String, default: '#4F7F82' }
 }, { timestamps: true });
 
 userSchema.methods.comparePassword = async function(candidatePassword) {

@@ -18,3 +18,10 @@ Behavioral expectations for own profile modification.
 * **And** request a password change
 * **Then** the server responds with a 400 Bad Request status
 * **And** the UI displays "Incorrect current password"
+
+### Scenario 3: Update avatar icon and color
+* **Given** an authenticated user is on their profile view
+* **When** they select icon "robot" and color "#E85B2F"
+* **And** submit the changes
+* **Then** the client sends a PUT request to `/api/profile` with avatar fields
+* **And** the avatar badge in top navigation updates immediately

@@ -4,9 +4,11 @@ Tasks to implement user profile management.
 
 ## Task Backlog
 
-- [ ] **TASK-003-01: Create Profile Router & Controller**
+- [x] **TASK-003-01: Create Profile Router & Controller**
   * Register paths for profile fetch, updates, and password changes.
-- [ ] **TASK-003-02: Implement Current Password verification logic**
+- [x] **TASK-003-02: Implement Current Password verification logic**
   * Integrate compare check with the hashed value inside `User` document.
-- [ ] **TASK-003-03: Create ProfileView Component**
+- [x] **TASK-003-03: Create ProfileView Component**
   * Design layout and tie forms to state variables.
+- [x] **TASK-003-04: Implement Customizable Avatar (Icon & Color)**
+  * Extend User schema with avatarIcon/avatarColor, build UserAvatar component, and add avatar picker to ProfileView.

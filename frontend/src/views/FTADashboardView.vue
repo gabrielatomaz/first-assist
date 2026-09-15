@@ -193,11 +193,11 @@
               </div>
               <div>
                 <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Temporary Password</label>
-                <input v-model="csaForm.password" type="password" required placeholder="****" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgCard text-textMain text-xs font-mono">
+                <input v-model="csaForm.password" type="password" required placeholder="******" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgCard text-textMain text-xs font-mono">
               </div>
               <div>
                 <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Confirm Password</label>
-                <input v-model="csaForm.confirmPassword" type="password" required placeholder="****" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgCard text-textMain text-xs font-mono">
+                <input v-model="csaForm.confirmPassword" type="password" required placeholder="******" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgCard text-textMain text-xs font-mono">
               </div>
             </div>
             <div>

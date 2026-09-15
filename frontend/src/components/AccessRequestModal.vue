@@ -62,7 +62,7 @@
               v-model="form.password" 
               type="password" 
               required 
-              placeholder="****"
+              placeholder="******"
               class="w-full px-3 py-1.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs font-medium placeholder-gray-500 focus:outline-none focus:border-primaryTeal font-mono"
             />
           </div>
@@ -72,7 +72,7 @@
               v-model="form.confirmPassword" 
               type="password" 
               required 
-              placeholder="****"
+              placeholder="******"
               class="w-full px-3 py-1.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs font-medium placeholder-gray-500 focus:outline-none focus:border-primaryTeal font-mono"
             />
           </div>

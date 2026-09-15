@@ -3,26 +3,26 @@ import { Incident } from '../models/Incident.js';
 export const incidentRepository = {
   findAll: async (query = {}) => {
     return await Incident.find(query)
-      .populate('reportedBy', 'name role')
-      .populate('assignedTo', 'name role')
-      .populate('closedBy', 'name role')
-      .populate('diagnosisHistory.updatedBy', 'name role')
+      .populate('reportedBy', 'name role avatarIcon avatarColor')
+      .populate('assignedTo', 'name role avatarIcon avatarColor')
+      .populate('closedBy', 'name role avatarIcon avatarColor')
+      .populate('diagnosisHistory.updatedBy', 'name role avatarIcon avatarColor')
       .sort({ createdAt: -1 });
   },
 
   findById: async (id) => {
     return await Incident.findById(id)
-      .populate('reportedBy', 'name role')
-      .populate('assignedTo', 'name role')
-      .populate('closedBy', 'name role')
-      .populate('diagnosisHistory.updatedBy', 'name role');
+      .populate('reportedBy', 'name role avatarIcon avatarColor')
+      .populate('assignedTo', 'name role avatarIcon avatarColor')
+      .populate('closedBy', 'name role avatarIcon avatarColor')
+      .populate('diagnosisHistory.updatedBy', 'name role avatarIcon avatarColor');
   },
 
   create: async (incidentData) => {
     const incident = new Incident(incidentData);
     await incident.save();
     return await Incident.findById(incident._id)
-      .populate('reportedBy', 'name role');
+      .populate('reportedBy', 'name role avatarIcon avatarColor');
   },
 
   updateStatus: async (id, status, assignedTo = undefined) => {
@@ -35,9 +35,9 @@ export const incidentRepository = {
       }
     }
     return await Incident.findByIdAndUpdate(id, updates, { new: true })
-      .populate('reportedBy', 'name role')
-      .populate('assignedTo', 'name role')
-      .populate('closedBy', 'name role');
+      .populate('reportedBy', 'name role avatarIcon avatarColor')
+      .populate('assignedTo', 'name role avatarIcon avatarColor')
+      .populate('closedBy', 'name role avatarIcon avatarColor');
   },
 
   updateDiagnosis: async (id, diagnosis, userId) => {
@@ -55,10 +55,10 @@ export const incidentRepository = {
       },
       { new: true }
     )
-      .populate('reportedBy', 'name role')
-      .populate('assignedTo', 'name role')
-      .populate('closedBy', 'name role')
-      .populate('diagnosisHistory.updatedBy', 'name role');
+      .populate('reportedBy', 'name role avatarIcon avatarColor')
+      .populate('assignedTo', 'name role avatarIcon avatarColor')
+      .populate('closedBy', 'name role avatarIcon avatarColor')
+      .populate('diagnosisHistory.updatedBy', 'name role avatarIcon avatarColor');
   },
 
   resolve: async (id, rootCause, appliedSolution) => {
@@ -72,9 +72,9 @@ export const incidentRepository = {
       },
       { new: true }
     )
-      .populate('reportedBy', 'name role')
-      .populate('assignedTo', 'name role')
-      .populate('closedBy', 'name role');
+      .populate('reportedBy', 'name role avatarIcon avatarColor')
+      .populate('assignedTo', 'name role avatarIcon avatarColor')
+      .populate('closedBy', 'name role avatarIcon avatarColor');
   },
 
   close: async (id, userId) => {
@@ -87,9 +87,9 @@ export const incidentRepository = {
       },
       { new: true }
     )
-      .populate('reportedBy', 'name role')
-      .populate('assignedTo', 'name role')
-      .populate('closedBy', 'name role')
-      .populate('diagnosisHistory.updatedBy', 'name role');
+      .populate('reportedBy', 'name role avatarIcon avatarColor')
+      .populate('assignedTo', 'name role avatarIcon avatarColor')
+      .populate('closedBy', 'name role avatarIcon avatarColor')
+      .populate('diagnosisHistory.updatedBy', 'name role avatarIcon avatarColor');
   }
 };

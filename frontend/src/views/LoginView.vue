@@ -40,7 +40,7 @@
             v-model="password"
             type="password"
             required
-            placeholder="****"
+            placeholder="******"
             class="w-full px-4 py-3 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal transition duration-200 font-mono"
           >
         </div>

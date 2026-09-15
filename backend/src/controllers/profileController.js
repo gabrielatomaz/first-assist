@@ -13,7 +13,7 @@ export const profileController = {
 
   updateProfile: async (req, res) => {
     try {
-      const { name, email } = req.body;
+      const { name, email, avatarIcon, avatarColor } = req.body;
       if (!name || !email) {
         return res.status(400).json({ error: 'Name and email are required' });
       }
@@ -23,9 +23,13 @@ export const profileController = {
         return res.status(409).json({ error: 'Email already in use' });
       }
 
+      const updateFields = { name, email: email.toLowerCase() };
+      if (avatarIcon) updateFields.avatarIcon = avatarIcon;
+      if (avatarColor) updateFields.avatarColor = avatarColor;
+
       const user = await User.findByIdAndUpdate(
         req.user._id,
-        { name, email: email.toLowerCase() },
+        updateFields,
         { new: true, select: '-passwordHash' }
       );
 

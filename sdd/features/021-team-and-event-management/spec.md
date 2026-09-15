@@ -1,79 +1,78 @@
-# Feature Specification: FEAT-021 — Multi-Team & Multi-Event Management Context
+# Feature Specification: FEAT-021 — Multi-Team & Multi-Event Management Context & FTA Team Approval
 
 **Feature ID**: FEAT-021  
-**Feature Name**: Multi-Team & Multi-Event Management Context  
+**Feature Name**: Multi-Team & Multi-Event Management Context & FTA Team Approval  
 **Status**: Specified  
 **Priority**: High  
 **Related Requirements**: FR-001, FR-003, FR-004, FR-006, FR-010  
 
 ---
 
-## 1. Overview & Purpose
+## 1. Executive Summary & Business Context
 
-**FIRST Assist** serves technical volunteers (FTAs, CSAs) and team representatives (Lead Mentors, Team Captains, Team Members) during FIRST Robotics Competition (FRC) events.
+**FIRST Assist** is a technical-support and knowledge-management application built for the **FIRST Robotics Competition (FRC)**. It empowers FRC teams and technical volunteers (FTAs, CSAs) to register, investigate, manage, diagnose, and resolve technical incidents during competition events, while preserving historical incident knowledge for future troubleshooting.
 
-This specification defines the domain model and application architecture for **Team and Event Management with Multi-Team / Multi-Event user relationships**:
-1. **Canonical Team Entity**: Teams exist as unique canonical records identified by `teamNumber` (e.g. FRC 1772). Teams participate in multiple `Event`s without duplicating team data.
-2. **Team-Scoped Roles**: Users can be associated with multiple teams. A user's role is scoped per team relationship (e.g., `LEAD_MENTOR` for Team 1772, `TEAM_CAPTAIN` for Team 9999).
-3. **Event-Scoped Incident Context**: Incidents are bound to a composite `(teamNumber, eventCode)` context. Incidents from Event A vs Event B remain isolated and preserved for historical knowledge management.
-4. **Active Context Switching**: Multi-team users switch between their active team (`activeTeamNumber`) and active event (`activeEventCode`) context to prevent accidental cross-team/event modifications.
+### 1.1 Team Roles & Strict Role Limits
+An FRC team consists of users accessing FIRST Assist under team-scoped roles:
+* **Lead Mentor**: Primary adult mentor for a team.
+* **Team Captain**: Student leadership role.
+* **Team Member**: Student or mentor participating on the team.
+
+#### **Role Multiplicity Constraint**:
+* **Maximum 1 Active Lead Mentor per Team**: Each canonical team can have **at most 1 active Lead Mentor (`LEAD_MENTOR`)** at any given time.
+* **Maximum 1 Active Team Captain per Team**: Each canonical team can have **at most 1 active Team Captain (`TEAM_CAPTAIN`)** at any given time.
+* **Team Members (`TEAM_MEMBER`)**: Uncapped number of additional students and mentors.
+
+### 1.2 Shared Incident Responsibilities
+Both the **Lead Mentor** and **Team Captain** hold **equal authority and responsibilities** for managing technical incidents for their team:
+* **Create Incidents**: Submit technical issue reports for their `(activeTeamNumber, activeEventCode)`.
+* **Edit Incidents**: Update incident description, severity, status, match number, or technical details.
+* **Delete / Close Incidents**: Delete or resolve/close technical incident tickets for their team.
+
+### 1.3 Team-Scoped Roles & Multi-Team Membership
+Users are **not restricted to a single team**. A user can belong to multiple FRC teams, and their role is **scoped per team relationship**:
+* *Example*: A user can be **Lead Mentor** for **Team 1772** (where no other Lead Mentor is active) and **Team Captain** for **Team 9999** (where no other Team Captain is active).
+
+### 1.4 Event Preservation & Canonical Teams
+* **Canonical Teams**: A team (e.g. FRC 1772) is a canonical system entity with a unique `teamNumber`. Participating in multiple events (**Event A**, **Event B**) links the event to the same canonical team record without creating duplicate team documents.
+* **Event-Scoped Incident Context**: Incidents belong to a composite `(teamNumber, eventCode)` context. Incidents from **Event A** vs **Event B** are isolated per event to preserve historical records while remaining searchable in the Knowledge Base.
+
+### 1.5 Team Access & FTA Approval Workflow (Following the FTA Pattern)
+To ensure system security and event alignment, team onboarding follows the **FTA Access Request pattern**:
+1. Team users submit a **Team Access Request** from the **Login page** (`LoginView.vue`) via a public modal (`TeamAccessRequestModal.vue`), following the same pattern as the existing FTA Access Request link/modal. The link appears in the login page footer alongside the FTA request link.
+2. **FTA Event-Scoped Approval**: An **FTA (FIRST Technical Advisor)** can review and **approve/accept** pending team requests **for any competition event the FTA is registered/assigned to** (`fta.assignedEventCodes.includes(request.eventCode)` or `ADMIN`).
+3. **Role Limit Validation**: When approving a request for a `LEAD_MENTOR` or `TEAM_CAPTAIN`, the system checks that the team does not already have an active user in that role. If one exists, the approval is rejected.
 
 ---
 
 ## 2. Actors & Target Roles
 
-* **Team Users**:
-  * **Lead Mentor**: Primary adult mentor registered to a team; full management access for their team's incidents and roster.
-  * **Team Captain**: Student leadership role; creates, tracks, and updates incidents for their team.
-  * **Team Member**: Student/Mentor; reports technical issues for their team.
-* **Event Volunteer Roles** (Global Context):
-  * **FTA (FIRST Technical Advisor)**: Manages event rosters, active competition events, and assigns CSAs.
-  * **CSA (Control System Advisor)**: Assists teams with control system troubleshooting across active event contexts.
-  * **ADMIN (System Administrator)**: Oversees system users, global team rosters, and event registrations.
+| Actor | Role Scope | Multiplicity Limit | Incident Permissions |
+| :--- | :--- | :--- | :--- |
+| **Lead Mentor** | Team-Scoped | **Max 1 per team** | Full Incident Control (Add, Edit, Delete, Resolve) |
+| **Team Captain** | Team-Scoped | **Max 1 per team** | Full Incident Control (Add, Edit, Delete, Resolve) |
+| **Team Member** | Team-Scoped | Uncapped | View and Add Incidents for team |
+| **FTA** | Event-Scoped / Global | Uncapped | Event roster management, approve team requests for assigned events |
+| **CSA** | Event-Scoped / Global | Uncapped | Diagnostic, investigation, and status update across event teams |
+| **ADMIN** | System-Wide | Uncapped | Full global system oversight and approval |
 
 ---
 
 ## 3. User Stories
 
-* **US-21.1 (Multi-Team Membership)**: As a user affiliated with multiple FRC teams (e.g. Lead Mentor of Team 1772 and Team Captain of Team 9999), I want to switch my active team context so I can view and manage incidents for the correct team without mixing data.
-* **US-21.2 (Multi-Event Context)**: As a team member, I want my team's incidents to be tied to the specific event where they occurred (e.g., Event A vs Event B) so our technical history is accurately preserved over time.
-* **US-21.3 (Team Roster Management)**: As a Lead Mentor or Admin, I want to add users to my team with specific team-scoped roles (`LEAD_MENTOR`, `TEAM_CAPTAIN`, `TEAM_MEMBER`).
-* **US-21.4 (Event Roster Association)**: As an FTA or Admin, I want to register teams to an event so that all team members participating in that event can submit and track incidents within that event's context.
+* **US-21.1 (Multi-Team Membership)**: As a user affiliated with multiple teams, I want to switch my active team context so I can view and manage incidents for the correct team without mixing data.
+* **US-21.2 (Lead Mentor & Team Captain Shared Authority)**: As a Lead Mentor or Team Captain, I want equal ability to create, edit, and delete incident tickets for my team so we can respond quickly during matches.
+* **US-21.3 (Role Limit Enforcement)**: As an FTA or Admin, I want the system to enforce that a team has at most 1 active Lead Mentor and 1 active Team Captain to prevent conflicting team leadership.
+* **US-21.4 (Team Access Request - FTA Pattern)**: As a Lead Mentor or Team Captain, I want to submit a team access request for a specific event so our team can participate in FIRST Assist.
+* **US-21.5 (FTA Event-Scoped Approval)**: As an FTA, I want to review and approve team access requests for events I am assigned to.
 
 ---
 
-## 4. Workflows & Functional Flows
+## 4. Acceptance Criteria
 
-### Main Flow: Active Context Selection & Incident Reporting
-1. User logs in to FIRST Assist.
-2. The system loads the user's team memberships (`memberships: [{ teamNumber, role }]`) and accessible events.
-3. If the user has multiple team memberships, the system sets `activeTeamNumber` (defaulting to the primary/first team or last selected team).
-4. The system sets `activeEventCode` based on the user's active team's registered events or active competition event.
-5. When creating an incident:
-   - `teamNumber` is automatically set to `activeTeamNumber`.
-   - `eventCode` is automatically set to `activeEventCode`.
-6. Dashboard filters display incidents matching `activeTeamNumber` and/or `activeEventCode`.
-
-### Context Switching Flow
-1. User clicks the Team/Event Context Switcher in the top navigation header.
-2. User selects a different team from their associated teams list.
-3. Frontend updates `authStore.activeTeamNumber` and loads available events for the new team.
-4. UI updates instantly to show incidents, rosters, and stats strictly for the selected team/event pair.
-
----
-
-## 5. Security & Isolation Rules
-
-1. **Role Scoping**: Global roles (`ADMIN`, `FTA`, `CSA`) retain cross-team visibility within assigned event contexts. Team roles (`LEAD_MENTOR`, `TEAM_CAPTAIN`, `TEAM_MEMBER`) are restricted to incidents where `teamNumber === activeTeamNumber`.
-2. **Context Validation**: API endpoints validating incident creation or modification check that `req.user` has active membership for the incident's `teamNumber` (or holds a global volunteer role).
-3. **Data Integrity**: Team records (`number`, `name`, `rookieYear`) are unique and immutable across events.
-
----
-
-## 6. Acceptance Criteria
-
-* [ ] A user can belong to multiple teams with different team-scoped roles.
-* [ ] Switching the active team context updates the incident board to show only that team's incidents.
-* [ ] Incidents created preserve both `teamNumber` and `eventCode` in their document.
-* [ ] Participating in a new event does not duplicate the canonical `Team` document.
-* [ ] API prevents team users from reading or writing incidents belonging to teams they do not belong to.
+* [ ] A canonical team can have at most **1 active Lead Mentor** and **1 active Team Captain** at any time.
+* [ ] Attempting to assign a second active `LEAD_MENTOR` or `TEAM_CAPTAIN` to a team returns a validation error.
+* [ ] Both **Lead Mentor** and **Team Captain** can add, edit, and delete incidents for their active team context.
+* [ ] Team access requests follow the FTA request pattern via a public modal.
+* [ ] FTAs can approve pending team requests for any event they are registered/assigned to.
+* [ ] Incidents store both `teamNumber` and `eventCode`, maintaining historical isolation.

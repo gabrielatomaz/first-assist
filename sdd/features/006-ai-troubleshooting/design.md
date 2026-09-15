@@ -4,8 +4,9 @@
 
 ### 1. `AISuggestionPanel.vue`
 * Embedded in the detail view.
-* Displays a loading state spinner during transit.
-* Renders suggested cause and suggested solution in structured markdown format.
+* Displays a "Generate AI Diagnosis" trigger button when no suggestion is available.
+* Displays a loading state spinner during LLM suggestion generation upon button click.
+* Renders suggested cause and suggested solution in structured format.
 * Renders feedback triggers (thumbs-up and thumbs-down button widgets) that toggle active colors when selected.
 
 ---
@@ -16,4 +17,5 @@
 * Exists. Houses database queries (`findByIncidentId`, `create`).
 
 ### 2. `incidentService.js`
-* **`getAISuggestionsForIncident`**: Exists. Extend simulation pattern to integrate API requests targeting a configured LLM service (e.g. Gemini API).
+* **`generateAISuggestions`**: Invokes `generateDiagnosticSuggestion` on-demand for a given incident ID, fetching related resolved tickets for context and saving/updating the DB record.
+* **`createIncident`**: Creates the incident ticket immediately without waiting for AI diagnostic generation.

@@ -49,7 +49,7 @@
 
           <!-- Desktop-only Profile Badge (Matching h-11 Height) -->
           <router-link to="/profile" class="hidden md:flex items-center space-x-2 bg-white/10 h-11 px-3.5 rounded-xl border border-white/10 hover:bg-white/15 transition duration-150 shadow-sm flex-shrink-0">
-            <font-awesome-icon icon="robot" class="text-sm text-primaryTeal" />
+            <UserAvatar :icon="authStore.user?.avatarIcon" :color="authStore.user?.avatarColor" size="sm" />
             <div class="text-left">
               <p class="text-xs font-bold leading-tight">{{ authStore.user?.name }}</p>
               <p :class="roleTextColor" class="text-[9px] font-mono font-bold tracking-widest uppercase leading-none mt-0.5">
@@ -79,7 +79,7 @@
       <div v-if="mobileMenuOpen" class="md:hidden border-t border-gray-800 bg-primaryNavy p-4 space-y-3 animate-fadeIn">
         <!-- Profile Badge Inside Mobile Hamburger Menu -->
         <router-link @click="mobileMenuOpen = false" to="/profile" class="flex items-center space-x-3 p-3 rounded-xl bg-white/10 border border-white/10 hover:bg-white/15 transition shadow-sm mb-2">
-          <font-awesome-icon icon="robot" class="text-2xl text-primaryTeal" />
+          <UserAvatar :icon="authStore.user?.avatarIcon" :color="authStore.user?.avatarColor" size="md" />
           <div class="text-left">
             <p class="text-sm font-bold text-white leading-tight">{{ authStore.user?.name }}</p>
             <p :class="roleTextColor" class="text-[10px] font-mono font-bold tracking-widest uppercase mt-0.5">
@@ -126,6 +126,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from './stores/auth';
 import { getApiUrl } from './config/api';
+import UserAvatar from './components/UserAvatar.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();

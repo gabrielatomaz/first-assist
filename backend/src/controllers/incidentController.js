@@ -113,6 +113,15 @@ export const incidentController = {
     }
   },
 
+  generateAISuggestions: async (req, res) => {
+    try {
+      const suggestion = await incidentService.generateAISuggestionsForIncident(req.params.id);
+      res.json({ suggestion, suggestions: [suggestion] });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+
   transcribeAudio: async (req, res) => {
     try {
       const { simulate_error } = req.query;

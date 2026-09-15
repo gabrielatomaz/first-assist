@@ -74,31 +74,6 @@ export const incidentService = {
       details: `Incident created for Team ${newIncident.teamNumber}`
     });
 
-    // Generate AI diagnostic suggestion ONCE at creation time and store in DB
-    try {
-      let relatedIncidents = [];
-      try {
-        relatedIncidents = await Incident.find({
-          _id: { $ne: newIncident._id },
-          status: { $in: ['RESOLVED', 'CLOSED'] },
-          category: newIncident.category
-        }).limit(3);
-      } catch (e) {
-        console.warn('Could not fetch related tickets for initial AI context:', e.message);
-      }
-
-      const aiResult = await generateDiagnosticSuggestion(newIncident, relatedIncidents);
-
-      await aiSuggestionRepository.create({
-        incidentId: newIncident._id,
-        suggestedCause: aiResult.suggestedCause,
-        suggestedSolution: aiResult.suggestedSolution,
-        rating: 'UNRATED'
-      });
-    } catch (aiErr) {
-      console.error('Failed to generate initial AI diagnosis on creation:', aiErr.message || aiErr);
-    }
-
     return newIncident;
   },
 
@@ -222,8 +197,8 @@ export const incidentService = {
 
     const total = await Incident.countDocuments(query);
     const incidents = await Incident.find(query)
-      .populate('reportedBy', 'name role')
-      .populate('assignedTo', 'name role')
+      .populate('reportedBy', 'name role avatarIcon avatarColor')
+      .populate('assignedTo', 'name role avatarIcon avatarColor')
       .sort(keyword ? { score: { $meta: 'textScore' } } : { createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -248,19 +223,16 @@ export const incidentService = {
       category: currentIncident.category
     })
       .limit(3)
-      .populate('reportedBy', 'name role')
-      .populate('assignedTo', 'name role');
+      .populate('reportedBy', 'name role avatarIcon avatarColor')
+      .populate('assignedTo', 'name role avatarIcon avatarColor');
   },
 
   getAISuggestionsForIncident: async (incidentId) => {
     let suggestion = await aiSuggestionRepository.findByIncidentId(incidentId);
+    return suggestion ? [suggestion] : [];
+  },
 
-    // Return stored suggestion from database directly if found
-    if (suggestion) {
-      return [suggestion];
-    }
-    
-    // Fallback only if incident was created prior to AI integration
+  generateAISuggestionsForIncident: async (incidentId) => {
     const incident = await incidentRepository.findById(incidentId);
     if (!incident) throw new Error('Incident not found');
 
@@ -277,14 +249,14 @@ export const incidentService = {
 
     const aiResult = await generateDiagnosticSuggestion(incident, relatedIncidents);
 
-    suggestion = await aiSuggestionRepository.create({
+    const suggestion = await aiSuggestionRepository.upsertByIncidentId(incidentId, {
       incidentId,
       suggestedCause: aiResult.suggestedCause,
       suggestedSolution: aiResult.suggestedSolution,
       rating: 'UNRATED'
     });
-    
-    return [suggestion];
+
+    return suggestion;
   },
 
   deleteIncident: async (incidentId, user) => {

@@ -1,103 +1,54 @@
-# API Specifications: FEAT-021 — Multi-Team & Multi-Event Management Context
+# API Specifications: FEAT-021 — Multi-Team & Multi-Event Context & FTA Team Approval
 
 ---
 
-## 1. Endpoints
+## 1. Incident CRUD Endpoints for Team Leadership (Lead Mentor & Team Captain)
 
-### 1.1 `GET /api/teams/my-teams`
-Retrieves all teams the authenticated user belongs to, including their team-scoped roles.
+### 1.1 `POST /api/incidents`
+Creates an incident ticket for active team and event context.
 
-* **Auth**: Required (`Bearer <token>`)
-* **Response 200 OK**:
-```json
-[
-  {
-    "teamNumber": 1772,
-    "teamName": "The Brazilian Trail Blazers",
-    "teamRole": "LEAD_MENTOR",
-    "joinedAt": "2026-01-15T10:00:00.000Z"
-  },
-  {
-    "teamNumber": 9999,
-    "teamName": "Robotics Academy",
-    "teamRole": "TEAM_CAPTAIN",
-    "joinedAt": "2026-02-01T14:30:00.000Z"
-  }
-]
-```
-
----
-
-### 1.2 `GET /api/teams/:number/members`
-Retrieves the roster of members for a specific team.
-
-* **Auth**: Required (`Bearer <token>`)
-* **Path Parameters**: `number` (Number) - FRC Team Number
-* **Response 200 OK**:
-```json
-[
-  {
-    "userId": "65d123456789abcdef012345",
-    "name": "Gabriela Tomaz",
-    "email": "gabriela@team1772.com",
-    "teamRole": "LEAD_MENTOR",
-    "joinedAt": "2026-01-15T10:00:00.000Z"
-  },
-  {
-    "userId": "65d987654321fedcba543210",
-    "name": "Alex Student",
-    "email": "alex@team1772.com",
-    "teamRole": "TEAM_CAPTAIN",
-    "joinedAt": "2026-01-20T11:00:00.000Z"
-  }
-]
-```
-
----
-
-### 1.3 `POST /api/teams/:number/members`
-Adds a user to a team with a team-scoped role.
-
-* **Auth**: Required (`LEAD_MENTOR` on target team, or global `ADMIN`)
+* **Auth**: Required (`LEAD_MENTOR`, `TEAM_CAPTAIN`, `TEAM_MEMBER` of active team, or global volunteer)
 * **Request Body**:
 ```json
 {
-  "email": "newstudent@team1772.com",
-  "teamRole": "TEAM_CAPTAIN"
+  "teamNumber": 1772,
+  "eventCode": "brba",
+  "matchNumber": "Q12",
+  "description": "RoboRIO losing CAN communications during autonomous"
 }
 ```
-* **Response 201 Created**:
-```json
-{
-  "message": "User added to team roster successfully",
-  "membership": {
-    "userId": "65d111222333444555666777",
-    "teamNumber": 1772,
-    "teamRole": "TEAM_CAPTAIN"
-  }
-}
-```
+* **Response 201 Created**: Incident object created and attributed to creator.
 
 ---
 
-### 1.4 `GET /api/teams/:number/events`
-Returns all registered competition events for a team.
+### 1.2 `PATCH /api/incidents/:id`
+Edits an existing incident ticket.
 
-* **Auth**: Required
-* **Response 200 OK**:
+* **Auth**: Required (`LEAD_MENTOR` or `TEAM_CAPTAIN` of `incident.teamNumber`, or `ADMIN`/`FTA`/`CSA`)
+* **Request Body**: `{ "description": "Updated CAN wire loose pin fix details" }`
+* **Response 200 OK**: Updated incident object.
+* **Response 403 Forbidden**: If user is a `TEAM_MEMBER` without Lead Mentor or Team Captain rights.
+
+---
+
+### 1.3 `DELETE /api/incidents/:id`
+Deletes an incident ticket.
+
+* **Auth**: Required (`LEAD_MENTOR` or `TEAM_CAPTAIN` of `incident.teamNumber`, or `ADMIN`/`FTA`)
+* **Response 200 OK**: `{ "message": "Incident ticket deleted successfully" }`
+* **Response 403 Forbidden**: If user is not authorized.
+
+---
+
+## 2. Role Limit Validation in Approvals
+
+### 2.1 `PATCH /api/team-access-requests/:id/approve`
+Approves a pending team access request. Enforces **Max 1 active Lead Mentor** and **Max 1 active Team Captain**.
+
+* **Auth**: Required (`FTA` assigned to `request.eventCode`, or global `ADMIN`)
+* **Error Response 400 Bad Request**:
 ```json
-[
-  {
-    "code": "brba",
-    "name": "Regional Brazil - Festival SESI de Educação",
-    "location": "Brasília, DF",
-    "isActive": true
-  },
-  {
-    "code": "brmp",
-    "name": "Regional São Paulo",
-    "location": "São Paulo, SP",
-    "isActive": false
-  }
-]
+{
+  "error": "Cannot approve request. Team 1772 already has an active Lead Mentor. Only 1 active Lead Mentor and 1 active Team Captain are permitted per team."
+}
 ```

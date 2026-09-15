@@ -4,9 +4,9 @@ Tasks to complete AI diagnostic options.
 
 ## Task Backlog
 
-- [ ] **TASK-006-01: Create rating update route**
-  * Map `PATCH /api/ai-suggestions/:id/rating` endpoint to save feedback states.
-- [ ] **TASK-006-02: Create AISuggestionPanel component**
-  * Design suggestions layout matching color markers, loading, and error states.
-- [ ] **TASK-006-03: Implement active LLM service call wrappers**
-  * Replace the simulated responses with real API calls using env keys.
+- [x] **TASK-006-01: Decouple AI generation from incident creation**
+  * Remove synchronous Gemini LLM call from `incidentService.createIncident`.
+- [x] **TASK-006-02: Add POST endpoint for on-demand diagnosis generation**
+  * Create `POST /api/incidents/:id/ai-suggestions` route and controller handler.
+- [x] **TASK-006-03: Add trigger button & loading state in AISuggestionPanel**
+  * Implement "Generate AI Diagnosis" button in frontend component.

@@ -60,14 +60,14 @@
       {{ error }}
     </div>
 
-    <div v-else-if="incidents.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div v-else-if="incidents.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
       <router-link
         v-for="incident in incidents"
         :key="incident._id"
         :to="`/incidents/${incident._id}`"
-        class="block hover:scale-[1.01] active:scale-[0.99] transition duration-150 cursor-pointer"
+        class="h-full flex flex-col hover:scale-[1.01] active:scale-[0.99] transition duration-150 cursor-pointer"
       >
-        <IncidentCard :incident="incident" />
+        <IncidentCard :incident="incident" class="h-full" />
       </router-link>
     </div>
 

@@ -1,38 +1,61 @@
 <template>
-  <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 flex flex-col space-y-4 hover:shadow-md transition">
-    <div class="flex justify-between items-start">
-      <div class="space-y-1">
-        <router-link :to="`/teams/${incident.teamNumber}`" @click.stop class="font-extrabold text-white text-lg hover:text-primaryTeal hover:underline">
-          Team {{ incident.teamNumber }}
-        </router-link>
-        <p class="text-xs text-gray-400 font-medium">Match: {{ incident.matchNumber || 'N/A' }}</p>
+  <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 flex flex-col justify-between space-y-4 hover:shadow-md transition h-full">
+    <div class="space-y-4">
+      <div class="flex justify-between items-start">
+        <div class="space-y-1">
+          <router-link :to="`/teams/${incident.teamNumber}`" @click.stop class="font-extrabold text-white text-lg hover:text-primaryTeal hover:underline">
+            Team {{ incident.teamNumber }}
+          </router-link>
+          <p class="text-xs text-gray-400 font-medium">
+            Match: <span class="text-gray-300 font-semibold">{{ incident.matchNumber || 'N/A' }}</span>
+          </p>
+        </div>
+
+        <div class="flex flex-col items-end space-y-1.5">
+          <!-- Status Badge -->
+          <span :class="statusBadgeClass" class="px-2.5 py-1 rounded text-xs font-bold tracking-wider font-mono uppercase">
+            {{ incident.status }}
+          </span>
+          <!-- Priority Badge -->
+          <span :class="priorityBadgeClass" class="px-2.5 py-1 rounded text-xs font-bold tracking-wider font-mono uppercase">
+            {{ incident.priority }}
+          </span>
+        </div>
       </div>
 
-      <div class="flex flex-col items-end space-y-1.5">
-        <!-- Status Badge -->
-        <span :class="statusBadgeClass" class="px-2.5 py-1 rounded text-xs font-bold tracking-wider font-mono uppercase">
-          {{ incident.status }}
-        </span>
-        <!-- Priority Badge -->
-        <span :class="priorityBadgeClass" class="px-2.5 py-1 rounded text-xs font-bold tracking-wider font-mono uppercase">
-          {{ incident.priority }}
+      <!-- Category Badge -->
+      <div class="flex items-center space-x-1.5">
+        <span class="text-xs font-bold text-primaryTeal/85 bg-primaryTeal/5 border border-primaryTeal/10 px-2 py-0.5 rounded font-mono uppercase tracking-wider">
+          {{ formatCategory(incident.category) }}
         </span>
       </div>
+
+      <p class="text-sm text-gray-300 line-clamp-2 leading-relaxed min-h-[2.5rem]">{{ incident.description }}</p>
     </div>
 
-    <!-- Category -->
-    <div class="flex items-center space-x-1.5">
-      <span class="text-xs font-bold text-primaryTeal/85 bg-primaryTeal/5 border border-primaryTeal/10 px-2 py-0.5 rounded font-mono uppercase tracking-wider">
-        {{ formatCategory(incident.category) }}
+    <!-- Footer: Assigned Technical (Left) & Event Code Badge (Right) -->
+    <div class="border-t border-gray-800/80 pt-3 flex items-center justify-between text-xs">
+      <div v-if="incident.assignedTo" class="flex items-center space-x-2">
+        <UserAvatar :icon="incident.assignedTo?.avatarIcon" :color="incident.assignedTo?.avatarColor" size="xs" />
+        <span class="text-xs font-bold text-gray-200 truncate max-w-[140px]" :title="incident.assignedTo?.name">
+          {{ incident.assignedTo?.name }}
+        </span>
+      </div>
+      <div v-else class="text-[11px] text-gray-400 italic flex items-center space-x-1">
+        <font-awesome-icon icon="user" class="text-gray-400 text-[10px]" />
+        <span>Unassigned</span>
+      </div>
+
+      <span v-if="incident.eventCode" class="text-[10px] font-bold text-accentYellow/90 bg-accentYellow/10 border border-accentYellow/20 px-2 py-0.5 rounded font-mono uppercase tracking-wider flex-shrink-0" title="Event Code">
+        <font-awesome-icon icon="trophy" class="mr-1 text-[9px]" />{{ incident.eventCode }}
       </span>
     </div>
-
-    <p class="text-sm text-gray-300 line-clamp-2 leading-relaxed">{{ incident.description }}</p>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue';
+import UserAvatar from './UserAvatar.vue';
 
 const props = defineProps({
   incident: { type: Object, required: true }
