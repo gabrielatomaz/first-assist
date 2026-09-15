@@ -18,8 +18,8 @@
         </p>
       </div>
 
-      <div v-if="success" class="p-3 bg-green-950/40 border border-green-900/30 rounded-xl space-y-2 text-center">
-        <font-awesome-icon icon="check-circle" class="text-2xl text-green-400" />
+      <div v-if="success" class="p-3 bg-accentGreen/10 border border-accentGreen/30 rounded-xl space-y-2 text-center">
+        <font-awesome-icon icon="check-circle" class="text-2xl text-accentGreen" />
         <h4 class="text-xs font-bold text-white">Access Request Submitted!</h4>
         <p class="text-[11px] text-gray-300">
           An administrator will review your request. Once approved, your account will be updated with FTA privileges.

@@ -7,14 +7,16 @@ import { logIncidentChange, createAssignmentNotification } from '../utils/auditL
 import { generateDiagnosticSuggestion } from './aiService.js';
 
 export const incidentService = {
-  getAllIncidents: async (filters = {}) => {
+  getAllIncidents: async (filters = {}, pagination = {}) => {
     const query = {};
-    if (filters.status) query.status = filters.status;
+    if (filters.status && filters.status !== 'ALL') {
+      query.status = filters.status;
+    }
     if (filters.category) query.category = filters.category;
     if (filters.priority) query.priority = filters.priority;
     if (filters.teamNumber) query.teamNumber = Number(filters.teamNumber);
     
-    if (filters.eventCode) {
+    if (filters.eventCode && filters.eventCode !== 'ALL') {
       const targetEvent = await Event.findOne({ code: filters.eventCode });
       const eventTeams = targetEvent?.teams || [];
       query.$or = [
@@ -25,6 +27,23 @@ export const incidentService = {
         }
       ];
     }
+
+    if (pagination.page || pagination.limit) {
+      const page = parseInt(pagination.page) || 1;
+      const limit = parseInt(pagination.limit) || 9;
+      const skip = (page - 1) * limit;
+
+      const total = await Incident.countDocuments(query);
+      const incidents = await incidentRepository.findAllPaginated(query, skip, limit);
+      return {
+        incidents,
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit) || 1
+      };
+    }
+
     return await incidentRepository.findAll(query);
   },
 
@@ -253,6 +272,8 @@ export const incidentService = {
       incidentId,
       suggestedCause: aiResult.suggestedCause,
       suggestedSolution: aiResult.suggestedSolution,
+      isRagGrounded: aiResult.isRagGrounded,
+      citedIncidents: aiResult.citedIncidents,
       rating: 'UNRATED'
     });
 

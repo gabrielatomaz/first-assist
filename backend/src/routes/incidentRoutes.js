@@ -14,7 +14,6 @@ router.post('/', incidentController.createIncident);
 router.patch('/:id/status', incidentController.updateStatus);
 router.patch('/:id/diagnosis', incidentController.updateDiagnosis);
 router.post('/:id/resolve', incidentController.resolveIncident);
-router.post('/:id/close', requireRole(['ADMIN', 'FTA']), incidentController.closeIncident);
 router.get('/:id/ai-suggestions', incidentController.getAISuggestions);
 router.post('/:id/ai-suggestions', incidentController.generateAISuggestions);
 router.get('/:id/related', incidentController.getRelatedIncidents);

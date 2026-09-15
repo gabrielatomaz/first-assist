@@ -55,8 +55,11 @@ export const useAuthStore = defineStore('auth', {
         });
         if (response.ok) {
           const data = await response.json();
-          this.user = data;
-          localStorage.setItem('user', JSON.stringify(data));
+          this.user = {
+            ...this.user,
+            ...data
+          };
+          localStorage.setItem('user', JSON.stringify(this.user));
         }
       } catch (err) {
         console.error('Failed to sync current user profile:', err);

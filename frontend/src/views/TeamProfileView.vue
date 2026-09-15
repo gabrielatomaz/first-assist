@@ -20,7 +20,7 @@
         <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1">Total Reported Incidents</span>
       </div>
       <div class="bg-bgCard p-5 rounded-2xl border border-gray-800 shadow-sm flex flex-col items-center justify-center">
-        <span class="text-3xl font-extrabold text-green-500">{{ resolvedCount }}</span>
+        <span class="text-3xl font-extrabold text-accentGreen">{{ resolvedCount }}</span>
         <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1">Resolved Issues</span>
       </div>
       <div class="bg-bgCard p-5 rounded-2xl border border-gray-800 shadow-sm flex flex-col items-center justify-center">
@@ -98,8 +98,8 @@ const team = ref(null);
 const incidents = ref([]);
 const loading = ref(true);
 
-const resolvedCount = computed(() => incidents.value.filter(i => i.status === 'RESOLVED' || i.status === 'CLOSED').length);
-const openCount = computed(() => incidents.value.filter(i => i.status !== 'RESOLVED' && i.status !== 'CLOSED').length);
+const resolvedCount = computed(() => incidents.value.filter(i => i.status === 'RESOLVED').length);
+const openCount = computed(() => incidents.value.filter(i => i.status !== 'RESOLVED').length);
 
 const fetchTeamDetails = async () => {
   try {
@@ -137,7 +137,7 @@ const statusBadgeClass = (status) => {
     case 'ASSIGNED': return 'bg-accentYellow/10 text-accentYellow border border-accentYellow/25';
     case 'IN_PROGRESS': return 'bg-accentPurple/10 text-accentPurple border border-accentPurple/25';
     case 'WAITING': return 'bg-gray-800 text-gray-400 border border-gray-700';
-    case 'RESOLVED': return 'bg-green-950/40 text-green-400 border border-green-900/30';
+    case 'RESOLVED': return 'bg-accentGreen/10 text-accentGreen border border-accentGreen/30';
     case 'CLOSED': return 'bg-gray-800/80 text-gray-500 border border-gray-700/50';
     default: return 'bg-gray-800 text-gray-400 border border-gray-700';
   }

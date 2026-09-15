@@ -20,3 +20,4 @@ This matrix maps functional requirements to features, architectural files, API e
 | **FR-012** | FEAT-005 | Dashboard Tracking | `DashboardView.vue` | `incidentController.js`| `GET /api/incidents` | `Incident.js` | `dashboard.test.js`| PARTIALLY IMPLEMENTED |
 | **FR-013** | FEAT-006 | AI Troubleshooting | `AISuggestionPanel.vue` | `incidentController.js`| `GET /api/incidents/:id/ai-suggestions` | `AISuggestion.js` | `ai.test.js` | PARTIALLY IMPLEMENTED |
 | **FR-014** | FEAT-007 | Knowledge Base | `KnowledgeBaseView.vue` | `incidentController.js`| `GET /api/incidents/search`| `Incident.js` | `kb.test.js` | NOT IMPLEMENTED |
+| **FR-023** | FEAT-023 | RAG AI Troubleshooting | `AISuggestionPanel.vue` | `aiService.js`, `incidentController.js` | `POST /api/incidents/:id/ai-suggestions` | `AISuggestion.js`, `Incident.js` | `rag.test.js` | SPECIFIED |

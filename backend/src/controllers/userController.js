@@ -45,7 +45,9 @@ export const userController = {
         name: user.name,
         email: user.email,
         role: user.role,
-        status: user.status
+        status: user.status,
+        avatarIcon: user.avatarIcon || 'user',
+        avatarColor: user.avatarColor || '#4F7F82'
       });
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -78,7 +80,9 @@ export const userController = {
         name: targetUser.name,
         email: targetUser.email,
         role: targetUser.role,
-        status: targetUser.status
+        status: targetUser.status,
+        avatarIcon: targetUser.avatarIcon || 'user',
+        avatarColor: targetUser.avatarColor || '#4F7F82'
       });
     } catch (error) {
       res.status(500).json({ error: error.message });

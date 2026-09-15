@@ -18,7 +18,7 @@
     </div>
 
     <!-- Alert Banner -->
-    <div v-if="alertMessage" :class="alertType === 'error' ? 'bg-red-950/40 text-accentCoral border-red-900/30' : 'bg-green-950/40 text-green-400 border-green-900/30'" class="p-4 rounded-xl border text-sm font-medium flex justify-between items-center">
+    <div v-if="alertMessage" :class="alertType === 'error' ? 'bg-red-950/40 text-accentCoral border-red-900/30' : 'bg-accentGreen/10 text-accentGreen border-accentGreen/30'" class="p-4 rounded-xl border text-sm font-medium flex justify-between items-center">
       <span>{{ alertMessage }}</span>
       <button @click="alertMessage = null" class="text-xs font-bold opacity-75 hover:opacity-100">✕</button>
     </div>
@@ -258,7 +258,7 @@
                   <button
                     @click="toggleCSAStatus(csa)"
                     :disabled="updatingCsaStatus === csa._id"
-                    :class="csa.status === 'ACTIVE' ? 'text-accentCoral hover:text-accentCoral/80' : 'text-green-600 hover:text-green-700'"
+                    :class="csa.status === 'ACTIVE' ? 'text-accentCoral hover:text-accentCoral/80' : 'text-accentGreen hover:text-accentGreen/80'"
                     class="text-xs font-semibold hover:underline disabled:opacity-50 transition cursor-pointer"
                   >
                     {{ csa.status === 'ACTIVE' ? 'Deactivate' : 'Reactivate' }}

@@ -2,60 +2,84 @@
   <div class="space-y-6">
     <!-- AI Suggestion Container -->
     <div class="bg-accentPurple/5 border-accentPurple/20 border-2 p-6 rounded-2xl transition-all duration-300 space-y-6">
-      <div class="flex justify-between items-center border-b border-gray-200/50 pb-3">
-        <div class="flex items-center space-x-2">
-          <!-- AI Icon -->
-          <font-awesome-icon icon="robot" class="text-accentPurple text-xl" />
-          <h3 class="text-lg font-bold text-accentPurple font-sans tracking-tight">AI Assistant Diagnosis</h3>
-        </div>
-        
-        <div v-if="suggestion && !loading && !generating" class="flex items-center space-x-2 text-xs">
-          <button
-            @click="generateDiagnosis"
-            class="px-2.5 py-1 bg-bgMain text-gray-300 hover:text-white border border-gray-700 rounded transition duration-150 text-xs font-semibold flex items-center shadow-sm"
-            title="Re-generate AI diagnosis"
-          >
-            <font-awesome-icon icon="rotate" class="mr-1.5" /> Re-generate
-          </button>
-          <div class="flex items-center space-x-1">
+      <div class="border-b border-gray-700/50 pb-3 space-y-2">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center space-x-2 min-w-0">
+            <!-- AI Icon -->
+            <font-awesome-icon icon="robot" class="text-accentPurple text-xl flex-shrink-0" />
+            <h3 class="text-base sm:text-lg font-bold text-accentPurple font-sans tracking-tight truncate">AI Assistant Diagnosis</h3>
+          </div>
+
+          <!-- Action Buttons -->
+          <div v-if="suggestion && !loading && !generating" class="flex items-center space-x-1 text-xs flex-shrink-0">
+            <!-- Icon-Only Re-generate button -->
+            <button
+              @click="generateDiagnosis"
+              :disabled="generating"
+              class="w-10 h-10 flex items-center justify-center bg-bgMain text-gray-300 hover:text-white border border-gray-700 hover:bg-gray-800 rounded-lg transition duration-150 shadow-sm cursor-pointer disabled:opacity-50"
+              title="Re-generate AI diagnosis"
+            >
+              <font-awesome-icon icon="arrows-rotate" :class="{ 'animate-spin': generating }" class="text-sm" />
+            </button>
+            
+            <!-- Thumbs Up Button -->
             <button
               @click="rateSuggestion('HELPFUL')"
-              :class="suggestion.rating === 'HELPFUL' ? 'bg-primaryTeal text-white border-primaryTeal' : 'bg-bgMain text-gray-300 hover:text-white border-gray-700'"
-              class="p-1.5 px-2.5 rounded border transition duration-150 text-sm font-semibold flex items-center shadow-sm"
+              :class="suggestion.rating === 'HELPFUL' ? 'bg-accentGreen text-white border-accentGreen' : 'bg-bgMain text-gray-300 hover:text-accentGreen border-gray-700 hover:bg-accentGreen/10 hover:border-accentGreen/40'"
+              class="w-10 h-10 rounded-lg border transition duration-150 text-sm font-semibold flex items-center justify-center shadow-sm cursor-pointer"
               title="Helpful"
             >
               <font-awesome-icon icon="thumbs-up" />
             </button>
+
+            <!-- Thumbs Down Button -->
             <button
               @click="rateSuggestion('NOT_HELPFUL')"
-              :class="suggestion.rating === 'NOT_HELPFUL' ? 'bg-accentCoral text-white border-accentCoral/30' : 'bg-bgMain text-gray-300 hover:text-white border-gray-700'"
-              class="p-1.5 px-2.5 rounded border transition duration-150 text-sm font-semibold flex items-center shadow-sm"
+              :class="suggestion.rating === 'NOT_HELPFUL' ? 'bg-accentCoral text-white border-accentCoral' : 'bg-bgMain text-gray-300 hover:text-accentCoral border-gray-700 hover:bg-accentCoral/10 hover:border-accentCoral/40'"
+              class="w-10 h-10 rounded-lg border transition duration-150 text-sm font-semibold flex items-center justify-center shadow-sm cursor-pointer"
               title="Reject suggestion"
             >
               <font-awesome-icon icon="thumbs-down" />
             </button>
           </div>
         </div>
+
+        <!-- Knowledge Base Solution Badge (Below Title) -->
+        <div v-if="suggestion?.isRagGrounded" class="pt-0.5">
+          <span class="inline-flex items-center justify-center text-center px-2.5 py-1 rounded-md text-xs font-bold font-mono uppercase tracking-wider bg-primaryTeal/15 text-primaryTeal border border-primaryTeal/30 shadow-sm">
+            Knowledge Base Solution
+          </span>
+        </div>
       </div>
 
-      <!-- Graceful Fallback Notice (US-AI-006) -->
+      <!-- Graceful Fallback Notice (Network / System Issue / Response Not Found) -->
       <div v-if="error" class="bg-amber-950/40 border border-amber-900/50 p-4 rounded-xl text-amber-300 text-xs flex flex-col space-y-1">
-        <span class="font-bold"><font-awesome-icon icon="triangle-exclamation" class="mr-1" /> AI Diagnostics Notice</span>
-        <span>{{ error }}</span>
+        <span class="font-bold flex items-center gap-1.5 text-amber-400">
+          <font-awesome-icon icon="triangle-exclamation" /> Response Not Found
+        </span>
+        <span class="text-gray-200 font-medium">Diagnostic response could not be determined due to a network or service issue ({{ error }}). Please inspect hardware connections manually.</span>
       </div>
 
       <!-- Initial Loading / Generating State -->
       <div v-else-if="loading || generating" class="text-center py-6">
         <div class="inline-block animate-spin rounded-full h-6 w-6 border-2 border-accentPurple border-t-transparent"></div>
         <p class="text-xs text-accentPurple/80 mt-2 font-medium">
-          {{ generating ? 'Analyzing incident details with AI...' : 'Checking AI diagnosis status...' }}
+          {{ generating ? 'Searching Knowledge Base & analyzing incident details with AI...' : 'Checking AI diagnosis status...' }}
         </p>
       </div>
 
       <!-- Main suggestions -->
       <div v-else-if="suggestion" class="space-y-4">
         <div class="space-y-4 text-sm text-textMain">
-          <div>
+          <!-- Response Not Found Warning Banner if AI/RAG could not determine diagnosis -->
+          <div v-if="suggestion.suggestedCause && suggestion.suggestedCause.toLowerCase().includes('response not found')" class="bg-amber-950/30 border border-amber-800/40 p-3.5 rounded-xl space-y-1.5 text-xs">
+            <div class="flex items-center gap-1.5 font-bold text-amber-400">
+              <font-awesome-icon icon="triangle-exclamation" />
+              <span>Response Not Found</span>
+            </div>
+            <p class="text-amber-200/90 font-medium leading-relaxed">{{ suggestion.suggestedCause }}</p>
+          </div>
+          <div v-else>
             <h4 class="font-bold text-accentPurple text-xs uppercase tracking-wider mb-1">Likely Root Cause</h4>
             <p class="bg-bgMain p-3 rounded-lg border border-gray-700 text-gray-200 leading-relaxed font-medium">
               {{ suggestion.suggestedCause }}
@@ -68,6 +92,30 @@
               {{ suggestion.suggestedSolution }}
             </p>
           </div>
+
+          <!-- Cited Knowledge Base Resolutions (Clickable Tickets) -->
+          <div v-if="suggestion.citedIncidents && suggestion.citedIncidents.length > 0" class="pt-2 border-t border-gray-700/60 space-y-2">
+            <h4 class="font-bold text-accentPurple text-xs uppercase tracking-wider mb-2">Cited Knowledge Base Resolutions</h4>
+            <router-link
+              v-for="cite in suggestion.citedIncidents" 
+              :key="cite.incidentId || cite.teamNumber"
+              :to="cite.incidentId ? `/incidents/${cite.incidentId}` : '#'"
+              class="block bg-bgMain p-3 rounded-xl border border-gray-700 hover:border-primaryTeal/50 hover:bg-bgMain/80 transition duration-150 text-xs space-y-1 cursor-pointer group shadow-sm"
+            >
+                <div class="flex justify-between items-center font-bold text-gray-200">
+                  <span class="group-hover:text-primaryTeal group-hover:underline transition flex items-center gap-1.5">
+                    <span>Team {{ cite.teamNumber }} ({{ (cite.eventCode || 'brba').toUpperCase() }} • {{ cite.matchNumber }})</span>
+                    <font-awesome-icon icon="arrow-up-right-from-square" class="text-[10px] text-gray-400 group-hover:text-primaryTeal" />
+                  </span>
+                  <span v-if="cite.similarityScore" class="text-[10px] font-mono font-bold text-accentGreen bg-accentGreen/10 border border-accentGreen/30 px-2 py-0.5 rounded-md">
+                    {{ cite.similarityScore }}% Match
+                  </span>
+                </div>
+                <p class="text-gray-300 text-[11px] font-medium leading-relaxed">
+                  <span class="text-gray-400 font-semibold">Applied Fix:</span> {{ cite.appliedSolution }}
+                </p>
+              </router-link>
+          </div>
         </div>
       </div>
 
@@ -77,47 +125,11 @@
         <button
           @click="generateDiagnosis"
           :disabled="generating"
-          class="px-4 py-2 bg-accentPurple hover:bg-accentPurple/90 text-white text-xs font-bold rounded-xl transition duration-150 flex items-center justify-center space-x-2 mx-auto shadow-md"
+          class="px-4 py-2 bg-accentPurple hover:bg-accentPurple/90 text-white text-xs font-bold rounded-xl transition duration-150 flex items-center justify-center space-x-2 mx-auto shadow-md cursor-pointer"
         >
           <font-awesome-icon icon="wand-magic-sparkles" class="mr-1" />
           <span>Generate AI Diagnosis</span>
         </button>
-      </div>
-    </div>
-
-    <!-- Related Historical Incidents (US-AI-004) -->
-    <div v-if="relatedIncidents.length > 0" class="bg-bgCard p-6 rounded-2xl border border-gray-700 shadow space-y-4">
-      <div class="flex items-center space-x-2 border-b border-gray-700 pb-3">
-        <font-awesome-icon icon="book" class="text-lg text-primaryTeal" />
-        <h4 class="text-base font-bold text-primaryTeal tracking-tight">Related Resolved Tickets</h4>
-      </div>
-      
-      <div class="space-y-3">
-        <div 
-          v-for="ticket in relatedIncidents" 
-          :key="ticket._id"
-          class="p-4 rounded-xl border border-gray-800 bg-bgMain/60 hover:bg-bgMain transition duration-150 flex flex-col space-y-2 text-xs"
-        >
-          <div class="flex justify-between items-center">
-            <span class="font-extrabold text-white text-sm">Team {{ ticket.teamNumber }}</span>
-            <span class="text-[10px] bg-green-950/40 text-green-400 border border-green-900/30 font-bold uppercase font-mono px-2 py-0.5 rounded">
-              Resolved
-            </span>
-          </div>
-          
-          <p class="text-gray-300 font-medium line-clamp-2">{{ ticket.description }}</p>
-          
-          <div class="grid grid-cols-2 gap-4 border-t border-gray-800 pt-2 mt-1">
-            <div>
-              <span class="block text-[10px] font-bold text-gray-400 uppercase">Root Cause</span>
-              <span class="text-gray-200 font-medium line-clamp-1">{{ ticket.rootCause }}</span>
-            </div>
-            <div>
-              <span class="block text-[10px] font-bold text-gray-400 uppercase">Solution</span>
-              <span class="text-gray-200 font-medium line-clamp-1">{{ ticket.appliedSolution }}</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -134,10 +146,14 @@ const props = defineProps({
 
 const authStore = useAuthStore();
 const suggestion = ref(null);
-const relatedIncidents = ref([]);
 const loading = ref(true);
 const generating = ref(false);
 const error = ref(null);
+
+const formatCategory = (cat) => {
+  if (!cat) return 'OTHER';
+  return cat.replace('_', ' ');
+};
 
 const fetchSuggestions = async () => {
   loading.value = true;
@@ -186,19 +202,6 @@ const generateDiagnosis = async () => {
   }
 };
 
-const fetchRelatedIncidents = async () => {
-  try {
-    const response = await fetch(getApiUrl(`/incidents/${props.incidentId}/related`), {
-      headers: { 'Authorization': `Bearer ${authStore.token}` }
-    });
-    if (response.ok) {
-      relatedIncidents.value = await response.json();
-    }
-  } catch (err) {
-    console.error('Failed to load related historical incidents:', err);
-  }
-};
-
 const rateSuggestion = async (ratingVal) => {
   if (!suggestion.value) return;
   try {
@@ -220,6 +223,5 @@ const rateSuggestion = async (ratingVal) => {
 
 onMounted(() => {
   fetchSuggestions();
-  fetchRelatedIncidents();
 });
 </script>

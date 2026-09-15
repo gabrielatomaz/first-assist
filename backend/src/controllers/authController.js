@@ -52,6 +52,8 @@ export const authController = {
           name: user.name,
           role: user.role,
           email: user.email,
+          avatarIcon: user.avatarIcon || 'user',
+          avatarColor: user.avatarColor || '#4F7F82',
           assignedEventCode: user.assignedEventCode || null,
           assignedEventCodes: user.assignedEventCodes || []
         }
@@ -71,6 +73,8 @@ export const authController = {
         role: user.role,
         email: user.email,
         status: user.status,
+        avatarIcon: user.avatarIcon || 'user',
+        avatarColor: user.avatarColor || '#4F7F82',
         assignedEventCode: user.assignedEventCode || null,
         assignedEventCodes: user.assignedEventCodes || []
       });

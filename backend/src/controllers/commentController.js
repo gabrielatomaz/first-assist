@@ -4,7 +4,7 @@ export const commentController = {
   getComments: async (req, res) => {
     try {
       const comments = await Comment.find({ incidentId: req.params.id })
-        .populate('authorId', 'name role')
+        .populate('authorId', 'name role avatarIcon avatarColor')
         .sort({ createdAt: 1 });
       res.json(comments);
     } catch (error) {
@@ -27,7 +27,7 @@ export const commentController = {
       });
 
       const populated = await Comment.findById(comment._id)
-        .populate('authorId', 'name role');
+        .populate('authorId', 'name role avatarIcon avatarColor');
 
       res.status(201).json(populated);
     } catch (error) {
@@ -58,7 +58,7 @@ export const commentController = {
       await comment.save();
 
       const populated = await Comment.findById(comment._id)
-        .populate('authorId', 'name role');
+        .populate('authorId', 'name role avatarIcon avatarColor');
 
       res.json(populated);
     } catch (error) {

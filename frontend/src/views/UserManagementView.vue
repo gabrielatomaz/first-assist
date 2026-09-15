@@ -132,7 +132,7 @@
 
               <td class="px-6 py-4">
                 <span :class="{
-                  'bg-emerald-950/40 text-emerald-400 border border-emerald-900/30': user.status === 'ACTIVE',
+                  'bg-accentGreen/10 text-accentGreen border border-accentGreen/30': user.status === 'ACTIVE',
                   'bg-red-950/40 text-accentCoral border border-red-900/30': user.status === 'INACTIVE'
                 }" class="px-2.5 py-1 rounded-md text-xs font-bold uppercase font-mono tracking-wider">
                   {{ user.status }}
@@ -143,7 +143,7 @@
                   v-if="canModifyUser(user)"
                   @click="toggleUserStatus(user)"
                   :disabled="updatingStatus === user._id"
-                  :class="user.status === 'ACTIVE' ? 'text-accentCoral hover:text-accentCoral/80' : 'text-green-600 hover:text-green-700'"
+                  :class="user.status === 'ACTIVE' ? 'text-accentCoral hover:text-accentCoral/80' : 'text-accentGreen hover:text-accentGreen/80'"
                   class="text-xs font-semibold hover:underline disabled:opacity-50 transition"
                 >
                   {{ user.status === 'ACTIVE' ? 'Deactivate' : 'Reactivate' }}

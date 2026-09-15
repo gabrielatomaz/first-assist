@@ -3,7 +3,7 @@ import { incidentService } from '../services/incidentService.js';
 export const incidentController = {
   getIncidents: async (req, res) => {
     try {
-      let { status, category, priority, teamNumber, eventCode } = req.query;
+      let { status, category, priority, teamNumber, eventCode, page, limit } = req.query;
       const userRole = (req.user?.role || '').toUpperCase();
 
       // Role-based event access scoping:
@@ -14,8 +14,11 @@ export const incidentController = {
       // 2. ADMIN: Full access to ALL events across system
       // 3. FTA: Full access to managed events / assigned events
 
-      const incidents = await incidentService.getAllIncidents({ status, category, priority, teamNumber, eventCode });
-      res.json(incidents);
+      const result = await incidentService.getAllIncidents(
+        { status, category, priority, teamNumber, eventCode },
+        { page, limit }
+      );
+      res.json(result);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

@@ -1,5 +1,19 @@
 <template>
+  <div
+    v-if="hasBg"
+    class="rounded-full flex items-center justify-center flex-shrink-0 border border-white/10 transition-all duration-200"
+    :style="{ backgroundColor: bgStyleColor }"
+    :class="containerSizeClass"
+    :title="title"
+  >
+    <font-awesome-icon 
+      :icon="icon || 'user'" 
+      :style="{ color: color || '#4F7F82' }"
+      :class="[iconSizeClass, 'inline-block transition-all duration-200']"
+    />
+  </div>
   <font-awesome-icon 
+    v-else
     :icon="icon || 'user'" 
     :style="{ color: color || '#4F7F82' }"
     :class="[sizeClass, 'inline-block transition-all duration-200 flex-shrink-0']"
@@ -14,7 +28,35 @@ const props = defineProps({
   icon: { type: String, default: 'user' },
   color: { type: String, default: '#4F7F82' },
   size: { type: String, default: 'md' },
-  title: { type: String, default: '' }
+  title: { type: String, default: '' },
+  hasBg: { type: Boolean, default: false }
+});
+
+const bgStyleColor = computed(() => {
+  const c = props.color || '#4F7F82';
+  return c.startsWith('#') ? `${c}25` : 'rgba(79, 127, 130, 0.2)';
+});
+
+const containerSizeClass = computed(() => {
+  switch (props.size) {
+    case 'xs': return 'w-6 h-6';
+    case 'sm': return 'w-8 h-8';
+    case 'lg': return 'w-11 h-11';
+    case 'xl': return 'w-14 h-14';
+    case 'md':
+    default: return 'w-9 h-9';
+  }
+});
+
+const iconSizeClass = computed(() => {
+  switch (props.size) {
+    case 'xs': return 'text-[10px]';
+    case 'sm': return 'text-xs';
+    case 'lg': return 'text-base';
+    case 'xl': return 'text-2xl';
+    case 'md':
+    default: return 'text-sm';
+  }
 });
 
 const sizeClass = computed(() => {

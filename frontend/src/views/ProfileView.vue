@@ -78,7 +78,7 @@
         <div v-if="profileError" class="text-accentCoral text-xs font-medium p-3 bg-red-950/40 rounded">
           {{ profileError }}
         </div>
-        <div v-if="profileSuccess" class="text-green-400 border border-green-900/30 text-xs font-medium p-3 bg-green-950/40 rounded">
+        <div v-if="profileSuccess" class="text-accentGreen border border-accentGreen/30 text-xs font-medium p-3 bg-accentGreen/10 rounded">
           Profile updated successfully!
         </div>
 
@@ -116,7 +116,7 @@
         <div v-if="passwordError" class="text-accentCoral text-xs font-medium p-3 bg-red-950/40 rounded">
           {{ passwordError }}
         </div>
-        <div v-if="passwordSuccess" class="text-green-400 border border-green-900/30 text-xs font-medium p-3 bg-green-950/40 rounded">
+        <div v-if="passwordSuccess" class="text-accentGreen border border-accentGreen/30 text-xs font-medium p-3 bg-accentGreen/10 rounded">
           Password updated successfully!
         </div>
 

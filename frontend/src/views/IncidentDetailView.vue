@@ -12,16 +12,21 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between md:items-start gap-4">
       <div class="space-y-2">
-        <div class="flex items-center space-x-3 flex-nowrap">
-          <span :class="statusBadgeClass" class="px-2.5 py-1 rounded text-xs font-bold font-mono tracking-wider uppercase flex-shrink-0">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-primaryTeal tracking-tight whitespace-nowrap">Team {{ incident.teamNumber }}</h2>
+
+        <div class="flex flex-wrap items-center gap-2 pt-0.5">
+          <span :class="statusBadgeClass" class="inline-flex items-center justify-center text-center min-w-[85px] px-2.5 py-1 rounded text-xs font-bold font-mono tracking-wider uppercase flex-shrink-0">
             {{ incident.status }}
           </span>
-          <span :class="priorityBadgeClass" class="px-2.5 py-1 rounded text-xs font-bold font-mono tracking-wider uppercase flex-shrink-0">
+          <span :class="priorityBadgeClass" class="inline-flex items-center justify-center text-center min-w-[85px] px-2.5 py-1 rounded text-xs font-bold font-mono tracking-wider uppercase flex-shrink-0">
             {{ incident.priority }}
           </span>
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-primaryTeal tracking-tight whitespace-nowrap">Team {{ incident.teamNumber }}</h2>
+          <span v-if="incident.category" class="inline-flex items-center justify-center text-center px-2.5 py-1 rounded text-xs font-bold text-primaryTeal/85 bg-primaryTeal/5 border border-primaryTeal/10 font-mono uppercase tracking-wider flex-shrink-0">
+            {{ formatCategory(incident.category) }}
+          </span>
         </div>
-        <p class="text-sm text-gray-400 font-medium sm:whitespace-nowrap">
+
+        <p class="text-sm text-gray-400 font-medium sm:whitespace-nowrap pt-0.5">
           Event: <span class="font-extrabold text-primaryTeal uppercase">{{ incident.eventCode || 'N/A' }}</span> | Match: <span class="font-bold text-gray-300">{{ incident.matchNumber || 'N/A' }}</span> | Reported: {{ formatTime(incident.createdAt) }}
         </p>
       </div>
@@ -29,7 +34,7 @@
       <div class="flex flex-col sm:flex-row sm:flex-nowrap items-stretch sm:items-center gap-2.5 w-full md:w-auto">
         <!-- 1. Technician selection dropdown (with "Assign to Me") -->
         <div v-if="authStore.isAdmin || authStore.isFTA || authStore.user" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1 sm:space-x-1.5 w-full sm:w-auto flex-shrink-0">
-          <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">Technician:</label>
+          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">Technician:</label>
           <CustomSelect
             v-model="selectedAssignee"
             :options="technicianOptions"
@@ -40,7 +45,7 @@
 
         <!-- 2. Status update select dropdown -->
         <div v-if="authStore.isAdmin || authStore.isFTA || isAssignee" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1 sm:space-x-1.5 w-full sm:w-auto flex-shrink-0">
-          <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">Status:</label>
+          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">Status:</label>
           <CustomSelect
             v-model="selectedStatus"
             :options="statusOptions"
@@ -63,21 +68,12 @@
           <button
             v-if="incident.status === 'ASSIGNED' || incident.status === 'IN_PROGRESS' || incident.status === 'WAITING'"
             @click="showResolveModal = true"
-            class="flex-1 sm:flex-initial h-9 sm:w-8 sm:h-8 flex items-center justify-center bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-150 shadow hover:shadow-md cursor-pointer"
+            class="flex-1 sm:flex-initial h-9 sm:w-8 sm:h-8 flex items-center justify-center bg-accentGreen hover:bg-accentGreen/90 text-white rounded-lg transition duration-150 shadow hover:shadow-md cursor-pointer"
             title="Resolve Incident"
           >
             <font-awesome-icon icon="check" class="text-xs" />
           </button>
         </div>
-
-        <button
-          v-if="incident.status === 'RESOLVED' && (authStore.isAdmin || authStore.isFTA)"
-          @click="closeIncident"
-          class="w-full sm:w-auto bg-primaryNavy hover:bg-primaryNavy/90 text-white font-semibold py-1.5 px-3 rounded-lg text-[11px] shadow hover:shadow-md transition duration-150 text-center flex-shrink-0 flex items-center justify-center space-x-1 cursor-pointer"
-        >
-          <font-awesome-icon icon="circle-xmark" class="mr-1 text-xs" />
-          <span>Close Incident</span>
-        </button>
       </div>
     </div>
 
@@ -85,18 +81,19 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <!-- Mobile Technical Assignee Header Card (Visible on mobile only, above Issue Description) -->
       <div class="block md:hidden bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-4">
-        <h3 class="text-xs font-bold text-primaryTeal uppercase tracking-wider border-b border-gray-800 pb-2">Technical Assignee</h3>
+        <div class="flex items-center space-x-2 border-b border-gray-800 pb-2">
+          <h3 class="text-xs font-bold text-primaryTeal uppercase tracking-wider">Technical Assignee</h3>
+          <span
+            v-if="incident.assignedTo"
+            class="inline-flex items-center justify-center text-center min-w-[65px] px-2.5 py-1 rounded text-xs font-bold font-mono uppercase tracking-wider flex-shrink-0"
+            :class="roleBadgeClass(incident.assignedTo?.role)"
+          >
+            {{ incident.assignedTo?.role }}
+          </span>
+        </div>
         <div v-if="incident.assignedTo" class="flex items-center space-x-3 pt-2">
-          <UserAvatar :icon="incident.assignedTo?.avatarIcon" :color="incident.assignedTo?.avatarColor" size="md" />
-          <div>
-            <p class="text-sm font-bold text-white leading-tight">{{ incident.assignedTo?.name }}</p>
-            <span
-              class="px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase tracking-wider inline-block mt-1"
-              :class="roleBadgeClass(incident.assignedTo?.role)"
-            >
-              {{ incident.assignedTo?.role }}
-            </span>
-          </div>
+          <UserAvatar :icon="incident.assignedTo?.avatarIcon" :color="incident.assignedTo?.avatarColor" size="md" :has-bg="true" />
+          <p class="text-sm font-bold text-white leading-tight">{{ incident.assignedTo?.name }}</p>
         </div>
         <p v-else class="text-xs text-gray-400 font-medium">Unassigned queue</p>
       </div>
@@ -106,45 +103,6 @@
         <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-3">
           <h3 class="text-xs font-bold text-primaryTeal uppercase tracking-wider">Issue Description</h3>
           <p class="text-sm text-gray-200 mt-2 whitespace-pre-wrap">{{ incident.description }}</p>
-        </div>
-
-        <!-- Technical Diagnosis Notes -->
-        <div v-if="incident.status === 'RESOLVED' || incident.status === 'CLOSED'" class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-4">
-          <div class="flex justify-between items-center border-b border-gray-800 pb-2">
-            <h3 class="text-xs font-bold text-primaryTeal uppercase tracking-wider">Diagnosis Details</h3>
-            <button
-              v-if="isAssignee"
-              @click="editingDiagnosis = !editingDiagnosis"
-              class="text-xs text-primaryTeal hover:underline font-semibold"
-            >
-              {{ editingDiagnosis ? 'Cancel' : 'Edit Notes' }}
-            </button>
-          </div>
-
-          <div v-if="editingDiagnosis" class="space-y-3">
-            <textarea
-              v-model="diagnosisText"
-              rows="3"
-              placeholder="Record technical reasoning, diagnostic observations..."
-              class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500"
-            ></textarea>
-            <div class="flex justify-end">
-              <button
-                @click="saveDiagnosis"
-                :disabled="savingDiagnosis"
-                class="bg-primaryTeal text-white text-xs font-bold py-1.5 px-4 rounded shadow hover:bg-opacity-90 disabled:opacity-50"
-              >
-                {{ savingDiagnosis ? 'Saving...' : 'Save Diagnosis' }}
-              </button>
-            </div>
-          </div>
-
-          <div v-else>
-            <p v-if="incident.diagnosis" class="text-sm text-gray-200 leading-relaxed font-medium bg-bgMain p-3 rounded-lg border border-gray-800">
-              {{ incident.diagnosis }}
-            </p>
-            <p v-else class="text-xs text-gray-400 font-medium italic">No technical diagnosis notes recorded yet.</p>
-          </div>
         </div>
 
         <!-- AI Assistant Suggestions -->
@@ -160,39 +118,40 @@
       <div class="space-y-6">
         <!-- Desktop Assignee Card info -->
         <div class="hidden md:block bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-4">
-          <h3 class="text-xs font-bold text-primaryTeal uppercase tracking-wider border-b border-gray-800 pb-2">Technical Assignee</h3>
+          <div class="flex items-center space-x-2 border-b border-gray-800 pb-2">
+            <h3 class="text-xs font-bold text-primaryTeal uppercase tracking-wider">Technical Assignee</h3>
+            <span
+              v-if="incident.assignedTo"
+              class="inline-flex items-center justify-center text-center min-w-[65px] px-2.5 py-1 rounded text-xs font-bold font-mono uppercase tracking-wider flex-shrink-0"
+              :class="roleBadgeClass(incident.assignedTo?.role)"
+            >
+              {{ incident.assignedTo?.role }}
+            </span>
+          </div>
           <div v-if="incident.assignedTo" class="flex items-center space-x-3 pt-2">
-            <UserAvatar :icon="incident.assignedTo?.avatarIcon" :color="incident.assignedTo?.avatarColor" size="md" />
-            <div>
-              <p class="text-sm font-bold text-white leading-tight">{{ incident.assignedTo?.name }}</p>
-              <span
-                class="px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase tracking-wider inline-block mt-1"
-                :class="roleBadgeClass(incident.assignedTo?.role)"
-              >
-                {{ incident.assignedTo?.role }}
-              </span>
-            </div>
+            <UserAvatar :icon="incident.assignedTo?.avatarIcon" :color="incident.assignedTo?.avatarColor" size="md" :has-bg="true" />
+            <p class="text-sm font-bold text-white leading-tight">{{ incident.assignedTo?.name }}</p>
           </div>
           <p v-else class="text-xs text-gray-400 font-medium">Unassigned queue</p>
         </div>
 
         <!-- Resolution Details Card -->
-        <div v-if="incident.status === 'RESOLVED' || incident.status === 'CLOSED'" class="bg-green-950/20 border border-green-900/30 p-6 rounded-2xl space-y-4">
-          <h3 class="text-xs font-bold text-green-400 uppercase tracking-wider border-b border-green-900/30 pb-2">Resolution details</h3>
+        <div v-if="incident.status === 'RESOLVED' || incident.status === 'CLOSED'" class="bg-accentGreen/10 border border-accentGreen/30 p-6 rounded-2xl space-y-4">
+          <h3 class="text-xs font-bold text-accentGreen uppercase tracking-wider border-b border-accentGreen/30 pb-2">Resolution details</h3>
           <div>
-            <h4 class="text-xs font-bold text-green-400 uppercase tracking-wider mb-1">Root Cause</h4>
-            <p class="text-xs text-textMain leading-relaxed font-medium bg-bgMain p-2.5 rounded border border-green-900/30">{{ incident.rootCause }}</p>
+            <h4 class="text-xs font-bold text-accentGreen uppercase tracking-wider mb-1">Root Cause</h4>
+            <p class="text-xs text-textMain leading-relaxed font-medium bg-bgMain p-2.5 rounded border border-accentGreen/30">{{ incident.rootCause }}</p>
           </div>
           <div>
-            <h4 class="text-xs font-bold text-green-400 uppercase tracking-wider mb-1">Applied Fix</h4>
-            <p class="text-xs text-textMain leading-relaxed font-medium bg-bgMain p-2.5 rounded border border-green-900/30">{{ incident.appliedSolution }}</p>
+            <h4 class="text-xs font-bold text-accentGreen uppercase tracking-wider mb-1">Applied Fix</h4>
+            <p class="text-xs text-textMain leading-relaxed font-medium bg-bgMain p-2.5 rounded border border-accentGreen/30">{{ incident.appliedSolution }}</p>
           </div>
         </div>
 
         <!-- Collapsible Audit Timeline spanning edge to edge when closed -->
         <div class="bg-bgCard rounded-2xl shadow border border-gray-800 overflow-hidden transition">
           <button 
-            @click="isAuditTimelineOpen = !isAuditTimelineOpen"
+            @click="toggleAuditTimeline"
             class="w-full px-6 py-4 flex justify-between items-center text-left hover:bg-gray-800/30 transition cursor-pointer group select-none"
           >
             <div class="flex items-center space-x-2">
@@ -288,14 +247,20 @@ const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 
-const statusOptions = [
-  { value: 'OPEN', label: 'Open' },
-  { value: 'ASSIGNED', label: 'Assigned' },
-  { value: 'IN_PROGRESS', label: 'In Progress' },
-  { value: 'WAITING', label: 'Waiting' },
-  { value: 'RESOLVED', label: 'Resolved', disabled: true },
-  { value: 'CLOSED', label: 'Closed', disabled: true }
-];
+const statusOptions = computed(() => {
+  const options = [
+    { value: 'OPEN', label: 'Open' },
+    { value: 'ASSIGNED', label: 'Assigned' },
+    { value: 'IN_PROGRESS', label: 'In Progress' },
+    { value: 'WAITING', label: 'Waiting' }
+  ];
+  if (incident.value?.status === 'RESOLVED') {
+    options.push({ value: 'RESOLVED', label: 'Resolved' });
+  } else {
+    options.push({ value: 'RESOLVED', label: 'Resolved', disabled: true });
+  }
+  return options;
+});
 
 const technicianOptions = computed(() => {
   const options = [{ value: null, label: 'Unassigned' }];
@@ -365,9 +330,6 @@ const selectedAssignee = ref(null);
 const selectedStatus = ref('OPEN');
 const technicians = ref([]);
 
-const diagnosisText = ref('');
-const editingDiagnosis = ref(false);
-const savingDiagnosis = ref(false);
 const isAuditTimelineOpen = ref(false);
 
 const isAssignee = computed(() => {
@@ -381,7 +343,7 @@ const statusBadgeClass = computed(() => {
     case 'ASSIGNED': return 'bg-accentYellow/10 text-accentYellow border border-accentYellow/25';
     case 'IN_PROGRESS': return 'bg-accentPurple/10 text-accentPurple border border-accentPurple/25';
     case 'WAITING': return 'bg-gray-800 text-gray-400 border border-gray-700';
-    case 'RESOLVED': return 'bg-green-950/40 text-green-400 border border-green-900/30';
+    case 'RESOLVED': return 'bg-accentGreen/10 text-accentGreen border border-accentGreen/30';
     case 'CLOSED': return 'bg-gray-800/80 text-gray-500 border border-gray-700/50';
     default: return 'bg-gray-800 text-gray-400 border border-gray-700';
   }
@@ -428,11 +390,6 @@ const fetchDetails = async (isBackground = false) => {
     // Refresh technicians list scoped to this event
     if (authStore.isAdmin || authStore.isFTA) {
       fetchTechnicians();
-    }
-
-    // Only update diagnosis text if user is NOT currently editing
-    if (!editingDiagnosis.value) {
-      diagnosisText.value = data.diagnosis || '';
     }
   } catch (err) {
     if (!isBackground) {
@@ -541,47 +498,17 @@ const updateStatus = async () => {
   }
 };
 
-const saveDiagnosis = async () => {
-  savingDiagnosis.value = true;
-  try {
-    const response = await fetch(getApiUrl(`/incidents/${incident.value._id}/diagnosis`), {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authStore.token}`
-      },
-      body: JSON.stringify({ diagnosis: diagnosisText.value })
-    });
-    const data = await response.json();
-    if (!response.ok) throw new Error('Failed to save diagnosis details');
-    incident.value = data;
-    editingDiagnosis.value = false;
-  } catch (err) {
-    alert(err.message);
-  } finally {
-    savingDiagnosis.value = false;
-  }
-};
-
-const closeIncident = async () => {
-  try {
-    const response = await fetch(getApiUrl(`/incidents/${incident.value._id}/close`), {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${authStore.token}` }
-    });
-    const data = await response.json();
-    if (!response.ok) throw new Error('Failed to close incident ticket');
-    incident.value = data;
-    selectedStatus.value = data.status;
-  } catch (err) {
-    alert(err.message);
-  }
-};
-
 const handleIncidentResolved = (resolvedData) => {
   incident.value = resolvedData;
   selectedStatus.value = resolvedData.status;
   showResolveModal.value = false;
+};
+
+const toggleAuditTimeline = () => {
+  isAuditTimelineOpen.value = !isAuditTimelineOpen.value;
+  if (isAuditTimelineOpen.value) {
+    fetchAuditLogs();
+  }
 };
 
 const fetchAuditLogs = async () => {
@@ -602,12 +529,19 @@ const formatTime = (dateStr) => {
   return date.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
 
+const formatCategory = (cat) => {
+  if (!cat) return 'OTHER';
+  return cat.replace('_', ' ');
+};
+
 let pollInterval = null;
 
 onMounted(() => {
   console.log('onMounted IncidentDetailView. User Role:', authStore.user?.role, 'isAdmin:', authStore.isAdmin, 'isFTA:', authStore.isFTA);
   fetchDetails();
-  fetchAuditLogs();
+  if (isAuditTimelineOpen.value) {
+    fetchAuditLogs();
+  }
   if (authStore.isAdmin || authStore.isFTA) {
     fetchTechnicians();
   }
@@ -615,7 +549,9 @@ onMounted(() => {
   // Real-time updates (Epic 14) refetches details/logs silently every 3000ms
   pollInterval = setInterval(() => {
     fetchDetails(true);
-    fetchAuditLogs();
+    if (isAuditTimelineOpen.value) {
+      fetchAuditLogs();
+    }
   }, 3000);
 });
 

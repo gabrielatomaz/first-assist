@@ -94,7 +94,7 @@
           <button
             type="submit"
             :disabled="submitting"
-            class="bg-primaryTeal hover:bg-primaryTeal/90 text-white font-bold px-5 py-2 rounded-xl text-xs shadow-md transition duration-150 disabled:opacity-50 flex items-center space-x-1"
+            class="bg-accentGreen hover:bg-accentGreen/90 text-white font-bold px-5 py-2 rounded-xl text-xs shadow-md transition duration-150 disabled:opacity-50 flex items-center space-x-1 cursor-pointer"
           >
             <font-awesome-icon v-if="submitting" icon="spinner" class="animate-spin mr-1" />
             <span>{{ submitting ? 'Saving...' : 'Resolve' }}</span>

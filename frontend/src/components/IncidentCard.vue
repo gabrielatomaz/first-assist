@@ -13,11 +13,11 @@
 
         <div class="flex flex-col items-end space-y-1.5">
           <!-- Status Badge -->
-          <span :class="statusBadgeClass" class="px-2.5 py-1 rounded text-xs font-bold tracking-wider font-mono uppercase">
+          <span :class="statusBadgeClass" class="inline-flex items-center justify-center text-center h-6 min-w-[85px] px-2.5 rounded text-xs font-bold tracking-wider font-mono uppercase leading-none">
             {{ incident.status }}
           </span>
           <!-- Priority Badge -->
-          <span :class="priorityBadgeClass" class="px-2.5 py-1 rounded text-xs font-bold tracking-wider font-mono uppercase">
+          <span :class="priorityBadgeClass" class="inline-flex items-center justify-center text-center h-6 min-w-[85px] px-2.5 rounded text-xs font-bold tracking-wider font-mono uppercase leading-none">
             {{ incident.priority }}
           </span>
         </div>
@@ -25,7 +25,7 @@
 
       <!-- Category Badge -->
       <div class="flex items-center space-x-1.5">
-        <span class="text-xs font-bold text-primaryTeal/85 bg-primaryTeal/5 border border-primaryTeal/10 px-2 py-0.5 rounded font-mono uppercase tracking-wider">
+        <span class="inline-flex items-center justify-center text-center h-6 px-2.5 rounded text-xs font-bold text-primaryTeal/85 bg-primaryTeal/5 border border-primaryTeal/10 font-mono uppercase tracking-wider leading-none">
           {{ formatCategory(incident.category) }}
         </span>
       </div>
@@ -46,8 +46,8 @@
         <span>Unassigned</span>
       </div>
 
-      <span v-if="incident.eventCode" class="text-[10px] font-bold text-accentYellow/90 bg-accentYellow/10 border border-accentYellow/20 px-2 py-0.5 rounded font-mono uppercase tracking-wider flex-shrink-0" title="Event Code">
-        <font-awesome-icon icon="trophy" class="mr-1 text-[9px]" />{{ incident.eventCode }}
+      <span v-if="incident.eventCode" class="inline-flex items-center justify-center text-center h-6 px-2.5 rounded text-xs font-bold text-accentYellow/90 bg-accentYellow/10 border border-accentYellow/20 font-mono uppercase tracking-wider flex-shrink-0 leading-none" title="Event Code">
+        <font-awesome-icon icon="trophy" class="mr-1 text-[10px]" />{{ incident.eventCode }}
       </span>
     </div>
   </div>
@@ -67,7 +67,7 @@ const statusBadgeClass = computed(() => {
     case 'ASSIGNED': return 'bg-accentYellow/10 text-accentYellow border border-accentYellow/25';
     case 'IN_PROGRESS': return 'bg-accentPurple/10 text-accentPurple border border-accentPurple/25';
     case 'WAITING': return 'bg-gray-800 text-gray-400 border border-gray-700';
-    case 'RESOLVED': return 'bg-green-950/40 text-green-400 border border-green-900/30';
+    case 'RESOLVED': return 'bg-accentGreen/10 text-accentGreen border border-accentGreen/30';
     case 'CLOSED': return 'bg-gray-800/80 text-gray-500 border border-gray-700/50';
     default: return 'bg-gray-800 text-gray-400 border border-gray-700';
   }

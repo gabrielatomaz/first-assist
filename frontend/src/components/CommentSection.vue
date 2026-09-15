@@ -16,6 +16,12 @@
         <!-- Header / Author Info -->
         <div class="flex justify-between items-center text-xs">
           <div class="flex items-center space-x-2">
+            <UserAvatar 
+              :icon="comment.authorId?.avatarIcon || 'user'"
+              :color="comment.authorId?.avatarColor || '#4F7F82'"
+              size="xs"
+              :hasBg="true"
+            />
             <span 
               class="font-extrabold text-xs"
               :class="{
@@ -129,10 +135,10 @@
       <button
         type="button"
         @click="triggerFileInput"
-        class="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-primaryTeal bg-bgMain border border-gray-700 hover:border-gray-600 rounded-lg transition flex-shrink-0 cursor-pointer"
+        class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-bgMain border border-gray-700 hover:border-primaryTeal text-gray-400 hover:text-primaryTeal rounded-lg shadow-sm transition duration-150 cursor-pointer"
         title="Attach Picture"
       >
-        <font-awesome-icon icon="paperclip" class="w-4 h-4" />
+        <font-awesome-icon icon="paperclip" class="text-sm" />
       </button>
       <input 
         type="file" 
@@ -147,18 +153,18 @@
         v-model="newComment"
         type="text"
         placeholder="Type an update or attach a picture..."
-        class="flex-grow px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-xs placeholder-gray-500"
+        class="h-10 flex-grow px-3 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-xs placeholder-gray-500 shadow-sm"
       >
 
-      <!-- Small Compact Send Button with Lighter Color -->
+      <!-- Compact Send Button -->
       <button
         type="submit"
         :disabled="posting || (!newComment.trim() && !attachedImage)"
-        class="w-9 h-9 flex items-center justify-center bg-primaryTeal/25 hover:bg-primaryTeal text-primaryTeal hover:text-white border border-primaryTeal/40 rounded-lg transition duration-150 disabled:opacity-30 flex-shrink-0 shadow-sm cursor-pointer"
+        class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-bgMain border border-gray-700 hover:border-primaryTeal text-primaryTeal hover:text-white hover:bg-primaryTeal rounded-lg shadow-sm transition duration-150 disabled:opacity-30 cursor-pointer"
         title="Send Update"
       >
-        <font-awesome-icon v-if="posting" icon="spinner" spin class="text-xs" />
-        <font-awesome-icon v-else icon="paper-plane" class="w-4 h-4" />
+        <font-awesome-icon v-if="posting" icon="spinner" spin class="text-sm" />
+        <font-awesome-icon v-else icon="paper-plane" class="text-sm" />
       </button>
     </form>
 
@@ -202,6 +208,7 @@
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { getApiUrl } from '../config/api';
+import UserAvatar from './UserAvatar.vue';
 
 const props = defineProps({
   incidentId: { type: String, required: true }

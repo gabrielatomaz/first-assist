@@ -14,6 +14,7 @@ export default {
         accentCoral: '#E85B2F',
         accentYellow: '#DAAB52',
         accentPurple: '#6E5F70',
+        accentGreen: '#10B981',
         textMain: '#E4E4E4'
       }
     },

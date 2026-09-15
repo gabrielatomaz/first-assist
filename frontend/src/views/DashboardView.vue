@@ -101,13 +101,12 @@ const eventFilter = ref('ALL');
 const refreshInterval = ref(parseInt(localStorage.getItem('first_assist_refresh_rate')) || 15000);
 
 const statusOptions = [
-  { value: 'ALL', label: 'Active' },
+  { value: 'ALL', label: 'All' },
   { value: 'OPEN', label: 'Open' },
   { value: 'ASSIGNED', label: 'Assigned' },
   { value: 'IN_PROGRESS', label: 'In Progress' },
   { value: 'WAITING', label: 'Waiting' },
-  { value: 'RESOLVED', label: 'Resolved' },
-  { value: 'CLOSED', label: 'Closed' }
+  { value: 'RESOLVED', label: 'Resolved' }
 ];
 
 const refreshOptions = [
@@ -177,7 +176,13 @@ const fetchIncidents = async () => {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     });
     if (!response.ok) throw new Error('Failed to sync incidents log from API');
-    incidents.value = await response.json();
+    const data = await response.json();
+
+    if (data.incidents) {
+      incidents.value = data.incidents;
+    } else {
+      incidents.value = data;
+    }
   } catch (err) {
     error.value = err.message || 'Failed to sync with API. Verify server connection.';
   } finally {

@@ -14,7 +14,7 @@
     <!-- Health Metrics Grid -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div class="bg-bgCard p-5 rounded-2xl border border-gray-800 shadow-sm flex flex-col items-center justify-center">
-        <span class="text-3xl font-extrabold text-green-400">ONLINE</span>
+        <span class="text-3xl font-extrabold text-accentGreen">ONLINE</span>
         <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1">Backend Node API Status</span>
       </div>
       <div class="bg-bgCard p-5 rounded-2xl border border-gray-800 shadow-sm flex flex-col items-center justify-center">
@@ -272,7 +272,7 @@
 
               <td class="px-4 py-3">
                 <span :class="{
-                  'bg-emerald-950/40 text-emerald-400 border border-emerald-900/30': u.status === 'ACTIVE',
+                  'bg-accentGreen/10 text-accentGreen border border-accentGreen/30': u.status === 'ACTIVE',
                   'bg-red-950/40 text-accentCoral border border-red-900/30': u.status === 'INACTIVE'
                 }" class="px-2.5 py-1 rounded-md text-xs font-bold uppercase font-mono tracking-wider">
                   {{ u.status }}
@@ -282,7 +282,7 @@
                 <button
                   @click="toggleUserStatus(u)"
                   :disabled="updatingUserStatus === u._id"
-                  :class="u.status === 'ACTIVE' ? 'text-accentCoral hover:text-accentCoral/80' : 'text-green-600 hover:text-green-700'"
+                  :class="u.status === 'ACTIVE' ? 'text-accentCoral hover:text-accentCoral/80' : 'text-accentGreen hover:text-accentGreen/80'"
                   class="text-xs font-semibold hover:underline disabled:opacity-50 transition cursor-pointer"
                 >
                   {{ u.status === 'ACTIVE' ? 'Deactivate' : 'Reactivate' }}
@@ -385,7 +385,7 @@
     <!-- System Audit Logs Section -->
     <div class="bg-bgCard rounded-2xl shadow border border-gray-800 overflow-hidden transition">
       <button 
-        @click="isAuditTimelineOpen = !isAuditTimelineOpen"
+        @click="toggleAuditTimeline"
         class="w-full px-6 py-4 flex justify-between items-center text-left hover:bg-gray-800/30 transition cursor-pointer group select-none"
       >
         <div class="flex items-center space-x-2">
@@ -452,7 +452,14 @@ import { getApiUrl } from '../config/api';
 const authStore = useAuthStore();
 const auditLogs = ref([]);
 const actionFilter = ref('ALL');
-const isAuditTimelineOpen = ref(true);
+const isAuditTimelineOpen = ref(false);
+
+const toggleAuditTimeline = () => {
+  isAuditTimelineOpen.value = !isAuditTimelineOpen.value;
+  if (isAuditTimelineOpen.value) {
+    fetchAuditLogs();
+  }
+};
 
 const accessRequests = ref([]);
 const loadingRequests = ref(true);
@@ -817,7 +824,6 @@ const formatTime = (dateStr) => {
 onMounted(() => {
   fetchEvents();
   fetchUsers();
-  fetchAuditLogs();
   fetchAccessRequests();
 });
 </script>

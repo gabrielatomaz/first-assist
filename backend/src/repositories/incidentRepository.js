@@ -10,6 +10,17 @@ export const incidentRepository = {
       .sort({ createdAt: -1 });
   },
 
+  findAllPaginated: async (query = {}, skip = 0, limit = 9) => {
+    return await Incident.find(query)
+      .populate('reportedBy', 'name role avatarIcon avatarColor')
+      .populate('assignedTo', 'name role avatarIcon avatarColor')
+      .populate('closedBy', 'name role avatarIcon avatarColor')
+      .populate('diagnosisHistory.updatedBy', 'name role avatarIcon avatarColor')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+  },
+
   findById: async (id) => {
     return await Incident.findById(id)
       .populate('reportedBy', 'name role avatarIcon avatarColor')
