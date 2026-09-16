@@ -50,6 +50,35 @@
       </div>
     </div>
 
+    <!-- Main View Tabs: Active Board vs In Triage -->
+    <div class="flex items-center space-x-2 border-b border-gray-800 pb-3">
+      <button
+        type="button"
+        @click="statusFilter = 'ALL'; fetchIncidents();"
+        :class="statusFilter !== 'PENDING_SCREENING' ? 'bg-primaryTeal/20 text-primaryTeal border-primaryTeal/40 shadow-sm' : 'bg-bgCard text-gray-400 border-gray-800 hover:text-white'"
+        class="px-4 py-2 rounded-lg text-xs font-bold border transition flex items-center space-x-2 cursor-pointer"
+      >
+        <font-awesome-icon icon="list-check" class="text-xs" />
+        <span>Active Board</span>
+      </button>
+
+      <button
+        type="button"
+        @click="statusFilter = 'PENDING_SCREENING'; fetchIncidents();"
+        :class="statusFilter === 'PENDING_SCREENING' ? 'bg-amber-500/20 text-amber-400 border-amber-500/40 shadow-sm' : 'bg-bgCard text-gray-400 border-gray-800 hover:text-white'"
+        class="px-4 py-2 rounded-lg text-xs font-bold border transition flex items-center space-x-2 cursor-pointer relative"
+      >
+        <font-awesome-icon icon="shield-halved" class="text-xs" />
+        <span>In Triage</span>
+        <span 
+          v-if="pendingScreeningCount > 0" 
+          class="bg-amber-400 text-gray-950 font-extrabold text-[10px] px-2 py-0.5 rounded-full ml-1"
+        >
+          {{ pendingScreeningCount }}
+        </span>
+      </button>
+    </div>
+
     <!-- Main Content -->
     <div v-if="loading && firstLoad" class="text-center py-16">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primaryTeal border-t-transparent"></div>
@@ -67,7 +96,12 @@
         :to="`/incidents/${incident._id}`"
         class="h-full flex flex-col hover:scale-[1.01] active:scale-[0.99] transition duration-150 cursor-pointer"
       >
-        <IncidentCard :incident="incident" class="h-full" />
+        <IncidentCard 
+          :incident="incident" 
+          @accept-triage="handleAcceptTriage"
+          @reject-triage="handleRejectTriage"
+          class="h-full" 
+        />
       </router-link>
     </div>
 
@@ -99,6 +133,7 @@ const error = ref(null);
 const statusFilter = ref('ALL');
 const eventFilter = ref('ALL');
 const refreshInterval = ref(parseInt(localStorage.getItem('first_assist_refresh_rate')) || 15000);
+const pendingScreeningCount = ref(0);
 
 const statusOptions = [
   { value: 'ALL', label: 'All' },
@@ -106,8 +141,18 @@ const statusOptions = [
   { value: 'ASSIGNED', label: 'Assigned' },
   { value: 'IN_PROGRESS', label: 'In Progress' },
   { value: 'WAITING', label: 'Waiting' },
-  { value: 'RESOLVED', label: 'Resolved' }
+  { value: 'RESOLVED', label: 'Resolved' },
+  { value: 'REJECTED', label: 'Rejected' }
 ];
+
+const toggleAwaitingTriage = () => {
+  if (statusFilter.value === 'PENDING_SCREENING') {
+    statusFilter.value = 'ALL';
+  } else {
+    statusFilter.value = 'PENDING_SCREENING';
+  }
+  fetchIncidents();
+};
 
 const refreshOptions = [
   { value: 0, label: 'Manual Sync' },
@@ -164,12 +209,36 @@ const fetchEvents = async () => {
   }
 };
 
+const fetchPendingCount = async () => {
+  try {
+    let params = ['status=PENDING_SCREENING'];
+    if (eventFilter.value !== 'ALL') {
+      params.push(`eventCode=${eventFilter.value}`);
+    }
+    const response = await fetch(getApiUrl(`/incidents?${params.join('&')}`), {
+      headers: { 'Authorization': `Bearer ${authStore.token}` }
+    });
+    if (response.ok) {
+      const data = await response.json();
+      const list = data.incidents || data || [];
+      pendingScreeningCount.value = list.length;
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 const fetchIncidents = async () => {
   error.value = null;
+  fetchPendingCount();
   try {
     let params = [];
-    if (statusFilter.value !== 'ALL') params.push(`status=${statusFilter.value}`);
-    if (eventFilter.value !== 'ALL') params.push(`eventCode=${eventFilter.value}`);
+    if (statusFilter.value !== 'ALL') {
+      params.push(`status=${statusFilter.value}`);
+    }
+    if (eventFilter.value !== 'ALL') {
+      params.push(`eventCode=${eventFilter.value}`);
+    }
     
     const query = params.length > 0 ? `?${params.join('&')}` : '';
     const response = await fetch(getApiUrl(`/incidents${query}`), {
@@ -178,16 +247,53 @@ const fetchIncidents = async () => {
     if (!response.ok) throw new Error('Failed to sync incidents log from API');
     const data = await response.json();
 
-    if (data.incidents) {
-      incidents.value = data.incidents;
-    } else {
-      incidents.value = data;
-    }
+    incidents.value = data.incidents || data || [];
   } catch (err) {
     error.value = err.message || 'Failed to sync with API. Verify server connection.';
   } finally {
     loading.value = false;
     firstLoad.value = false;
+  }
+};
+
+const handleAcceptTriage = async (incidentId) => {
+  try {
+    const res = await fetch(getApiUrl(`/incidents/${incidentId}/status`), {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authStore.token}`
+      },
+      body: JSON.stringify({ status: 'OPEN' })
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'Failed to accept ticket into Open queue');
+    }
+    await fetchIncidents();
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
+const handleRejectTriage = async (incidentId) => {
+  if (!confirm('Are you sure you want to reject this incident ticket?')) return;
+  try {
+    const res = await fetch(getApiUrl(`/incidents/${incidentId}/status`), {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authStore.token}`
+      },
+      body: JSON.stringify({ status: 'REJECTED' })
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'Failed to reject ticket');
+    }
+    await fetchIncidents();
+  } catch (err) {
+    alert(err.message);
   }
 };
 

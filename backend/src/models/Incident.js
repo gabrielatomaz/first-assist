@@ -17,8 +17,8 @@ const incidentSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['OPEN', 'ASSIGNED', 'IN_PROGRESS', 'WAITING', 'RESOLVED', 'CLOSED'],
-    default: 'OPEN'
+    enum: ['PENDING_SCREENING', 'OPEN', 'ASSIGNED', 'IN_PROGRESS', 'WAITING', 'RESOLVED', 'CLOSED', 'REJECTED'],
+    default: 'PENDING_SCREENING'
   },
   audioUrl: String,
   reportedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

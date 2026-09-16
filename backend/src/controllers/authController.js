@@ -54,6 +54,8 @@ export const authController = {
           email: user.email,
           avatarIcon: user.avatarIcon || 'user',
           avatarColor: user.avatarColor || '#4F7F82',
+          teamNumber: user.teamNumber || null,
+          teamRole: user.teamRole || null,
           assignedEventCode: user.assignedEventCode || null,
           assignedEventCodes: user.assignedEventCodes || []
         }
@@ -75,6 +77,8 @@ export const authController = {
         status: user.status,
         avatarIcon: user.avatarIcon || 'user',
         avatarColor: user.avatarColor || '#4F7F82',
+        teamNumber: user.teamNumber || null,
+        teamRole: user.teamRole || null,
         assignedEventCode: user.assignedEventCode || null,
         assignedEventCodes: user.assignedEventCodes || []
       });

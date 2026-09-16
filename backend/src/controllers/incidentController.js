@@ -1,4 +1,6 @@
+import mongoose from 'mongoose';
 import { incidentService } from '../services/incidentService.js';
+import { Event } from '../models/Event.js';
 
 export const incidentController = {
   getIncidents: async (req, res) => {
@@ -13,12 +15,16 @@ export const incidentController = {
       }
       // 2. ADMIN: Full access to ALL events across system
       // 3. FTA: Full access to managed events / assigned events
+      if (userRole === 'FTA' && !eventCode) {
+        const assignedCodes = req.user?.assignedEventCodes || [];
+        if (assignedCodes.length > 0) {
+          eventCode = assignedCodes[0];
+        }
+      }
 
-      const result = await incidentService.getAllIncidents(
-        { status, category, priority, teamNumber, eventCode },
-        { page, limit }
-      );
-      res.json(result);
+      const filters = { status, category, priority, teamNumber, eventCode };
+      const incidents = await incidentService.getAllIncidents(filters, page, limit);
+      res.json(incidents);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
@@ -36,9 +42,157 @@ export const incidentController = {
     }
   },
 
+  createPublicIncident: async (req, res) => {
+    try {
+      const incident = await incidentService.createIncident({
+        ...req.body,
+        status: 'PENDING_SCREENING'
+      }, null);
+      res.status(201).json(incident);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  },
+
+  lookupTeamEvents: async (req, res) => {
+    try {
+      const { teamNumber, year } = req.query;
+      if (!teamNumber) {
+        return res.status(400).json({ error: 'Team number is required' });
+      }
+
+      const num = Number(teamNumber);
+      const seasonYear = year ? Number(year) : new Date().getFullYear();
+
+      let teamInfo = null;
+      let teamFound = false;
+
+      // 1. Fetch team details from TBA
+      try {
+        const { getTeamFromTBA } = await import('../services/tbaService.js');
+        teamInfo = await getTeamFromTBA(num);
+        teamFound = true;
+      } catch (tbaTeamErr) {
+        // Fallback to local Team model if exists
+        try {
+          if (mongoose.connection.readyState === 1) {
+            const { Team } = await import('../models/Team.js');
+            const localTeam = await Team.findOne({ number: num });
+            if (localTeam) {
+              teamInfo = {
+                number: localTeam.number,
+                name: localTeam.name,
+                city: localTeam.city || '',
+                state: localTeam.state || '',
+                country: localTeam.country || '',
+                rookieYear: localTeam.rookieYear
+              };
+              teamFound = true;
+            }
+          }
+        } catch (dbErr) {
+          console.warn('Local team lookup fallback:', dbErr.message);
+        }
+      }
+
+      const eventsList = [];
+
+      // 2. Fetch from Local Database matching teamNumber if DB is connected
+      if (mongoose.connection.readyState === 1) {
+        try {
+          const localTeamEvents = await Event.find({ teams: num });
+          for (const e of localTeamEvents) {
+            eventsList.push({
+              code: e.code,
+              name: e.name,
+              key: `${seasonYear}${e.code.toLowerCase()}`,
+              year: seasonYear,
+              location: e.location || ''
+            });
+            teamFound = true;
+          }
+        } catch (dbErr) {
+          console.warn('Local event find fallback:', dbErr.message);
+        }
+      }
+
+      // 3. Fetch from TBA for team (specified season year events only)
+      try {
+        const { getTeamEventsFromTBA } = await import('../services/tbaService.js');
+        const tbaEvents = await getTeamEventsFromTBA(num, seasonYear);
+        for (const tbaEv of tbaEvents) {
+          if (!eventsList.some(e => e.code.toLowerCase() === tbaEv.code.toLowerCase())) {
+            eventsList.push(tbaEv);
+          }
+        }
+        if (tbaEvents.length > 0) {
+          teamFound = true;
+        }
+      } catch (tbaErr) {
+        console.warn('TBA team events lookup fallback:', tbaErr.message);
+      }
+
+      // If team not found via TBA or DB, but events were found, default teamInfo
+      if (!teamInfo && eventsList.length > 0) {
+        teamInfo = { number: num, name: `Team ${num}` };
+      }
+
+      res.json({
+        found: teamFound,
+        team: teamInfo,
+        events: eventsList,
+        year: seasonYear
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  lookupTeamMatches: async (req, res) => {
+    try {
+      const { teamNumber, eventCode, eventKey } = req.query;
+      if (!teamNumber) {
+        return res.status(400).json({ error: 'Team number is required' });
+      }
+
+      const num = Number(teamNumber);
+      const eKey = eventKey || (eventCode ? `${new Date().getFullYear()}${eventCode.toLowerCase()}` : '');
+
+      let matchesList = [];
+
+      // 1. Fetch from TBA if eventKey available
+      if (eKey) {
+        try {
+          const { getTeamEventMatchesFromTBA } = await import('../services/tbaService.js');
+          matchesList = await getTeamEventMatchesFromTBA(num, eKey);
+        } catch (tbaErr) {
+          console.warn('TBA team matches lookup fallback:', tbaErr.message);
+        }
+      }
+
+      // 2. Fallback default matches if TBA yields no matches
+      if (matchesList.length === 0) {
+        for (let i = 1; i <= 15; i++) {
+          matchesList.push({
+            key: `Q${i}`,
+            label: `Qualification ${i} (Q${i})`,
+            compLevel: 'qm',
+            matchNumber: i
+          });
+        }
+        matchesList.push({ key: 'Playoffs', label: 'Playoffs', compLevel: 'po', matchNumber: 1 });
+        matchesList.push({ key: 'Pit Prep', label: 'Pit / Practice', compLevel: 'pit', matchNumber: 0 });
+      }
+
+      res.json(matchesList);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+
   createIncident: async (req, res) => {
     try {
-      const incident = await incidentService.createIncident(req.body, req.user._id);
+      const incident = await incidentService.createIncident(req.body, req.user?._id);
       res.status(201).json(incident);
     } catch (error) {
       res.status(400).json({ error: error.message });
@@ -48,10 +202,14 @@ export const incidentController = {
   updateStatus: async (req, res) => {
     try {
       const { status, assignedTo } = req.body;
+      const userRole = (req.user?.role || '').toUpperCase();
       
+      if (!['ADMIN', 'FTA', 'CSA'].includes(userRole)) {
+        return res.status(403).json({ error: 'Forbidden: Only CSAs, FTAs, and Administrators can manage incident screening and status transitions.' });
+      }
+
       // If setting an assignee that is not self, verify the user is ADMIN or FTA
       if (assignedTo && assignedTo !== req.user._id.toString()) {
-        const userRole = (req.user.role || '').toUpperCase();
         if (userRole !== 'ADMIN' && userRole !== 'FTA') {
           return res.status(403).json({ error: 'CSAs can only assign incidents to themselves' });
         }

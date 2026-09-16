@@ -2,31 +2,37 @@ import express from 'express';
 import multer from 'multer';
 import { incidentController } from '../controllers/incidentController.js';
 import { commentController } from '../controllers/commentController.js';
-import { requireRole } from '../middleware/authMiddleware.js';
+import { authMiddleware, requireRole } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.get('/', incidentController.getIncidents);
-router.get('/search', incidentController.searchIncidents);
-router.get('/:id', incidentController.getIncidentById);
-router.post('/', incidentController.createIncident);
-router.patch('/:id/status', incidentController.updateStatus);
-router.patch('/:id/diagnosis', incidentController.updateDiagnosis);
-router.post('/:id/resolve', incidentController.resolveIncident);
-router.get('/:id/ai-suggestions', incidentController.getAISuggestions);
-router.post('/:id/ai-suggestions', incidentController.generateAISuggestions);
-router.get('/:id/related', incidentController.getRelatedIncidents);
-router.get('/:id/audit-logs', incidentController.getIncidentAuditLogs);
-router.delete('/:id', incidentController.deleteIncident);
+// Public routes (Guest Mode ticket submission & TBA team lookup)
+router.get('/public/team-events', incidentController.lookupTeamEvents);
+router.get('/public/team-matches', incidentController.lookupTeamMatches);
+router.post('/public', incidentController.createPublicIncident);
+
+// Protected routes (Require Authentication)
+router.get('/', authMiddleware, incidentController.getIncidents);
+router.get('/search', authMiddleware, incidentController.searchIncidents);
+router.get('/:id', authMiddleware, incidentController.getIncidentById);
+router.post('/', authMiddleware, incidentController.createIncident);
+router.patch('/:id/status', authMiddleware, incidentController.updateStatus);
+router.patch('/:id/diagnosis', authMiddleware, incidentController.updateDiagnosis);
+router.post('/:id/resolve', authMiddleware, incidentController.resolveIncident);
+router.get('/:id/ai-suggestions', authMiddleware, incidentController.getAISuggestions);
+router.post('/:id/ai-suggestions', authMiddleware, incidentController.generateAISuggestions);
+router.get('/:id/related', authMiddleware, incidentController.getRelatedIncidents);
+router.get('/:id/audit-logs', authMiddleware, incidentController.getIncidentAuditLogs);
+router.delete('/:id', authMiddleware, incidentController.deleteIncident);
 
 // Transcription route accepting binary audio file
-router.post('/transcribe', upload.single('audio'), incidentController.transcribeAudio);
+router.post('/transcribe', authMiddleware, upload.single('audio'), incidentController.transcribeAudio);
 
 // Comments routes nested under incidents
-router.get('/:id/comments', commentController.getComments);
-router.post('/:id/comments', commentController.createComment);
-router.put('/comments/:commentId', commentController.updateComment);
-router.delete('/comments/:commentId', commentController.deleteComment);
+router.get('/:id/comments', authMiddleware, commentController.getComments);
+router.post('/:id/comments', authMiddleware, commentController.createComment);
+router.put('/comments/:commentId', authMiddleware, commentController.updateComment);
+router.delete('/comments/:commentId', authMiddleware, commentController.deleteComment);
 
 export default router;

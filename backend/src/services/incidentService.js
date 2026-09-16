@@ -10,7 +10,14 @@ export const incidentService = {
   getAllIncidents: async (filters = {}, pagination = {}) => {
     const query = {};
     if (filters.status && filters.status !== 'ALL') {
-      query.status = filters.status;
+      if (filters.status === 'ALL_INCLUDING_PENDING') {
+        // No status filter applied
+      } else {
+        query.status = filters.status;
+      }
+    } else {
+      // Active board view: exclude PENDING_SCREENING tickets (which belong to In Triage queue)
+      query.status = { $ne: 'PENDING_SCREENING' };
     }
     if (filters.category) query.category = filters.category;
     if (filters.priority) query.priority = filters.priority;
@@ -56,29 +63,33 @@ export const incidentService = {
       throw new Error("teamNumber and description are required");
     }
 
-    let resolvedEventCode = data.eventCode || null;
+    let resolvedEventCode = null;
+
+    if (data.eventCode) {
+      resolvedEventCode = data.eventCode;
+    } else {
+      const teamEv = await Event.findOne({ teams: Number(data.teamNumber) });
+      if (teamEv) {
+        resolvedEventCode = teamEv.code;
+      }
+    }
 
     if (!resolvedEventCode) {
-      const activeEv = await Event.findOne({ isActive: true });
-      if (activeEv) {
-        resolvedEventCode = activeEv.code;
-      } else {
-        const teamEv = await Event.findOne({ teams: Number(data.teamNumber) });
-        if (teamEv) {
-          resolvedEventCode = teamEv.code;
-        } else if (userId) {
-          const user = await User.findById(userId);
-          if (user?.assignedEventCode) {
-            resolvedEventCode = user.assignedEventCode;
-          } else if (user?.assignedEventCodes?.length > 0) {
-            resolvedEventCode = user.assignedEventCodes[0];
-          }
-        }
+      throw new Error(`Cannot create incident: Team ${data.teamNumber} is not registered for any active competition event.`);
+    }
+
+    // Determine initial status: PENDING_SCREENING for general reporters, OPEN if logged directly by CSA/FTA/Admin
+    let initialStatus = data.status || 'PENDING_SCREENING';
+    if (userId) {
+      const reportingUser = await User.findById(userId);
+      if (reportingUser && ['ADMIN', 'FTA', 'CSA'].includes(reportingUser.role)) {
+        initialStatus = data.status || 'OPEN';
       }
     }
 
     const incidentData = {
       ...data,
+      status: initialStatus,
       eventCode: resolvedEventCode,
       reportedBy: userId
     };
@@ -89,15 +100,15 @@ export const incidentService = {
       incidentId: newIncident._id,
       userId,
       action: 'INCIDENT_CREATED',
-      newValue: 'OPEN',
-      details: `Incident created for Team ${newIncident.teamNumber}`
+      newValue: newIncident.status,
+      details: `Incident created for Team ${newIncident.teamNumber} (${newIncident.status})`
     });
 
     return newIncident;
   },
 
   updateIncidentStatus: async (id, status, assignedTo, userId) => {
-    const allowedStatuses = ['OPEN', 'ASSIGNED', 'IN_PROGRESS', 'WAITING', 'RESOLVED', 'CLOSED'];
+    const allowedStatuses = ['PENDING_SCREENING', 'OPEN', 'ASSIGNED', 'IN_PROGRESS', 'WAITING', 'RESOLVED', 'CLOSED', 'REJECTED'];
     if (!allowedStatuses.includes(status)) {
       throw new Error("Invalid status state");
     }

@@ -59,7 +59,32 @@
         </button>
       </form>
 
-      <div class="mt-8 text-center text-xs text-gray-400 border-t border-gray-800 pt-6 space-y-3">
+      <!-- Divider -->
+      <div class="relative my-6">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-gray-800"></div>
+        </div>
+        <div class="relative flex justify-center text-xs uppercase">
+          <span class="bg-bgCard px-3 text-gray-500 font-mono">OR</span>
+        </div>
+      </div>
+
+      <!-- Guest Incident Action (Clean Text Link) -->
+      <div class="bg-bgMain p-4 rounded-xl border border-gray-800 text-center space-y-2">
+        <p class="text-xs text-gray-400 font-medium">Need technical assistance at the pits?</p>
+        <div>
+          <button 
+            type="button" 
+            @click="showPublicModal = true"
+            class="text-xs font-bold text-primaryTeal hover:underline inline-flex items-center space-x-1.5 cursor-pointer transition duration-150"
+          >
+            <font-awesome-icon icon="plus-circle" class="text-xs" />
+            <span>Request CSA Support</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-6 text-center text-xs text-gray-400 border-t border-gray-800 pt-5 space-y-2">
         <p>If you need account access, please see the FTA or event Administrator.</p>
         <div>
           <button 
@@ -79,6 +104,13 @@
       v-if="showRequestModal" 
       @close="showRequestModal = false" 
     />
+
+    <!-- Public Guest Report Modal -->
+    <PublicReportModal
+      v-if="showPublicModal"
+      @close="showPublicModal = false"
+      @submitted="showPublicModal = false"
+    />
   </div>
 </template>
 
@@ -86,7 +118,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
-import { AccessRequestModal } from '../components';
+import { AccessRequestModal, PublicReportModal } from '../components';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -96,6 +128,7 @@ const password = ref('');
 const loading = ref(false);
 const error = ref(null);
 const showRequestModal = ref(false);
+const showPublicModal = ref(false);
 
 const handleLogin = async () => {
   loading.value = true;

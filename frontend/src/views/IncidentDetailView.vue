@@ -9,6 +9,35 @@
   </div>
 
   <div v-else-if="incident" class="space-y-8 animate-fadeIn max-w-5xl mx-auto">
+    <!-- Quick Triage Action Banner on Top of the Incident Detail -->
+    <div v-if="incident.status === 'PENDING_SCREENING' && (authStore.isAdmin || authStore.isFTA || authStore.isCSA)" class="bg-amber-500/10 border border-amber-500/30 p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 animate-fadeIn">
+      <div class="flex items-center space-x-2.5 text-amber-300 text-xs font-bold">
+        <font-awesome-icon icon="shield-halved" class="text-base text-amber-400" />
+        <div>
+          <p class="text-white font-extrabold text-sm">This ticket is currently In Triage</p>
+          <p class="text-gray-400 text-xs font-normal">Review details and accept into the active board or reject.</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2 w-full sm:w-auto">
+        <button
+          @click="acceptTriage"
+          class="flex-1 sm:flex-initial px-4 py-2 bg-accentGreen hover:bg-accentGreen/90 text-white font-bold rounded-xl text-xs shadow transition flex items-center justify-center space-x-1.5 cursor-pointer"
+          title="Accept ticket into Open queue"
+        >
+          <font-awesome-icon icon="check" class="text-xs" />
+          <span>Accept Ticket</span>
+        </button>
+        <button
+          @click="rejectTriage"
+          class="flex-1 sm:flex-initial px-4 py-2 bg-accentCoral/20 hover:bg-accentCoral text-accentCoral hover:text-white border border-accentCoral/40 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-1.5 cursor-pointer"
+          title="Reject ticket"
+        >
+          <font-awesome-icon icon="xmark" class="text-xs" />
+          <span>Reject Ticket</span>
+        </button>
+      </div>
+    </div>
+
     <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between md:items-start gap-4">
       <div class="space-y-2">
@@ -16,7 +45,7 @@
 
         <div class="flex flex-wrap items-center gap-2 pt-0.5">
           <span :class="statusBadgeClass" class="inline-flex items-center justify-center text-center min-w-[85px] px-2.5 py-1 rounded text-xs font-bold font-mono tracking-wider uppercase flex-shrink-0">
-            {{ incident.status }}
+            {{ incident.status === 'PENDING_SCREENING' ? 'IN TRIAGE' : incident.status }}
           </span>
           <span :class="priorityBadgeClass" class="inline-flex items-center justify-center text-center min-w-[85px] px-2.5 py-1 rounded text-xs font-bold font-mono tracking-wider uppercase flex-shrink-0">
             {{ incident.priority }}
@@ -339,6 +368,8 @@ const isAssignee = computed(() => {
 const statusBadgeClass = computed(() => {
   if (!incident.value) return '';
   switch (incident.value.status) {
+    case 'PENDING_SCREENING': return 'bg-amber-500/15 text-amber-400 border border-amber-500/30';
+    case 'REJECTED': return 'bg-accentCoral/15 text-accentCoral border border-accentCoral/30';
     case 'OPEN': return 'bg-primaryTeal/10 text-primaryTeal border border-primaryTeal/25';
     case 'ASSIGNED': return 'bg-accentYellow/10 text-accentYellow border border-accentYellow/25';
     case 'IN_PROGRESS': return 'bg-accentPurple/10 text-accentPurple border border-accentPurple/25';
@@ -495,6 +526,44 @@ const updateStatus = async () => {
   } catch (err) {
     alert(err.message);
     selectedStatus.value = incident.value.status;
+  }
+};
+
+const acceptTriage = async () => {
+  try {
+    const response = await fetch(getApiUrl(`/incidents/${incident.value._id}/status`), {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authStore.token}`
+      },
+      body: JSON.stringify({ status: 'OPEN' })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Failed to accept ticket');
+    incident.value = data;
+    selectedStatus.value = data.status;
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
+const rejectTriage = async () => {
+  try {
+    const response = await fetch(getApiUrl(`/incidents/${incident.value._id}/status`), {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authStore.token}`
+      },
+      body: JSON.stringify({ status: 'REJECTED' })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Failed to reject ticket');
+    incident.value = data;
+    selectedStatus.value = data.status;
+  } catch (err) {
+    alert(err.message);
   }
 };
 

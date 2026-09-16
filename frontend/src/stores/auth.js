@@ -12,7 +12,8 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated: (state) => !!state.token,
     isAdmin: (state) => (state.user?.role || '').toUpperCase() === 'ADMIN',
     isFTA: (state) => (state.user?.role || '').toUpperCase() === 'FTA',
-    isCSA: (state) => (state.user?.role || '').toUpperCase() === 'CSA'
+    isCSA: (state) => (state.user?.role || '').toUpperCase() === 'CSA',
+    canReportIncident: (state) => !!state.token
   },
   actions: {
     async login(email, password) {

@@ -40,6 +40,7 @@
         <div class="flex items-center space-x-3">
           <!-- Report Incident Button (Solid Emerald Green Icon-Only + with Lift) -->
           <router-link
+            v-if="authStore.canReportIncident"
             to="/create"
             class="w-11 h-11 flex items-center justify-center bg-emerald-400 hover:bg-emerald-300 text-slate-950 rounded-xl text-lg font-black shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex-shrink-0 cursor-pointer"
             title="Report Technical Incident"

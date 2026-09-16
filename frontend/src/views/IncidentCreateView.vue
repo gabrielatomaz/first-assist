@@ -28,12 +28,13 @@
           </datalist>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Match Number</label>
+          <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2" title="Select match number">Match Number</label>
           <input 
             v-model="form.matchNumber" 
             type="text" 
             list="matchSuggestionsList" 
             :disabled="!form.teamNumber"
+            title="Select match number"
             class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500 font-mono disabled:opacity-50 disabled:cursor-not-allowed" 
             :placeholder="form.teamNumber ? 'e.g. Q12 (select match)' : 'Select Team Number first...'"
           >
@@ -383,6 +384,29 @@ const submitIncident = async () => {
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Failed to submit incident');
     
+    // Cache submitted incident in reporter's local storage for instant tracking
+    const createdIncident = data.incident || data;
+    if (createdIncident && createdIncident._id) {
+      try {
+        const existingMyIncidents = JSON.parse(localStorage.getItem('my_submitted_incidents') || '[]');
+        const updatedCache = [
+          {
+            _id: createdIncident._id,
+            teamNumber: createdIncident.teamNumber,
+            matchNumber: createdIncident.matchNumber || 'N/A',
+            category: createdIncident.category,
+            status: createdIncident.status || 'OPEN',
+            eventCode: createdIncident.eventCode,
+            createdAt: createdIncident.createdAt || new Date().toISOString()
+          },
+          ...existingMyIncidents.filter(i => i._id !== createdIncident._id)
+        ];
+        localStorage.setItem('my_submitted_incidents', JSON.stringify(updatedCache));
+      } catch (cacheErr) {
+        console.warn('Could not cache submitted incident locally:', cacheErr.message);
+      }
+    }
+
     router.push('/');
   } catch (err) {
     error.value = err.message;

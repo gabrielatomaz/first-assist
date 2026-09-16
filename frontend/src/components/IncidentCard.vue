@@ -1,6 +1,26 @@
 <template>
   <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 flex flex-col justify-between space-y-4 hover:shadow-md transition h-full">
     <div class="space-y-4">
+      <!-- Quick Triage Action Buttons on Top of the Incident with Separator Line -->
+      <div v-if="incident.status === 'PENDING_SCREENING' && isStaffUser" class="border-b border-gray-800/80 pb-3 flex items-center justify-end space-x-2" @click.stop.prevent>
+        <button 
+          @click.stop.prevent="emit('accept-triage', incident._id)" 
+          class="px-3 py-1 bg-accentGreen/20 hover:bg-accentGreen text-accentGreen hover:text-white border border-accentGreen/40 rounded-lg text-xs font-bold transition flex items-center space-x-1 cursor-pointer shadow-sm"
+          title="Accept ticket into Open queue"
+        >
+          <font-awesome-icon icon="check" class="text-[10px]" />
+          <span>Accept</span>
+        </button>
+        <button 
+          @click.stop.prevent="emit('reject-triage', incident._id)" 
+          class="px-3 py-1 bg-accentCoral/20 hover:bg-accentCoral text-accentCoral hover:text-white border border-accentCoral/40 rounded-lg text-xs font-bold transition flex items-center space-x-1 cursor-pointer shadow-sm"
+          title="Reject ticket"
+        >
+          <font-awesome-icon icon="xmark" class="text-[10px]" />
+          <span>Reject</span>
+        </button>
+      </div>
+
       <div class="flex justify-between items-start">
         <div class="space-y-1">
           <router-link :to="`/teams/${incident.teamNumber}`" @click.stop class="font-extrabold text-white text-lg hover:text-primaryTeal hover:underline">
@@ -14,7 +34,7 @@
         <div class="flex flex-col items-end space-y-1.5">
           <!-- Status Badge -->
           <span :class="statusBadgeClass" class="inline-flex items-center justify-center text-center h-6 min-w-[85px] px-2.5 rounded text-xs font-bold tracking-wider font-mono uppercase leading-none">
-            {{ incident.status }}
+            {{ formatStatus(incident.status) }}
           </span>
           <!-- Priority Badge -->
           <span :class="priorityBadgeClass" class="inline-flex items-center justify-center text-center h-6 min-w-[85px] px-2.5 rounded text-xs font-bold tracking-wider font-mono uppercase leading-none">
@@ -24,7 +44,7 @@
       </div>
 
       <!-- Category Badge -->
-      <div class="flex items-center space-x-1.5">
+      <div>
         <span class="inline-flex items-center justify-center text-center h-6 px-2.5 rounded text-xs font-bold text-primaryTeal/85 bg-primaryTeal/5 border border-primaryTeal/10 font-mono uppercase tracking-wider leading-none">
           {{ formatCategory(incident.category) }}
         </span>
@@ -55,14 +75,27 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useAuthStore } from '../stores/auth';
 import UserAvatar from './UserAvatar.vue';
 
 const props = defineProps({
   incident: { type: Object, required: true }
 });
 
+const emit = defineEmits(['accept-triage', 'reject-triage']);
+
+const authStore = useAuthStore();
+const isStaffUser = computed(() => authStore.isAdmin || authStore.isFTA || authStore.isCSA);
+
+const formatStatus = (s) => {
+  if (s === 'PENDING_SCREENING') return 'IN TRIAGE';
+  return s;
+};
+
 const statusBadgeClass = computed(() => {
   switch (props.incident.status) {
+    case 'PENDING_SCREENING': return 'bg-amber-500/15 text-amber-400 border border-amber-500/30';
+    case 'REJECTED': return 'bg-accentCoral/15 text-accentCoral border border-accentCoral/30';
     case 'OPEN': return 'bg-primaryTeal/10 text-primaryTeal border border-primaryTeal/25';
     case 'ASSIGNED': return 'bg-accentYellow/10 text-accentYellow border border-accentYellow/25';
     case 'IN_PROGRESS': return 'bg-accentPurple/10 text-accentPurple border border-accentPurple/25';

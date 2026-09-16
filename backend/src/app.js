@@ -26,7 +26,7 @@ connectDB();
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api/auth', authRoutes);
 app.use('/api/access-requests', accessRequestRoutes);
-app.use('/api/incidents', authMiddleware, incidentRoutes);
+app.use('/api/incidents', incidentRoutes);
 app.use('/api/users', authMiddleware, userRoutes);
 app.use('/api/profile', authMiddleware, profileRoutes);
 app.use('/api/ai-suggestions', authMiddleware, aiSuggestionRoutes);
