@@ -90,7 +90,7 @@
           <button 
             type="button" 
             @click="showRequestModal = true"
-            class="text-xs font-bold text-primaryTeal hover:underline inline-flex items-center space-x-1 cursor-pointer"
+            class="text-xs font-bold text-primaryTeal hover:underline inline-flex items-center space-x-1.5 cursor-pointer transition duration-150"
           >
             <font-awesome-icon icon="id-card" class="text-xs" />
             <span>Request FTA Event Access</span>

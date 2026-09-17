@@ -6,6 +6,7 @@ const router = express.Router();
 
 // Public routes: Submit FTA access request & fetch registered events from login screen
 router.get('/events', accessRequestController.getPublicEvents);
+router.get('/validate-event/:key', accessRequestController.validateEvent);
 router.post('/', accessRequestController.createRequest);
 
 // Protected routes (ADMIN only)

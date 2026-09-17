@@ -36,8 +36,8 @@ export const incidentRepository = {
       .populate('reportedBy', 'name role avatarIcon avatarColor');
   },
 
-  updateStatus: async (id, status, assignedTo = undefined) => {
-    const updates = { status };
+  updateStatus: async (id, status, assignedTo = undefined, extraUpdates = {}) => {
+    const updates = { status, ...extraUpdates };
     if (assignedTo !== undefined) {
       updates.assignedTo = assignedTo;
       // Automatically transition from OPEN to ASSIGNED when assignedTo is set

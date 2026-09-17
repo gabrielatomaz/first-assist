@@ -70,16 +70,17 @@
     </div>
 
     <div v-else class="space-y-4">
-      <div 
+      <router-link 
         v-for="(incident, index) in results" 
         :key="incident._id" 
-        class="p-6 rounded-2xl border border-gray-700/60 space-y-4"
+        :to="`/incidents/${incident._id}`"
+        class="block p-6 rounded-2xl border border-gray-700/60 hover:border-primaryTeal/50 space-y-4 transition-all duration-150 cursor-pointer hover:shadow-xl hover:scale-[1.005]"
         :class="index % 2 === 0 ? 'bg-bgCard' : 'bg-[#243344]'"
       >
         <!-- Header Row -->
         <div class="flex flex-row items-start justify-between gap-3">
           <div class="space-y-1.5 flex-1 min-w-0">
-            <h3 class="font-extrabold text-white text-xl tracking-tight">Team {{ incident.teamNumber }}</h3>
+            <h3 class="font-extrabold text-white text-xl tracking-tight group-hover:text-primaryTeal transition">Team {{ incident.teamNumber }}</h3>
 
             <div class="flex flex-wrap items-center gap-2 pt-0.5">
               <!-- Category Badge -->
@@ -113,12 +114,12 @@
           <div class="flex items-center space-x-2 flex-shrink-0">
             <button
               v-if="authStore.user"
-              @click.stop="rollbackIncidentStatus(incident)"
+              @click.stop.prevent="rollbackIncidentStatus(incident)"
               :disabled="rollingBackId === incident._id"
-              class="h-8 w-8 flex items-center justify-center bg-accentYellow/15 hover:bg-accentYellow/25 text-accentYellow border border-accentYellow/30 rounded-lg transition cursor-pointer disabled:opacity-50"
+              class="h-9 w-9 flex items-center justify-center bg-gray-800/80 hover:bg-gray-700 text-gray-400 hover:text-gray-200 border border-gray-700/60 rounded-xl transition cursor-pointer disabled:opacity-40 shadow-sm"
               title="Re-open ticket and return to Dashboard"
             >
-              <font-awesome-icon :icon="rollingBackId === incident._id ? 'spinner' : 'rotate-left'" :class="{ 'animate-spin': rollingBackId === incident._id }" class="text-xs" />
+              <font-awesome-icon :icon="rollingBackId === incident._id ? 'spinner' : 'rotate-left'" :class="{ 'animate-spin': rollingBackId === incident._id }" class="text-sm" />
             </button>
           </div>
         </div>
@@ -152,7 +153,7 @@
             <p class="text-emerald-200 leading-relaxed font-semibold">{{ incident.appliedSolution }}</p>
           </div>
         </div>
-      </div>
+      </router-link>
 
       <div v-if="results.length === 0" class="text-center py-12 bg-bgCard rounded-2xl border border-dashed border-gray-800">
         <p class="text-gray-400 text-sm font-medium">No matching resolved incident records found.</p>

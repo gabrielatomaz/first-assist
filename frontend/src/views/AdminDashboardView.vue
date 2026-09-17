@@ -27,6 +27,25 @@
       </div>
     </div>
 
+    <!-- Styled Reject Access Request Modal -->
+    <ConfirmationModal
+      v-model="rejectModal.open"
+      title="Reject Access Request?"
+      :message="`Are you sure you want to reject the FTA access request for ${rejectModal.requesterName}? You can provide an optional rejection reason below.`"
+      icon="user-xmark"
+      variant="danger"
+      confirm-text="Reject Request"
+      confirm-icon="xmark"
+      cancel-text="Cancel"
+      :loading="processingReq === rejectModal.requestId"
+      loading-text="Rejecting..."
+      :show-input="true"
+      input-label="Optional Rejection Reason"
+      input-placeholder="e.g. Event assignment unverified"
+      v-model:input-value="rejectModal.reason"
+      @confirm="executeRejectRequest"
+    />
+
     <!-- FTA Access Approved Success CSS Modal -->
     <div v-if="approvalModal.open" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
       <div class="bg-bgCard border border-emerald-500/40 p-6 rounded-2xl shadow-2xl max-w-md w-full text-center space-y-5">
@@ -126,7 +145,7 @@
                   <font-awesome-icon icon="check" class="text-[11px]" />
                 </button>
                 <button 
-                  @click="handleRejectRequest(req._id)"
+                  @click="openRejectModal(req)"
                   :disabled="processingReq === req._id"
                   title="Reject Request"
                   class="w-7 h-7 rounded-md bg-red-950/60 hover:bg-red-900/60 text-accentCoral border border-red-900/40 inline-flex items-center justify-center transition cursor-pointer disabled:opacity-50"
@@ -446,7 +465,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
-import { CustomSelect } from '../components';
+import { CustomSelect, ConfirmationModal } from '../components';
 import { getApiUrl } from '../config/api';
 
 const authStore = useAuthStore();
@@ -497,6 +516,7 @@ const fetchAccessRequests = async () => {
 
 const isApprovingTBA = ref(false);
 const approvalModal = ref({ open: false, title: '', message: '', requesterName: '' });
+const rejectModal = ref({ open: false, requestId: null, reason: 'Event assignment unverified', requesterName: '' });
 
 const handleApproveRequest = async (reqObj) => {
   const requestId = typeof reqObj === 'string' ? reqObj : reqObj._id;
@@ -529,9 +549,21 @@ const handleApproveRequest = async (reqObj) => {
   }
 };
 
-const handleRejectRequest = async (requestId) => {
-  const reason = prompt('Optional rejection reason:', 'Event assignment unverified');
-  if (reason === null) return;
+const openRejectModal = (reqObj) => {
+  const reqId = typeof reqObj === 'string' ? reqObj : reqObj._id;
+  const name = reqObj?.name || 'Requester';
+  rejectModal.value = {
+    open: true,
+    requestId: reqId,
+    reason: 'Event assignment unverified',
+    requesterName: name
+  };
+};
+
+const executeRejectRequest = async () => {
+  if (!rejectModal.value.requestId) return;
+  const requestId = rejectModal.value.requestId;
+  const reason = rejectModal.value.reason;
   processingReq.value = requestId;
   try {
     const res = await fetch(getApiUrl(`/access-requests/${requestId}/reject`), {
@@ -544,6 +576,7 @@ const handleRejectRequest = async (requestId) => {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to reject request');
+    rejectModal.value.open = false;
     fetchAccessRequests();
   } catch (err) {
     alert(err.message);

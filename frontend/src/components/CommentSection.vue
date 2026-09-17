@@ -186,21 +186,21 @@
     </div>
 
     <!-- Styled Delete Confirmation Modal Overlay -->
-    <div v-if="deleteModalCommentId" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 animate-fadeIn">
-      <div class="bg-bgCard border border-gray-700 p-6 rounded-2xl max-w-md w-full shadow-2xl space-y-4">
-        <div class="flex items-center space-x-3 text-accentCoral">
-          <font-awesome-icon icon="triangle-exclamation" class="text-2xl text-accentCoral" />
-          <h3 class="text-lg font-bold">Delete Update</h3>
-        </div>
-        <p class="text-sm text-gray-300">Are you sure you want to permanently delete this update comment? This action cannot be undone.</p>
-        <div class="flex justify-end space-x-3 pt-2">
-          <button @click="deleteModalCommentId = null" class="px-4 py-2 rounded-xl text-xs font-semibold bg-bgMain text-gray-300 hover:text-white border border-gray-700">Cancel</button>
-          <button @click="executeDeleteComment" :disabled="deleting" class="px-4 py-2 rounded-xl text-xs font-bold bg-accentCoral hover:bg-accentCoral/90 text-white shadow">
-            {{ deleting ? 'Deleting...' : 'Delete Update' }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <ConfirmationModal
+      :model-value="!!deleteModalCommentId"
+      @update:model-value="(val) => { if (!val) deleteModalCommentId = null; }"
+      title="Delete Update?"
+      message="Are you sure you want to permanently delete this update comment? This action cannot be undone."
+      icon="trash-can"
+      variant="danger"
+      confirm-text="Delete Update"
+      confirm-icon="trash-can"
+      cancel-text="Cancel"
+      :loading="deleting"
+      loading-text="Deleting..."
+      @confirm="executeDeleteComment"
+      @cancel="deleteModalCommentId = null"
+    />
   </div>
 </template>
 
@@ -209,6 +209,7 @@ import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { getApiUrl } from '../config/api';
 import UserAvatar from './UserAvatar.vue';
+import ConfirmationModal from './ConfirmationModal.vue';
 
 const props = defineProps({
   incidentId: { type: String, required: true }

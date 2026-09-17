@@ -17,11 +17,23 @@
       </div>
     </div>
 
-    <!-- Alert Banner -->
-    <div v-if="alertMessage" :class="alertType === 'error' ? 'bg-red-950/40 text-accentCoral border-red-900/30' : 'bg-accentGreen/10 text-accentGreen border-accentGreen/30'" class="p-4 rounded-xl border text-sm font-medium flex justify-between items-center">
-      <span>{{ alertMessage }}</span>
-      <button @click="alertMessage = null" class="text-xs font-bold opacity-75 hover:opacity-100">✕</button>
-    </div>
+
+    <!-- Confirm Remove Team Modal Overlay -->
+    <ConfirmationModal
+      :model-value="!!teamToRemove"
+      @update:model-value="(val) => { if (!val) teamToRemove = null; }"
+      title="Remove Team from Event?"
+      :message="`Are you sure you want to remove Team ${teamToRemove} from the event roster for ${selectedEventCode}?`"
+      icon="trash-can"
+      variant="danger"
+      confirm-text="Yes, Remove"
+      confirm-icon="trash-can"
+      cancel-text="Cancel"
+      :loading="removingTeam"
+      loading-text="Removing..."
+      @confirm="executeRemoveTeam"
+      @cancel="teamToRemove = null"
+    />
 
     <!-- Prominent Full-Screen Event Sync Loading Modal Overlay -->
     <div v-if="importingTBAEvent || creatingEvent" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
@@ -81,6 +93,16 @@
               <font-awesome-icon icon="plus" class="text-sm" />
             </button>
           </form>
+        </div>
+
+        <!-- Alert Banner inside Manage Event Teams -->
+        <div 
+          v-if="alertMessage" 
+          :class="alertType === 'error' ? 'bg-red-950/40 text-accentCoral border-red-900/30' : 'bg-accentGreen/10 text-accentGreen border-accentGreen/30'" 
+          class="p-4 rounded-xl border text-sm font-medium flex justify-between items-center animate-fadeIn"
+        >
+          <span>{{ alertMessage }}</span>
+          <button @click="alertMessage = null" class="text-xs font-bold opacity-75 hover:opacity-100 cursor-pointer">✕</button>
         </div>
 
         <!-- Search Bar -->
@@ -176,6 +198,16 @@
             <font-awesome-icon :icon="showCreateCsaForm ? 'xmark' : 'user-plus'" class="text-xs" />
             <span v-if="!showCreateCsaForm">Register</span>
           </button>
+        </div>
+
+        <!-- Alert Banner inside Manage CSAs & Event Assignments -->
+        <div 
+          v-if="alertMessage" 
+          :class="alertType === 'error' ? 'bg-red-950/40 text-accentCoral border-red-900/30' : 'bg-accentGreen/10 text-accentGreen border-accentGreen/30'" 
+          class="p-4 rounded-xl border text-sm font-medium flex justify-between items-center animate-fadeIn"
+        >
+          <span>{{ alertMessage }}</span>
+          <button @click="alertMessage = null" class="text-xs font-bold opacity-75 hover:opacity-100 cursor-pointer">✕</button>
         </div>
 
         <!-- Inline Register CSA Form -->
@@ -276,7 +308,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
-import { CustomSelect } from '../components';
+import { CustomSelect, ConfirmationModal } from '../components';
 import { getApiUrl } from '../config/api';
 
 const authStore = useAuthStore();
@@ -422,8 +454,17 @@ const handleAddTeamToEvent = async () => {
   }
 };
 
-const handleRemoveTeamFromEvent = async (teamNum) => {
-  if (!confirm(`Remove Team ${teamNum} from event roster?`)) return;
+const teamToRemove = ref(null);
+const removingTeam = ref(false);
+
+const handleRemoveTeamFromEvent = (teamNum) => {
+  teamToRemove.value = teamNum;
+};
+
+const executeRemoveTeam = async () => {
+  if (!teamToRemove.value) return;
+  const teamNum = teamToRemove.value;
+  removingTeam.value = true;
   try {
     const res = await fetch(getApiUrl(`/events/${selectedEventCode.value}/teams/${teamNum}`), {
       method: 'DELETE',
@@ -431,9 +472,12 @@ const handleRemoveTeamFromEvent = async (teamNum) => {
     });
     if (!res.ok) throw new Error('Failed to remove team');
     showAlert(`Team ${teamNum} removed from roster`);
+    teamToRemove.value = null;
     loadEventTeams(currentPage.value);
   } catch (err) {
     showAlert(err.message, 'error');
+  } finally {
+    removingTeam.value = false;
   }
 };
 

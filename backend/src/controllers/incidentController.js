@@ -54,6 +54,69 @@ export const incidentController = {
     }
   },
 
+  getPublicIncidentsStatus: async (req, res) => {
+    try {
+      const { Incident } = await import('../models/Incident.js');
+      const idsParam = req.query.ids || (req.body && req.body.ids);
+      if (!idsParam) {
+        return res.json([]);
+      }
+      const rawIds = Array.isArray(idsParam) ? idsParam : String(idsParam).split(',');
+      const validIds = rawIds
+        .map(id => String(id).trim())
+        .filter(id => mongoose.Types.ObjectId.isValid(id));
+
+      if (validIds.length === 0) {
+        return res.json([]);
+      }
+
+      const incidents = await Incident.find({ _id: { $in: validIds } })
+        .select('_id teamNumber eventCode matchNumber category priority status description createdAt updatedAt resolvedAt')
+        .lean();
+
+      res.json(incidents);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  cancelPublicIncident: async (req, res) => {
+    try {
+      const { id } = req.params;
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ error: 'Invalid incident ID' });
+      }
+
+      const incident = await incidentService.getIncidentById(id);
+      if (!incident) {
+        return res.status(404).json({ error: 'Incident not found' });
+      }
+
+      if (['CLOSED', 'RESOLVED', 'REJECTED'].includes(incident.status)) {
+        return res.status(400).json({
+          error: `Incident cannot be canceled because it is already ${incident.status.toLowerCase()}`
+        });
+      }
+
+      const updated = await incidentService.updateIncidentStatus(
+        id,
+        'CLOSED',
+        null,
+        null
+      );
+
+      updated.diagnosis = (updated.diagnosis ? updated.diagnosis + '\n' : '') + '[Guest Reporter]: Incident canceled by reporter.';
+      await updated.save();
+
+      res.json({
+        message: 'Incident ticket canceled successfully.',
+        incident: updated
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+
   lookupTeamEvents: async (req, res) => {
     try {
       const { teamNumber, year } = req.query;

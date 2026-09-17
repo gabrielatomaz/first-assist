@@ -14,6 +14,65 @@ export const accessRequestController = {
     }
   },
 
+  // Public endpoint: Validate a TBA Event Key or existing event
+  validateEvent: async (req, res) => {
+    try {
+      const { key } = req.params;
+      if (!key || !key.trim()) {
+        return res.status(400).json({ valid: false, error: 'Event key is required' });
+      }
+
+      const cleanKey = key.trim().toLowerCase();
+
+      // 1. Check local DB
+      try {
+        const { Event } = await import('../models/Event.js');
+        const localEvent = await Event.findOne({
+          $or: [
+            { code: cleanKey },
+            { code: cleanKey.toUpperCase() }
+          ]
+        });
+        if (localEvent) {
+          return res.json({
+            valid: true,
+            event: {
+              code: localEvent.code,
+              name: localEvent.name,
+              location: localEvent.location || '',
+              isLocal: true
+            }
+          });
+        }
+      } catch (dbErr) {
+        console.warn('Local event check fallback:', dbErr.message);
+      }
+
+      // 2. Check TBA
+      try {
+        const { getEventFromTBA } = await import('../services/tbaService.js');
+        const tbaEvent = await getEventFromTBA(cleanKey);
+        return res.json({
+          valid: true,
+          event: {
+            code: tbaEvent.code,
+            name: tbaEvent.name,
+            location: tbaEvent.location || '',
+            year: tbaEvent.year,
+            isTBA: true
+          }
+        });
+      } catch (tbaErr) {
+        return res.status(404).json({
+          valid: false,
+          error: `Event '${cleanKey}' does not exist on The Blue Alliance.`
+        });
+      }
+    } catch (error) {
+      res.status(500).json({ valid: false, error: error.message });
+    }
+  },
+
   // Public endpoint: Submit new FTA event access request
   createRequest: async (req, res) => {
     try {
@@ -25,6 +84,52 @@ export const accessRequestController = {
       }
 
       const formattedEmail = email.toLowerCase().trim();
+
+      // Validate TBA Event Key if provided
+      let validatedEventKey = '';
+      if (tbaEventKey && tbaEventKey.trim()) {
+        const cleanKey = tbaEventKey.trim().toLowerCase();
+        let eventFound = false;
+
+        // 1. Check local DB
+        try {
+          const { Event } = await import('../models/Event.js');
+          const localEvent = await Event.findOne({
+            $or: [
+              { code: cleanKey },
+              { code: cleanKey.toUpperCase() }
+            ]
+          });
+          if (localEvent) {
+            eventFound = true;
+          }
+        } catch (dbErr) {
+          console.warn('Local event check during request submission:', dbErr.message);
+        }
+
+        // 2. Check TBA
+        if (!eventFound) {
+          try {
+            const { getEventFromTBA } = await import('../services/tbaService.js');
+            const tbaEvent = await getEventFromTBA(cleanKey);
+            if (tbaEvent) {
+              eventFound = true;
+            }
+          } catch (tbaErr) {
+            return res.status(400).json({
+              error: `Invalid TBA Event Key: Event '${cleanKey}' does not exist on The Blue Alliance.`
+            });
+          }
+        }
+
+        if (!eventFound) {
+          return res.status(400).json({
+            error: `Invalid TBA Event Key: Event '${cleanKey}' does not exist.`
+          });
+        }
+
+        validatedEventKey = cleanKey;
+      }
 
       // Check for duplicate pending request for same email
       const existingPending = await AccessRequest.findOne({
@@ -43,7 +148,7 @@ export const accessRequestController = {
         email: formattedEmail,
         passwordHash,
         requestedEventCodes: eventsList,
-        tbaEventKey: tbaEventKey ? tbaEventKey.trim() : '',
+        tbaEventKey: validatedEventKey,
         notes: notes ? notes.trim() : ''
       });
 

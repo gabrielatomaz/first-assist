@@ -5,19 +5,23 @@
       <div v-if="incident.status === 'PENDING_SCREENING' && isStaffUser" class="border-b border-gray-800/80 pb-3 flex items-center justify-end space-x-2" @click.stop.prevent>
         <button 
           @click.stop.prevent="emit('accept-triage', incident._id)" 
-          class="px-3 py-1 bg-accentGreen/20 hover:bg-accentGreen text-accentGreen hover:text-white border border-accentGreen/40 rounded-lg text-xs font-bold transition flex items-center space-x-1 cursor-pointer shadow-sm"
+          :disabled="!!triageLoadingAction"
+          class="px-3 py-1 bg-accentGreen/20 hover:bg-accentGreen text-accentGreen hover:text-white border border-accentGreen/40 rounded-lg text-xs font-bold transition flex items-center space-x-1 cursor-pointer shadow-sm disabled:opacity-50"
           title="Accept ticket into Open queue"
         >
-          <font-awesome-icon icon="check" class="text-[10px]" />
-          <span>Accept</span>
+          <font-awesome-icon v-if="triageLoadingAction === 'accept'" icon="spinner" spin class="text-[10px]" />
+          <font-awesome-icon v-else icon="check" class="text-[10px]" />
+          <span>{{ triageLoadingAction === 'accept' ? 'Accepting...' : 'Accept' }}</span>
         </button>
         <button 
           @click.stop.prevent="emit('reject-triage', incident._id)" 
-          class="px-3 py-1 bg-accentCoral/20 hover:bg-accentCoral text-accentCoral hover:text-white border border-accentCoral/40 rounded-lg text-xs font-bold transition flex items-center space-x-1 cursor-pointer shadow-sm"
+          :disabled="!!triageLoadingAction"
+          class="px-3 py-1 bg-accentCoral/20 hover:bg-accentCoral text-accentCoral hover:text-white border border-accentCoral/40 rounded-lg text-xs font-bold transition flex items-center space-x-1 cursor-pointer shadow-sm disabled:opacity-50"
           title="Reject ticket"
         >
-          <font-awesome-icon icon="xmark" class="text-[10px]" />
-          <span>Reject</span>
+          <font-awesome-icon v-if="triageLoadingAction === 'reject'" icon="spinner" spin class="text-[10px]" />
+          <font-awesome-icon v-else icon="xmark" class="text-[10px]" />
+          <span>{{ triageLoadingAction === 'reject' ? 'Rejecting...' : 'Reject' }}</span>
         </button>
       </div>
 
@@ -79,7 +83,8 @@ import { useAuthStore } from '../stores/auth';
 import UserAvatar from './UserAvatar.vue';
 
 const props = defineProps({
-  incident: { type: Object, required: true }
+  incident: { type: Object, required: true },
+  triageLoadingAction: { type: String, default: null }
 });
 
 const emit = defineEmits(['accept-triage', 'reject-triage']);
@@ -88,7 +93,7 @@ const authStore = useAuthStore();
 const isStaffUser = computed(() => authStore.isAdmin || authStore.isFTA || authStore.isCSA);
 
 const formatStatus = (s) => {
-  if (s === 'PENDING_SCREENING') return 'IN TRIAGE';
+  if (s === 'PENDING_SCREENING') return 'IN_TRIAGE';
   return s;
 };
 

@@ -77,7 +77,10 @@
             />
           </div>
         </div>
-        <p v-if="form.confirmPassword && form.password !== form.confirmPassword" class="text-[9px] text-accentCoral font-semibold">Passwords do not match.</p>
+        <div v-if="form.confirmPassword && form.password !== form.confirmPassword" class="mt-1.5 text-[10px] text-accentCoral font-semibold flex items-center space-x-1 animate-fadeIn">
+          <font-awesome-icon icon="circle-exclamation" class="text-[10px]" />
+          <span>Passwords do not match.</span>
+        </div>
 
         <div>
           <label class="block text-[10px] font-bold text-primaryTeal uppercase tracking-wider mb-1">Registered Competition Event(s)</label>
@@ -102,12 +105,43 @@
 
         <div>
           <label class="block text-[10px] font-bold text-primaryTeal uppercase tracking-wider mb-1">Or Request New Event (TBA Event Key)</label>
-          <input 
-            v-model="form.tbaEventKey" 
-            type="text" 
-            placeholder="e.g. 2026brba"
-            class="w-full px-3 py-1.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs font-medium placeholder-gray-500 focus:outline-none focus:border-primaryTeal font-mono"
-          />
+          <div class="flex space-x-1.5">
+            <div class="relative flex-1">
+              <input 
+                v-model="form.tbaEventKey" 
+                @input="handleTbaKeyChange"
+                @keydown.enter.prevent="validateTbaEvent"
+                type="text" 
+                placeholder="e.g. 2026brba"
+                class="w-full px-3 py-1.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs font-medium placeholder-gray-500 focus:outline-none focus:border-primaryTeal font-mono"
+              />
+            </div>
+            <button 
+              type="button" 
+              @click="validateTbaEvent"
+              :disabled="!form.tbaEventKey || validatingEvent"
+              class="px-2.5 py-1.5 flex items-center justify-center bg-primaryTeal/20 hover:bg-primaryTeal/30 text-primaryTeal font-bold border border-primaryTeal/40 rounded-lg text-xs transition disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0 cursor-pointer shadow-sm"
+              title="Validate on TBA"
+            >
+              <font-awesome-icon v-if="validatingEvent" icon="spinner" spin class="text-xs" />
+              <font-awesome-icon v-else icon="magnifying-glass" class="text-xs" />
+            </button>
+          </div>
+
+          <!-- Verified Event Badge -->
+          <div v-if="verifiedEvent" class="mt-1.5 flex items-center space-x-1.5 text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-2.5 py-1.5 rounded-lg animate-fadeIn">
+            <font-awesome-icon icon="circle-check" class="text-xs text-emerald-400 flex-shrink-0" />
+            <span class="font-medium truncate text-xs">
+              <strong class="text-white font-mono uppercase">{{ verifiedEvent.code }}</strong> — {{ verifiedEvent.name }}
+              <span v-if="verifiedEvent.location" class="text-gray-400 text-[10px]">({{ verifiedEvent.location }})</span>
+            </span>
+          </div>
+
+          <!-- Event Validation Error -->
+          <div v-else-if="eventError" class="mt-1.5 text-[10px] text-accentCoral font-semibold flex items-center space-x-1">
+            <font-awesome-icon icon="circle-exclamation" class="text-[10px]" />
+            <span>{{ eventError }}</span>
+          </div>
         </div>
 
         <div>
@@ -120,7 +154,7 @@
           ></textarea>
         </div>
 
-        <div v-if="error" class="p-2 bg-red-950/40 border border-red-900/30 text-accentCoral text-xs rounded-lg font-medium">
+        <div v-if="error && error !== eventError" class="p-2 bg-red-950/40 border border-red-900/30 text-accentCoral text-xs rounded-lg font-medium animate-fadeIn">
           {{ error }}
         </div>
 
@@ -144,7 +178,7 @@
       </form>
     </div>
   </div>
-</template>e>
+</template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
@@ -168,6 +202,38 @@ const submitting = ref(false);
 const success = ref(false);
 const error = ref(null);
 
+const validatingEvent = ref(false);
+const verifiedEvent = ref(null);
+const eventError = ref(null);
+
+const handleTbaKeyChange = () => {
+  verifiedEvent.value = null;
+  eventError.value = null;
+  error.value = null;
+};
+
+const validateTbaEvent = async () => {
+  if (!form.value.tbaEventKey || !form.value.tbaEventKey.trim()) return;
+  validatingEvent.value = true;
+  eventError.value = null;
+  verifiedEvent.value = null;
+  error.value = null;
+  try {
+    const key = form.value.tbaEventKey.trim().toLowerCase();
+    const res = await fetch(getApiUrl(`/access-requests/validate-event/${key}`));
+    const data = await res.json();
+    if (!res.ok || !data.valid) {
+      throw new Error(data.error || `Event '${key}' was not found on The Blue Alliance.`);
+    }
+    verifiedEvent.value = data.event;
+    form.value.tbaEventKey = data.event.code.toLowerCase();
+  } catch (err) {
+    eventError.value = err.message;
+  } finally {
+    validatingEvent.value = false;
+  }
+};
+
 const fetchEvents = async () => {
   try {
     const res = await fetch(getApiUrl('/access-requests/events'));
@@ -190,6 +256,18 @@ const handleSubmit = async () => {
     error.value = 'Passwords do not match.';
     return;
   }
+
+  // If a TBA Event Key is provided, validate it first
+  if (form.value.tbaEventKey && form.value.tbaEventKey.trim()) {
+    if (!verifiedEvent.value || verifiedEvent.value.code.toLowerCase() !== form.value.tbaEventKey.trim().toLowerCase()) {
+      await validateTbaEvent();
+      if (!verifiedEvent.value) {
+        // Error is already shown directly under the TBA Event Key field
+        return;
+      }
+    }
+  }
+
   submitting.value = true;
   error.value = null;
   try {

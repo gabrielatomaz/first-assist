@@ -6,3 +6,4 @@ export { default as CustomSelect } from './CustomSelect.vue';
 export { default as AccessRequestModal } from './AccessRequestModal.vue';
 export { default as UserAvatar } from './UserAvatar.vue';
 export { default as PublicReportModal } from './PublicReportModal.vue';
+export { default as ConfirmationModal } from './ConfirmationModal.vue';

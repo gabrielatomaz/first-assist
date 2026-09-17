@@ -116,17 +116,26 @@ export const incidentService = {
     const previous = await Incident.findById(id);
     if (!previous) throw new Error("Incident not found");
 
-    const updated = await incidentRepository.updateStatus(id, status, assignedTo);
+    const extraUpdates = {};
+    if (previous.status === 'PENDING_SCREENING' && status !== 'REJECTED' && userId) {
+      extraUpdates.reportedBy = userId;
+    }
+
+    const updated = await incidentRepository.updateStatus(id, status, assignedTo, extraUpdates);
 
     // Audit logs for status change
     if (previous.status !== updated.status) {
+      const detailsMsg = previous.status === 'PENDING_SCREENING' && extraUpdates.reportedBy
+        ? `Incident accepted from Triage into ${updated.status}`
+        : `Status transitioned from ${previous.status} to ${updated.status}`;
+
       await logIncidentChange({
         incidentId: id,
         userId,
         action: 'STATUS_UPDATE',
         oldValue: previous.status,
         newValue: updated.status,
-        details: `Status transitioned from ${previous.status} to ${updated.status}`
+        details: detailsMsg
       });
     }
 
@@ -210,7 +219,7 @@ export const incidentService = {
   },
 
   searchResolvedIncidents: async (keyword, filters = {}, pagination = {}) => {
-    const query = { status: { $in: ['RESOLVED', 'CLOSED'] } };
+    const query = { status: 'RESOLVED' };
     
     if (filters.category) query.category = filters.category;
     if (filters.priority) query.priority = filters.priority;
@@ -246,10 +255,10 @@ export const incidentService = {
     const currentIncident = await Incident.findById(incidentId);
     if (!currentIncident) throw new Error('Incident not found');
 
-    // Find resolved or closed incidents matching the category, excluding self
+    // Find resolved incidents matching the category, excluding self
     return await Incident.find({
       _id: { $ne: incidentId },
-      status: { $in: ['RESOLVED', 'CLOSED'] },
+      status: 'RESOLVED',
       category: currentIncident.category
     })
       .limit(3)
@@ -270,7 +279,7 @@ export const incidentService = {
     try {
       relatedIncidents = await Incident.find({
         _id: { $ne: incidentId },
-        status: { $in: ['RESOLVED', 'CLOSED'] },
+        status: 'RESOLVED',
         category: incident.category
       }).limit(3);
     } catch (err) {

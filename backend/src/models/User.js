@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   role: { type: String, enum: ['ADMIN', 'FTA', 'CSA', 'TEAM'], required: true },
   teamNumber: { type: Number, default: null },
-  teamRole: { type: String, enum: ['MENTOR', 'CAPTAIN', 'STUDENT_MEMBER'], default: null },
+  teamRole: { type: String, enum: ['MENTOR', 'CAPTAIN', 'STUDENT_MEMBER', null], default: null },
   passwordHash: { type: String, required: true },
   status: { type: String, enum: ['ACTIVE', 'INACTIVE'], default: 'ACTIVE' },
   assignedEventCode: { type: String, default: null },

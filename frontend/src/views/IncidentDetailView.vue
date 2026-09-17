@@ -21,19 +21,23 @@
       <div class="flex items-center space-x-2 w-full sm:w-auto">
         <button
           @click="acceptTriage"
-          class="flex-1 sm:flex-initial px-4 py-2 bg-accentGreen hover:bg-accentGreen/90 text-white font-bold rounded-xl text-xs shadow transition flex items-center justify-center space-x-1.5 cursor-pointer"
+          :disabled="triageLoading !== null"
+          class="flex-1 sm:flex-initial px-4 py-2 bg-accentGreen hover:bg-accentGreen/90 text-white font-bold rounded-xl text-xs shadow transition flex items-center justify-center space-x-1.5 cursor-pointer disabled:opacity-50"
           title="Accept ticket into Open queue"
         >
-          <font-awesome-icon icon="check" class="text-xs" />
-          <span>Accept Ticket</span>
+          <font-awesome-icon v-if="triageLoading === 'accept'" icon="spinner" spin class="text-xs" />
+          <font-awesome-icon v-else icon="check" class="text-xs" />
+          <span>{{ triageLoading === 'accept' ? 'Accepting...' : 'Accept Ticket' }}</span>
         </button>
         <button
           @click="rejectTriage"
-          class="flex-1 sm:flex-initial px-4 py-2 bg-accentCoral/20 hover:bg-accentCoral text-accentCoral hover:text-white border border-accentCoral/40 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-1.5 cursor-pointer"
+          :disabled="triageLoading !== null"
+          class="flex-1 sm:flex-initial px-4 py-2 bg-accentCoral/20 hover:bg-accentCoral text-accentCoral hover:text-white border border-accentCoral/40 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-1.5 cursor-pointer disabled:opacity-50"
           title="Reject ticket"
         >
-          <font-awesome-icon icon="xmark" class="text-xs" />
-          <span>Reject Ticket</span>
+          <font-awesome-icon v-if="triageLoading === 'reject'" icon="spinner" spin class="text-xs" />
+          <font-awesome-icon v-else icon="xmark" class="text-xs" />
+          <span>{{ triageLoading === 'reject' ? 'Rejecting...' : 'Reject Ticket' }}</span>
         </button>
       </div>
     </div>
@@ -45,7 +49,7 @@
 
         <div class="flex flex-wrap items-center gap-2 pt-0.5">
           <span :class="statusBadgeClass" class="inline-flex items-center justify-center text-center min-w-[85px] px-2.5 py-1 rounded text-xs font-bold font-mono tracking-wider uppercase flex-shrink-0">
-            {{ incident.status === 'PENDING_SCREENING' ? 'IN TRIAGE' : incident.status }}
+            {{ incident.status === 'PENDING_SCREENING' ? 'IN_TRIAGE' : incident.status }}
           </span>
           <span :class="priorityBadgeClass" class="inline-flex items-center justify-center text-center min-w-[85px] px-2.5 py-1 rounded text-xs font-bold font-mono tracking-wider uppercase flex-shrink-0">
             {{ incident.priority }}
@@ -246,22 +250,35 @@
       @resolved="handleIncidentResolved"
     />
 
+    <!-- Confirm Reject Triage Modal overlay -->
+    <ConfirmationModal
+      v-model="showRejectModal"
+      title="Reject Technical Incident?"
+      :message="`Are you sure you want to reject this incident ticket for Team ${incident.teamNumber}? It will be marked as rejected and removed from the active triage queue.`"
+      icon="triangle-exclamation"
+      variant="danger"
+      confirm-text="Yes, Reject"
+      confirm-icon="xmark"
+      cancel-text="Cancel"
+      :loading="triageLoading === 'reject'"
+      loading-text="Rejecting..."
+      @confirm="executeRejectTriage"
+    />
+
     <!-- Confirm Delete Modal overlay -->
-    <div v-if="showDeleteModal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 animate-fadeIn">
-      <div class="bg-bgCard border border-gray-700 p-6 rounded-2xl max-w-md w-full shadow-2xl space-y-4">
-        <div class="flex items-center space-x-3 text-accentCoral">
-          <font-awesome-icon icon="triangle-exclamation" class="text-2xl text-accentCoral" />
-          <h3 class="text-lg font-bold">Delete Incident</h3>
-        </div>
-        <p class="text-sm text-gray-300">Are you sure you want to permanently delete this incident ticket for <strong>Team {{ incident.teamNumber }}</strong>? This action cannot be undone.</p>
-        <div class="flex justify-end space-x-3 pt-2">
-          <button @click="showDeleteModal = false" class="px-4 py-2 rounded-xl text-xs font-semibold bg-bgMain text-gray-300 hover:text-white border border-gray-700">Cancel</button>
-          <button @click="handleDelete" :disabled="deleting" class="px-4 py-2 rounded-xl text-xs font-bold bg-accentCoral hover:bg-accentCoral/90 text-white shadow">
-            {{ deleting ? 'Deleting...' : 'Delete' }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <ConfirmationModal
+      v-model="showDeleteModal"
+      title="Delete Incident?"
+      :message="`Are you sure you want to permanently delete this incident ticket for Team ${incident.teamNumber}? This action cannot be undone.`"
+      icon="trash-can"
+      variant="danger"
+      confirm-text="Delete"
+      confirm-icon="trash-can"
+      cancel-text="Cancel"
+      :loading="deleting"
+      loading-text="Deleting..."
+      @confirm="handleDelete"
+    />
   </div>
 </template>
 
@@ -269,12 +286,13 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
-import { CommentSection, AISuggestionPanel, ResolveIncidentModal, CustomSelect, UserAvatar } from '../components';
+import { CommentSection, AISuggestionPanel, ResolveIncidentModal, CustomSelect, UserAvatar, ConfirmationModal } from '../components';
 import { getApiUrl } from '../config/api';
 
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
+const triageLoading = ref(null);
 
 const statusOptions = computed(() => {
   const options = [
@@ -317,6 +335,7 @@ const loading = ref(true);
 const error = ref(null);
 const showResolveModal = ref(false);
 const showDeleteModal = ref(false);
+const showRejectModal = ref(false);
 const deleting = ref(false);
 
 const canDelete = computed(() => {
@@ -530,6 +549,7 @@ const updateStatus = async () => {
 };
 
 const acceptTriage = async () => {
+  triageLoading.value = 'accept';
   try {
     const response = await fetch(getApiUrl(`/incidents/${incident.value._id}/status`), {
       method: 'PATCH',
@@ -545,10 +565,17 @@ const acceptTriage = async () => {
     selectedStatus.value = data.status;
   } catch (err) {
     alert(err.message);
+  } finally {
+    triageLoading.value = null;
   }
 };
 
-const rejectTriage = async () => {
+const rejectTriage = () => {
+  showRejectModal.value = true;
+};
+
+const executeRejectTriage = async () => {
+  triageLoading.value = 'reject';
   try {
     const response = await fetch(getApiUrl(`/incidents/${incident.value._id}/status`), {
       method: 'PATCH',
@@ -562,8 +589,11 @@ const rejectTriage = async () => {
     if (!response.ok) throw new Error(data.error || 'Failed to reject ticket');
     incident.value = data;
     selectedStatus.value = data.status;
+    showRejectModal.value = false;
   } catch (err) {
     alert(err.message);
+  } finally {
+    triageLoading.value = null;
   }
 };
 

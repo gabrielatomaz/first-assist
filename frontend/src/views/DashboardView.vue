@@ -1,5 +1,22 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 relative">
+    <!-- Styled Confirm Reject Triage Modal -->
+    <ConfirmationModal
+      :model-value="!!incidentToReject"
+      @update:model-value="(val) => { if (!val) incidentToReject = null; }"
+      title="Reject Technical Incident?"
+      message="Are you sure you want to reject this incident ticket? It will be marked as rejected and removed from the active triage queue."
+      icon="triangle-exclamation"
+      variant="danger"
+      confirm-text="Yes, Reject"
+      confirm-icon="xmark"
+      cancel-text="Cancel"
+      :loading="!!triageLoadingMap[incidentToReject]"
+      loading-text="Rejecting..."
+      @confirm="executeRejectTriage"
+      @cancel="incidentToReject = null"
+    />
+
     <div class="flex flex-col md:flex-row justify-between md:items-center gap-4">
       <div>
         <h2 class="text-3xl font-extrabold text-primaryTeal tracking-tight">Technical Incidents</h2>
@@ -98,6 +115,7 @@
       >
         <IncidentCard 
           :incident="incident" 
+          :triage-loading-action="triageLoadingMap[incident._id]"
           @accept-triage="handleAcceptTriage"
           @reject-triage="handleRejectTriage"
           class="h-full" 
@@ -120,7 +138,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
-import { IncidentCard, CustomSelect } from '../components';
+import { IncidentCard, CustomSelect, ConfirmationModal } from '../components';
 import { getApiUrl } from '../config/api';
 
 const authStore = useAuthStore();
@@ -136,12 +154,14 @@ const refreshInterval = ref(parseInt(localStorage.getItem('first_assist_refresh_
 const pendingScreeningCount = ref(0);
 
 const statusOptions = [
-  { value: 'ALL', label: 'All' },
+  { value: 'ALL', label: 'All Active' },
+  { value: 'PENDING_SCREENING', label: 'In Triage' },
   { value: 'OPEN', label: 'Open' },
   { value: 'ASSIGNED', label: 'Assigned' },
   { value: 'IN_PROGRESS', label: 'In Progress' },
   { value: 'WAITING', label: 'Waiting' },
   { value: 'RESOLVED', label: 'Resolved' },
+  { value: 'CLOSED', label: 'Closed' },
   { value: 'REJECTED', label: 'Rejected' }
 ];
 
@@ -214,6 +234,8 @@ const fetchPendingCount = async () => {
     let params = ['status=PENDING_SCREENING'];
     if (eventFilter.value !== 'ALL') {
       params.push(`eventCode=${eventFilter.value}`);
+    } else {
+      params.push('eventCode=ALL');
     }
     const response = await fetch(getApiUrl(`/incidents?${params.join('&')}`), {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
@@ -230,7 +252,7 @@ const fetchPendingCount = async () => {
 
 const fetchIncidents = async () => {
   error.value = null;
-  fetchPendingCount();
+  await fetchPendingCount();
   try {
     let params = [];
     if (statusFilter.value !== 'ALL') {
@@ -238,6 +260,8 @@ const fetchIncidents = async () => {
     }
     if (eventFilter.value !== 'ALL') {
       params.push(`eventCode=${eventFilter.value}`);
+    } else {
+      params.push('eventCode=ALL');
     }
     
     const query = params.length > 0 ? `?${params.join('&')}` : '';
@@ -256,7 +280,15 @@ const fetchIncidents = async () => {
   }
 };
 
+watch([statusFilter, eventFilter], () => {
+  fetchIncidents();
+});
+
+const triageLoadingMap = ref({});
+const incidentToReject = ref(null);
+
 const handleAcceptTriage = async (incidentId) => {
+  triageLoadingMap.value[incidentId] = 'accept';
   try {
     const res = await fetch(getApiUrl(`/incidents/${incidentId}/status`), {
       method: 'PATCH',
@@ -273,11 +305,19 @@ const handleAcceptTriage = async (incidentId) => {
     await fetchIncidents();
   } catch (err) {
     alert(err.message);
+  } finally {
+    delete triageLoadingMap.value[incidentId];
   }
 };
 
-const handleRejectTriage = async (incidentId) => {
-  if (!confirm('Are you sure you want to reject this incident ticket?')) return;
+const handleRejectTriage = (incidentId) => {
+  incidentToReject.value = incidentId;
+};
+
+const executeRejectTriage = async () => {
+  if (!incidentToReject.value) return;
+  const incidentId = incidentToReject.value;
+  triageLoadingMap.value[incidentId] = 'reject';
   try {
     const res = await fetch(getApiUrl(`/incidents/${incidentId}/status`), {
       method: 'PATCH',
@@ -291,9 +331,12 @@ const handleRejectTriage = async (incidentId) => {
       const errData = await res.json().catch(() => ({}));
       throw new Error(errData.error || 'Failed to reject ticket');
     }
+    incidentToReject.value = null;
     await fetchIncidents();
   } catch (err) {
     alert(err.message);
+  } finally {
+    delete triageLoadingMap.value[incidentId];
   }
 };
 

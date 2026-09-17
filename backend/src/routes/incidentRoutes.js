@@ -7,9 +7,13 @@ import { authMiddleware, requireRole } from '../middleware/authMiddleware.js';
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Public routes (Guest Mode ticket submission & TBA team lookup)
+// Public routes (Guest Mode ticket submission, TBA team lookup & status checks)
 router.get('/public/team-events', incidentController.lookupTeamEvents);
 router.get('/public/team-matches', incidentController.lookupTeamMatches);
+router.get('/public/status', incidentController.getPublicIncidentsStatus);
+router.post('/public/status', incidentController.getPublicIncidentsStatus);
+router.post('/public/:id/cancel', incidentController.cancelPublicIncident);
+router.patch('/public/:id/cancel', incidentController.cancelPublicIncident);
 router.post('/public', incidentController.createPublicIncident);
 
 // Protected routes (Require Authentication)

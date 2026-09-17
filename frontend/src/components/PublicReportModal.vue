@@ -1,8 +1,32 @@
 <template>
   <div class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn overflow-y-auto">
-    <div class="bg-bgCard border border-gray-700/80 rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4 relative my-auto">
+    <div class="bg-bgCard border border-gray-700/80 rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4 relative my-auto overflow-hidden">
+      <!-- Styled Cancellation Confirmation Modal Overlay -->
+      <ConfirmationModal
+        :model-value="!!incidentToCancel"
+        @update:model-value="(val) => { if (!val) incidentToCancel = null; }"
+        title="Cancel Technical Incident?"
+        message="Are you sure you want to cancel this technical incident ticket? Event technicians will be notified that assistance is no longer needed."
+        icon="triangle-exclamation"
+        variant="danger"
+        confirm-text="Yes, Cancel"
+        confirm-icon="xmark"
+        cancel-text="Keep Ticket"
+        :loading="cancelingId === incidentToCancel"
+        loading-text="Canceling..."
+        @confirm="executeCancelIncident"
+        @cancel="incidentToCancel = null"
+      />
+
+      <button 
+        @click="$emit('close')" 
+        class="absolute top-3.5 right-3.5 text-gray-400 hover:text-white transition font-bold text-base cursor-pointer z-10"
+      >
+        ✕
+      </button>
+
       <!-- Header -->
-      <div class="border-b border-gray-700/80 pb-3">
+      <div class="border-b border-gray-700/80 pb-3 pr-6">
         <h3 class="text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
           <font-awesome-icon icon="clipboard-list" class="text-primaryTeal text-base" />
           <span>Report Incident (Guest Mode)</span>
@@ -23,7 +47,7 @@
         </button>
         <button
           type="button"
-          @click="viewMode = 'history'"
+          @click="viewMode = 'history'; refreshCachedStatus();"
           :class="viewMode === 'history' ? 'bg-primaryTeal/20 text-primaryTeal border-primaryTeal/40 font-bold' : 'text-gray-400 hover:text-gray-200 border-transparent font-medium'"
           class="px-3 py-1.5 rounded-lg text-xs border transition cursor-pointer flex items-center space-x-1.5"
         >
@@ -68,8 +92,8 @@
 
           <div class="flex justify-between items-center text-[11px] pt-0.5">
             <span class="text-gray-400">Category: <strong class="text-gray-200">{{ successTicket.category || form.category }}</strong></span>
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-              IN TRIAGE
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono">
+              IN_TRIAGE
             </span>
           </div>
         </div>
@@ -82,11 +106,22 @@
         <div class="flex flex-col sm:flex-row gap-2 pt-1">
           <button 
             type="button"
-            @click="viewMode = 'history'" 
+            @click="viewMode = 'history'; refreshCachedStatus();" 
             class="flex-1 py-2.5 px-4 bg-primaryTeal hover:bg-primaryTeal/90 text-white font-bold rounded-xl transition text-xs flex items-center justify-center space-x-1.5 shadow-md cursor-pointer"
           >
             <font-awesome-icon icon="clock-rotate-left" class="text-xs" />
             <span>Check My Cached Incidents ({{ cachedIncidents.length }})</span>
+          </button>
+          <button 
+            v-if="successTicket && canCancelIncident(successTicket.status)"
+            type="button" 
+            @click="incidentToCancel = successTicket._id" 
+            :disabled="cancelingId === successTicket._id"
+            class="py-2.5 px-3 bg-accentCoral/15 hover:bg-accentCoral text-accentCoral hover:text-white font-bold rounded-xl border border-accentCoral/30 transition text-xs cursor-pointer flex items-center justify-center space-x-1"
+          >
+            <font-awesome-icon v-if="cancelingId === successTicket._id" icon="spinner" spin class="text-xs" />
+            <font-awesome-icon v-else icon="xmark" class="text-xs" />
+            <span>Cancel Ticket</span>
           </button>
           <button 
             type="button"
@@ -120,7 +155,7 @@
           <font-awesome-icon icon="inbox" class="text-2xl text-gray-600" />
           <p class="text-xs text-gray-400 font-medium">No cached incidents found on this device.</p>
           <button 
-            type="button"
+            type="button" 
             @click="viewMode = 'form'" 
             class="mt-2 px-3 py-1.5 bg-primaryTeal text-white font-bold rounded-lg text-xs hover:bg-primaryTeal/90 transition cursor-pointer"
           >
@@ -151,9 +186,24 @@
 
             <p class="text-[11px] text-gray-300 line-clamp-2">{{ inc.description || 'No description provided' }}</p>
 
-            <div class="flex justify-between items-center text-[10px] text-gray-500 pt-1 border-t border-gray-800">
-              <span>Category: <strong class="text-gray-400">{{ inc.category }}</strong></span>
-              <span>{{ formatTime(inc.createdAt) }}</span>
+            <div class="flex justify-between items-center text-[10px] text-gray-500 pt-1.5 border-t border-gray-800">
+              <div class="flex items-center space-x-1.5">
+                <span>Category: <strong class="text-gray-400">{{ inc.category }}</strong></span>
+                <span>•</span>
+                <span>{{ formatTime(inc.createdAt) }}</span>
+              </div>
+              <button 
+                v-if="canCancelIncident(inc.status)"
+                type="button" 
+                @click="incidentToCancel = inc._id" 
+                :disabled="cancelingId === inc._id"
+                class="px-2 py-0.5 rounded-lg bg-accentCoral/15 hover:bg-accentCoral text-accentCoral hover:text-white border border-accentCoral/30 transition text-[10px] font-bold cursor-pointer flex items-center space-x-1"
+                title="Cancel ticket"
+              >
+                <font-awesome-icon v-if="cancelingId === inc._id" icon="spinner" spin class="text-[9px]" />
+                <font-awesome-icon v-else icon="xmark" class="text-[9px]" />
+                <span>Cancel Ticket</span>
+              </button>
             </div>
           </div>
         </div>
@@ -323,6 +373,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { getApiUrl } from '../config/api';
+import ConfirmationModal from './ConfirmationModal.vue';
 
 const emit = defineEmits(['close']);
 
@@ -510,12 +561,74 @@ const resetForm = () => {
 };
 
 const refreshCachedStatus = async () => {
+  loadCachedIncidents();
   if (cachedIncidents.value.length === 0) return;
+  const ids = cachedIncidents.value.map(i => i._id).filter(Boolean);
+  if (ids.length === 0) return;
+
   refreshingStatus.value = true;
   try {
-    loadCachedIncidents();
+    const res = await fetch(getApiUrl('/incidents/public/status'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids })
+    });
+    if (res.ok) {
+      const updatedList = await res.json();
+      if (Array.isArray(updatedList) && updatedList.length > 0) {
+        const updateMap = new Map(updatedList.map(item => [String(item._id), item]));
+        cachedIncidents.value = cachedIncidents.value.map(cached => {
+          const fresh = updateMap.get(String(cached._id));
+          return fresh ? { ...cached, ...fresh } : cached;
+        });
+        localStorage.setItem('my_submitted_incidents', JSON.stringify(cachedIncidents.value));
+      }
+    }
+  } catch (err) {
+    console.warn('Failed to refresh cached ticket status from server:', err);
   } finally {
     refreshingStatus.value = false;
+  }
+};
+
+const incidentToCancel = ref(null);
+const cancelingId = ref(null);
+
+const canCancelIncident = (status) => {
+  const s = (status || '').toUpperCase();
+  return s === 'PENDING_SCREENING' || s === 'IN_TRIAGE' || s === 'OPEN' || s === 'WAITING';
+};
+
+const executeCancelIncident = async () => {
+  const incidentId = incidentToCancel.value;
+  if (!incidentId) return;
+  
+  cancelingId.value = incidentId;
+  try {
+    const res = await fetch(getApiUrl(`/incidents/public/${incidentId}/cancel`), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to cancel incident');
+    
+    // Update cached incident in memory and local storage
+    cachedIncidents.value = cachedIncidents.value.map(item => {
+      if (String(item._id) === String(incidentId)) {
+        return { ...item, status: 'CLOSED' };
+      }
+      return item;
+    });
+    localStorage.setItem('my_submitted_incidents', JSON.stringify(cachedIncidents.value));
+
+    if (successTicket.value && String(successTicket.value._id) === String(incidentId)) {
+      successTicket.value.status = 'CLOSED';
+    }
+    incidentToCancel.value = null;
+  } catch (err) {
+    alert(err.message || 'Failed to cancel ticket');
+  } finally {
+    cancelingId.value = null;
   }
 };
 
@@ -529,9 +642,9 @@ const getStatusBadgeClass = (status) => {
 
 const formatStatus = (status) => {
   const s = (status || '').toUpperCase();
-  if (s === 'PENDING_SCREENING') return 'In Triage';
-  if (s === 'IN_PROGRESS') return 'In Progress';
-  return s || 'In Triage';
+  if (s === 'PENDING_SCREENING') return 'IN_TRIAGE';
+  if (s === 'IN_PROGRESS') return 'IN_PROGRESS';
+  return s || 'IN_TRIAGE';
 };
 
 const formatTime = (iso) => {
@@ -546,5 +659,6 @@ const formatTime = (iso) => {
 
 onMounted(() => {
   loadCachedIncidents();
+  refreshCachedStatus();
 });
 </script>
