@@ -47,7 +47,7 @@ export const userController = {
         role: user.role,
         status: user.status,
         avatarIcon: user.avatarIcon || 'user',
-        avatarColor: user.avatarColor || '#4F7F82'
+        avatarColor: user.avatarColor || '#38A3A5'
       });
     } catch (error) {
       res.status(500).json({ error: error.message });

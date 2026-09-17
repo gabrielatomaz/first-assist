@@ -130,8 +130,8 @@ const iconContainerClass = computed(() => {
 const confirmButtonClass = computed(() => {
   switch (props.variant) {
     case 'danger': return 'bg-accentCoral hover:bg-accentCoral/90 text-white';
-    case 'warning': return 'bg-amber-500 hover:bg-amber-400 text-slate-950';
-    case 'success': return 'bg-emerald-500 hover:bg-emerald-400 text-slate-950';
+    case 'warning': return 'bg-amber-600 hover:bg-amber-500 text-white';
+    case 'success': return 'bg-accentGreen hover:bg-accentGreen/90 text-white';
     case 'primary': return 'bg-primaryTeal hover:bg-primaryTeal/90 text-white';
     default: return 'bg-gray-700 hover:bg-gray-600 text-white';
   }

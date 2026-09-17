@@ -7,15 +7,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        bgMain: '#22303F',
-        bgCard: '#2B3B4E',
-        primaryNavy: '#16202B',
-        primaryTeal: '#4F7F82',
-        accentCoral: '#E85B2F',
-        accentYellow: '#DAAB52',
-        accentPurple: '#6E5F70',
+        bgMain: '#1C2633',
+        bgCard: '#253344',
+        primaryNavy: '#131C26',
+        primaryTeal: '#38777E',
+        accentCoral: '#E25C43',
+        accentYellow: '#E5B25D',
+        accentPurple: '#9D85C5',
         accentGreen: '#10B981',
-        textMain: '#E4E4E4'
+        textMain: '#E2E8F0'
       }
     },
   },

@@ -7,7 +7,7 @@
       </div>
       <button
         @click="showCreateForm = !showCreateForm"
-        :class="showCreateForm ? 'w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 rounded-lg transition cursor-pointer flex-shrink-0' : 'bg-primaryTeal hover:bg-primaryTeal/90 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center space-x-1.5 shadow-sm'"
+        :class="showCreateForm ? 'w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 rounded-lg transition cursor-pointer flex-shrink-0' : 'bg-primaryTeal hover:brightness-95 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center space-x-1.5 shadow-sm'"
         :title="showCreateForm ? 'Cancel' : 'Register'"
       >
         <font-awesome-icon :icon="showCreateForm ? 'xmark' : 'user-plus'" class="text-xs" />
@@ -52,7 +52,7 @@
         <button
           type="submit"
           :disabled="creating"
-          class="bg-primaryTeal hover:bg-primaryTeal/90 text-white font-semibold py-2.5 px-6 rounded-lg text-sm shadow hover:shadow-md transition duration-150 disabled:opacity-50"
+          class="bg-primaryTeal hover:brightness-95 text-white font-semibold py-2.5 px-6 rounded-lg text-sm shadow hover:shadow-md transition duration-150 disabled:opacity-50 cursor-pointer"
         >
           {{ creating ? 'Registering...' : 'Register' }}
         </button>

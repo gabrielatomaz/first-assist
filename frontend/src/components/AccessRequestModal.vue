@@ -26,7 +26,7 @@
         </p>
         <button 
           @click="$emit('close')" 
-          class="mt-2 w-full py-1.5 bg-primaryTeal text-slate-950 font-bold rounded-lg text-xs hover:bg-opacity-90 transition cursor-pointer"
+          class="mt-2 w-full py-1.5 bg-primaryTeal hover:bg-primaryTeal/90 text-white font-bold rounded-lg text-xs transition cursor-pointer shadow-sm"
         >
           Close
         </button>
@@ -169,7 +169,7 @@
           <button 
             type="submit" 
             :disabled="submitting || (form.requestedEventCodes.length === 0 && !form.tbaEventKey) || (form.password !== form.confirmPassword)"
-            class="px-4 py-1.5 bg-primaryTeal text-slate-950 font-bold rounded-lg text-xs hover:bg-opacity-90 disabled:opacity-50 transition cursor-pointer flex items-center space-x-1.5"
+            class="px-4 py-1.5 bg-primaryTeal hover:brightness-95 text-white font-bold rounded-lg text-xs disabled:opacity-50 transition cursor-pointer flex items-center space-x-1.5 shadow-sm"
           >
             <font-awesome-icon v-if="submitting" icon="spinner" spin class="text-xs" />
             <span>Submit</span>

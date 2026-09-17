@@ -52,7 +52,7 @@
         <button
           type="submit"
           :disabled="loading"
-          class="w-full bg-primaryTeal hover:bg-primaryTeal/90 text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl transition duration-200 disabled:opacity-50 flex items-center justify-center space-x-2"
+          class="w-full bg-primaryTeal hover:brightness-95 text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl transition duration-200 disabled:opacity-50 flex items-center justify-center space-x-2 cursor-pointer"
         >
           <span v-if="loading" class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></span>
           <span>{{ loading ? 'Signing in...' : 'Sign In' }}</span>

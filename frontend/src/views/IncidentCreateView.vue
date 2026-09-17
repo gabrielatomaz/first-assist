@@ -131,7 +131,7 @@
         <button
           type="submit"
           :disabled="submitting || transcribing"
-          class="h-12 px-6 bg-primaryTeal hover:bg-primaryTeal/90 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition duration-150 disabled:opacity-50 text-sm flex items-center justify-center space-x-2 flex-shrink-0"
+          class="h-12 px-6 bg-primaryTeal hover:brightness-95 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition duration-150 disabled:opacity-50 text-sm flex items-center justify-center space-x-2 flex-shrink-0 cursor-pointer"
           title="Submit Ticket"
         >
           <font-awesome-icon v-if="submitting" icon="spinner" spin class="text-base" />

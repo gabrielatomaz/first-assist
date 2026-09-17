@@ -52,8 +52,8 @@
           class="px-3 py-1.5 rounded-lg text-xs border transition cursor-pointer flex items-center space-x-1.5"
         >
           <font-awesome-icon icon="clock-rotate-left" class="text-xs" />
-          <span>My Cached Tickets</span>
-          <span v-if="cachedIncidents.length > 0" class="px-1.5 py-0.2 bg-primaryTeal text-slate-950 font-bold rounded-full text-[10px] ml-1 font-mono">
+          <span>My Submitted Tickets</span>
+          <span v-if="cachedIncidents.length > 0" class="px-1.5 py-0.2 bg-primaryTeal text-white font-bold rounded-full text-[10px] ml-1 font-mono">
             {{ cachedIncidents.length }}
           </span>
         </button>
@@ -359,7 +359,7 @@
           <button 
             type="submit" 
             :disabled="submitting || !form.eventCode || teamEvents.length === 0" 
-            class="px-6 py-2.5 rounded-xl text-xs font-bold bg-primaryTeal hover:bg-primaryTeal/90 text-white shadow-md transition disabled:opacity-50 cursor-pointer flex items-center space-x-1.5"
+            class="px-6 py-2.5 rounded-xl text-xs font-bold bg-primaryTeal hover:brightness-95 text-white shadow-md transition disabled:opacity-50 cursor-pointer flex items-center space-x-1.5"
           >
             <font-awesome-icon v-if="submitting" icon="spinner" spin class="text-xs" />
             <span>{{ submitting ? 'Submitting...' : 'Submit' }}</span>

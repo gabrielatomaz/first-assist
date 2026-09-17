@@ -8,14 +8,14 @@
   >
     <font-awesome-icon 
       :icon="icon || 'user'" 
-      :style="{ color: color || '#4F7F82' }"
+      :style="{ color: color || '#38777E' }"
       :class="[iconSizeClass, 'inline-block transition-all duration-200']"
     />
   </div>
   <font-awesome-icon 
     v-else
     :icon="icon || 'user'" 
-    :style="{ color: color || '#4F7F82' }"
+    :style="{ color: color || '#38777E' }"
     :class="[sizeClass, 'inline-block transition-all duration-200 flex-shrink-0']"
     :title="title"
   />
@@ -26,15 +26,15 @@ import { computed } from 'vue';
 
 const props = defineProps({
   icon: { type: String, default: 'user' },
-  color: { type: String, default: '#4F7F82' },
+  color: { type: String, default: '#38777E' },
   size: { type: String, default: 'md' },
   title: { type: String, default: '' },
   hasBg: { type: Boolean, default: false }
 });
 
 const bgStyleColor = computed(() => {
-  const c = props.color || '#4F7F82';
-  return c.startsWith('#') ? `${c}25` : 'rgba(79, 127, 130, 0.2)';
+  const c = props.color || '#38777E';
+  return c.startsWith('#') ? `${c}25` : 'rgba(56, 119, 126, 0.2)';
 });
 
 const containerSizeClass = computed(() => {

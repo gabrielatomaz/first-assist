@@ -192,7 +192,7 @@
           </div>
           <button
             @click="showCreateCsaForm = !showCreateCsaForm"
-            :class="showCreateCsaForm ? 'w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 rounded-lg transition cursor-pointer flex-shrink-0' : 'bg-primaryTeal hover:bg-primaryTeal/90 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center space-x-1.5 shadow-sm'"
+            :class="showCreateCsaForm ? 'w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 rounded-lg transition cursor-pointer flex-shrink-0' : 'bg-primaryTeal hover:brightness-95 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center space-x-1.5 shadow-sm'"
             :title="showCreateCsaForm ? 'Cancel' : 'Register New CSA'"
           >
             <font-awesome-icon :icon="showCreateCsaForm ? 'xmark' : 'user-plus'" class="text-xs" />

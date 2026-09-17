@@ -42,7 +42,7 @@
   }
   
   input::placeholder, textarea::placeholder {
-    @apply text-gray-500 !important;
+    @apply text-gray-400 !important;
   }
 
   /* Custom Stylized Single Select Dropdowns */
@@ -50,11 +50,11 @@
     appearance: none !important;
     -webkit-appearance: none !important;
     -moz-appearance: none !important;
-    background-color: #2B3B4E !important;
-    color: #E4E4E4 !important;
-    border: 1px solid #374151 !important;
+    background-color: #253344 !important;
+    color: #E2E8F0 !important;
+    border: 1px solid #384A60 !important;
     border-radius: 0.75rem !important; /* rounded-xl */
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234F7F82' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338777E' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
     background-repeat: no-repeat !important;
     background-position: right 0.75rem center !important;
     background-size: 1.1rem !important;
@@ -69,9 +69,9 @@
     appearance: listbox !important;
     -webkit-appearance: listbox !important;
     -moz-appearance: listbox !important;
-    background-color: #22303F !important;
-    color: #E4E4E4 !important;
-    border: 1px solid #374151 !important;
+    background-color: #1C2633 !important;
+    color: #E2E8F0 !important;
+    border: 1px solid #384A60 !important;
     border-radius: 0.75rem !important;
     background-image: none !important;
     padding: 6px !important;
@@ -79,25 +79,25 @@
   }
 
   select:hover {
-    border-color: #4F7F82 !important;
+    border-color: #38777E !important;
   }
 
   select:focus {
     outline: none !important;
-    border-color: #4F7F82 !important;
-    box-shadow: 0 0 0 3px rgba(79, 127, 130, 0.25) !important;
+    border-color: #38777E !important;
+    box-shadow: 0 0 0 3px rgba(56, 119, 126, 0.25) !important;
   }
 
   /* Dark Theme Dropdown Options */
   select option {
-    background-color: #22303F !important;
+    background-color: #1C2633 !important;
     color: #FFFFFF !important;
     padding: 8px 12px !important;
     border-radius: 4px;
   }
 
   select option:checked {
-    background-color: #4F7F82 !important;
+    background-color: #38777E !important;
     color: #FFFFFF !important;
   }
 

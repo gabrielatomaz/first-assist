@@ -85,7 +85,7 @@
         <button
           type="submit"
           :disabled="updatingProfile"
-          class="bg-primaryTeal hover:bg-primaryTeal/90 text-white font-semibold py-2.5 px-6 rounded-lg text-sm shadow hover:shadow-md transition duration-150 disabled:opacity-50"
+          class="bg-primaryTeal hover:brightness-95 text-white font-semibold py-2.5 px-6 rounded-lg text-sm shadow hover:shadow-md transition duration-150 disabled:opacity-50 cursor-pointer"
         >
           {{ updatingProfile ? 'Saving...' : 'Save Profile' }}
         </button>
@@ -123,7 +123,7 @@
         <button
           type="submit"
           :disabled="changingPassword"
-          class="bg-primaryTeal hover:bg-primaryTeal/90 text-white font-semibold py-2.5 px-6 rounded-lg text-sm shadow hover:shadow-md transition duration-150 disabled:opacity-50"
+          class="bg-primaryTeal hover:brightness-95 text-white font-semibold py-2.5 px-6 rounded-lg text-sm shadow hover:shadow-md transition duration-150 disabled:opacity-50 cursor-pointer"
         >
           {{ changingPassword ? 'Updating...' : 'Update Password' }}
         </button>
@@ -153,16 +153,16 @@ const iconOptions = [
 ];
 
 const colorOptions = [
-  { name: 'Primary Teal', hex: '#4F7F82' },
-  { name: 'Accent Coral', hex: '#E85B2F' },
-  { name: 'Accent Yellow', hex: '#DAAB52' },
-  { name: 'Accent Purple', hex: '#6E5F70' },
+  { name: 'Primary Teal', hex: '#38777E' },
+  { name: 'Accent Coral', hex: '#E25C43' },
+  { name: 'Accent Yellow', hex: '#E5B25D' },
+  { name: 'Accent Purple', hex: '#9D85C5' },
   { name: 'Emerald Green', hex: '#10B981' },
   { name: 'Sky Blue', hex: '#38BDF8' },
-  { name: 'Text Light', hex: '#E4E4E4' }
+  { name: 'Text Light', hex: '#E2E8F0' }
 ];
 
-const profile = ref({ name: '', email: '', role: '', avatarIcon: 'user', avatarColor: '#4F7F82' });
+const profile = ref({ name: '', email: '', role: '', avatarIcon: 'user', avatarColor: '#38777E' });
 const loading = ref(true);
 const profileError = ref(null);
 const profileSuccess = ref(false);
