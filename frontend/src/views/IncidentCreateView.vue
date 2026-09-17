@@ -117,24 +117,24 @@
         {{ error }}
       </div>
 
-      <div class="flex items-center justify-between pt-4 border-t">
+      <div class="flex items-center justify-between pt-4 border-t border-gray-800">
         <button
           type="button"
           @click="startRecording"
           :disabled="recording || transcribing"
-          class="w-12 h-12 flex items-center justify-center rounded-xl text-primaryTeal hover:bg-primaryTeal/10 disabled:opacity-50 transition border border-primaryTeal/30 shadow-sm flex-shrink-0"
+          class="w-10 h-10 flex items-center justify-center rounded-xl text-primaryTeal hover:bg-primaryTeal/10 disabled:opacity-50 transition border border-primaryTeal/30 shadow-sm flex-shrink-0 cursor-pointer"
           title="Voice Record"
         >
-          <font-awesome-icon icon="microphone" class="text-lg" />
+          <font-awesome-icon icon="microphone" class="text-sm" />
         </button>
 
         <button
           type="submit"
           :disabled="submitting || transcribing"
-          class="h-12 px-6 bg-primaryTeal hover:brightness-95 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition duration-150 disabled:opacity-50 text-sm flex items-center justify-center space-x-2 flex-shrink-0 cursor-pointer"
+          class="h-10 px-5 bg-primaryTeal hover:brightness-95 text-white font-bold rounded-xl shadow transition duration-150 disabled:opacity-50 text-xs sm:text-sm flex items-center justify-center space-x-2 flex-shrink-0 cursor-pointer"
           title="Submit Ticket"
         >
-          <font-awesome-icon v-if="submitting" icon="spinner" spin class="text-base" />
+          <font-awesome-icon v-if="submitting" icon="spinner" spin class="text-xs" />
           <span>{{ submitting ? 'Submitting...' : 'Submit' }}</span>
         </button>
       </div>

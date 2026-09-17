@@ -44,10 +44,13 @@
           </div>
         </div>
 
-        <!-- Knowledge Base Solution Badge (Below Title) -->
-        <div v-if="suggestion?.isRagGrounded" class="pt-0.5">
-          <span class="inline-flex items-center justify-center text-center px-2.5 py-1 rounded-md text-xs font-bold font-mono uppercase tracking-wider bg-primaryTeal/15 text-primaryTeal border border-primaryTeal/30 shadow-sm">
-            Knowledge Base Solution
+        <!-- Knowledge Base Status Badge (Below Title) -->
+        <div class="pt-0.5">
+          <span v-if="suggestion?.isRagGrounded" class="inline-flex items-center justify-center text-center px-2.5 py-1 rounded-md text-xs font-bold font-mono uppercase tracking-wider bg-primaryTeal/15 text-primaryTeal border border-primaryTeal/30 shadow-sm">
+            <font-awesome-icon icon="database" class="mr-1.5 text-[10px]" /> Knowledge Base Solution
+          </span>
+          <span v-else-if="suggestion" class="inline-flex items-center justify-center text-center px-2.5 py-1 rounded-md text-xs font-bold font-mono uppercase tracking-wider bg-accentPurple/15 text-accentPurple border border-accentPurple/30 shadow-sm">
+            <font-awesome-icon icon="wand-magic-sparkles" class="mr-1.5 text-[10px]" /> AI Generated Suggestion
           </span>
         </div>
       </div>
@@ -71,6 +74,12 @@
       <!-- Main suggestions -->
       <div v-else-if="suggestion" class="space-y-4">
         <div class="space-y-4 text-sm text-textMain">
+          <!-- Not Found in Knowledge Base Notice -->
+          <div v-if="!suggestion.isRagGrounded && (!suggestion.suggestedCause || !suggestion.suggestedCause.toLowerCase().includes('response not found'))" class="p-3 bg-accentPurple/10 border border-accentPurple/25 rounded-xl text-xs text-purple-200 flex items-center space-x-2 animate-fadeIn">
+            <font-awesome-icon icon="circle-info" class="text-sm text-accentPurple flex-shrink-0" />
+            <span class="font-medium">It was not found in our knowledge base, but here is an AI suggestion:</span>
+          </div>
+
           <!-- Response Not Found Warning Banner if AI/RAG could not determine diagnosis -->
           <div v-if="suggestion.suggestedCause && suggestion.suggestedCause.toLowerCase().includes('response not found')" class="bg-amber-950/30 border border-amber-800/40 p-3.5 rounded-xl space-y-1.5 text-xs">
             <div class="flex items-center gap-1.5 font-bold text-amber-400">
@@ -94,7 +103,7 @@
           </div>
 
           <!-- Cited Knowledge Base Resolutions (Clickable Tickets) -->
-          <div v-if="suggestion.citedIncidents && suggestion.citedIncidents.length > 0" class="pt-2 border-t border-gray-700/60 space-y-2">
+          <div v-if="suggestion.isRagGrounded && suggestion.citedIncidents && suggestion.citedIncidents.length > 0" class="pt-2 border-t border-gray-700/60 space-y-2">
             <h4 class="font-bold text-accentPurple text-xs uppercase tracking-wider mb-2">Cited Knowledge Base Resolutions</h4>
             <router-link
               v-for="cite in suggestion.citedIncidents" 

@@ -101,11 +101,14 @@ Instructions:
       console.log(`Gemini AI (${modelName}) RAG Diagnostic Response:`, responseText);
 
       const json = JSON.parse(responseText);
+      const isNotFound = json.suggestedCause && json.suggestedCause.toLowerCase().includes('response not found');
+      const grounded = isRagGrounded && !isNotFound;
+
       return {
         suggestedCause: json.suggestedCause || 'Response not found: Unspecified technical cause.',
         suggestedSolution: json.suggestedSolution || 'Inspect control system wiring and reboot RoboRIO.',
-        isRagGrounded,
-        citedIncidents
+        isRagGrounded: grounded,
+        citedIncidents: grounded ? citedIncidents : []
       };
     } catch (error) {
       console.warn(`Gemini model ${modelName} unavailable (${error.status || error.message}). Trying next fallback...`);
