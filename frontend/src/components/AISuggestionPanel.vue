@@ -10,36 +10,15 @@
             <h3 class="text-base sm:text-lg font-bold text-accentPurple font-sans tracking-tight truncate">AI Assistant Diagnosis</h3>
           </div>
 
-          <!-- Action Buttons -->
-          <div v-if="suggestion && !loading && !generating" class="flex items-center space-x-1 text-xs flex-shrink-0">
-            <!-- Icon-Only Re-generate button -->
+          <!-- Action Button: Only Refresh on top -->
+          <div v-if="suggestion && !loading && !generating" class="flex items-center flex-shrink-0">
             <button
               @click="generateDiagnosis"
               :disabled="generating"
-              class="w-10 h-10 flex items-center justify-center bg-bgMain text-gray-300 hover:text-white border border-gray-700 hover:bg-gray-800 rounded-lg transition duration-150 shadow-sm cursor-pointer disabled:opacity-50"
+              class="w-9 h-9 flex items-center justify-center bg-bgMain text-gray-300 hover:text-white border border-gray-700 hover:bg-gray-800 rounded-xl transition duration-150 shadow-sm cursor-pointer disabled:opacity-50 text-sm"
               title="Re-generate AI diagnosis"
             >
               <font-awesome-icon icon="arrows-rotate" :class="{ 'animate-spin': generating }" class="text-sm" />
-            </button>
-            
-            <!-- Thumbs Up Button -->
-            <button
-              @click="rateSuggestion('HELPFUL')"
-              :class="suggestion.rating === 'HELPFUL' ? 'bg-accentGreen text-white border-accentGreen' : 'bg-bgMain text-gray-300 hover:text-accentGreen border-gray-700 hover:bg-accentGreen/10 hover:border-accentGreen/40'"
-              class="w-10 h-10 rounded-lg border transition duration-150 text-sm font-semibold flex items-center justify-center shadow-sm cursor-pointer"
-              title="Helpful"
-            >
-              <font-awesome-icon icon="thumbs-up" />
-            </button>
-
-            <!-- Thumbs Down Button -->
-            <button
-              @click="rateSuggestion('NOT_HELPFUL')"
-              :class="suggestion.rating === 'NOT_HELPFUL' ? 'bg-accentCoral text-white border-accentCoral' : 'bg-bgMain text-gray-300 hover:text-accentCoral border-gray-700 hover:bg-accentCoral/10 hover:border-accentCoral/40'"
-              class="w-10 h-10 rounded-lg border transition duration-150 text-sm font-semibold flex items-center justify-center shadow-sm cursor-pointer"
-              title="Reject suggestion"
-            >
-              <font-awesome-icon icon="thumbs-down" />
             </button>
           </div>
         </div>
@@ -124,6 +103,32 @@
                   <span class="text-gray-400 font-semibold">Applied Fix:</span> {{ cite.appliedSolution }}
                 </p>
               </router-link>
+          </div>
+
+          <!-- Bottom Feedback / Thumbs Rating Section -->
+          <div class="pt-3 border-t border-gray-700/60 flex items-center justify-between">
+            <span class="text-xs text-gray-400 font-medium">Was this suggestion helpful?</span>
+            <div class="inline-flex rounded-xl shadow-sm border border-gray-700 bg-bgMain overflow-hidden">
+              <!-- Thumbs Up Button -->
+              <button
+                @click="rateSuggestion('HELPFUL')"
+                :class="suggestion.rating === 'HELPFUL' ? 'bg-accentGreen/25 text-emerald-400 font-bold' : 'text-gray-300 hover:text-accentGreen hover:bg-accentGreen/10'"
+                class="w-9 h-9 transition duration-150 text-sm font-semibold flex items-center justify-center cursor-pointer border-r border-gray-700"
+                title="Helpful"
+              >
+                <font-awesome-icon icon="thumbs-up" class="text-sm" />
+              </button>
+
+              <!-- Thumbs Down Button -->
+              <button
+                @click="rateSuggestion('NOT_HELPFUL')"
+                :class="suggestion.rating === 'NOT_HELPFUL' ? 'bg-accentCoral/25 text-red-400 font-bold' : 'text-gray-300 hover:text-accentCoral hover:bg-accentCoral/10'"
+                class="w-9 h-9 transition duration-150 text-sm font-semibold flex items-center justify-center cursor-pointer"
+                title="Reject suggestion"
+              >
+                <font-awesome-icon icon="thumbs-down" class="text-sm" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
