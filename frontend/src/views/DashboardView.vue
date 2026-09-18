@@ -32,8 +32,8 @@
         />
 
         <!-- CSA Active Event Context Badge (CSAs have 1 event, no dropdown) -->
-        <div v-else-if="authStore.user?.assignedEventCode" class="px-3.5 py-2 rounded-lg border border-primaryTeal/40 bg-primaryTeal/10 text-teal-400 text-xs font-bold font-mono">
-          <font-awesome-icon icon="trophy" class="mr-1 text-accentYellow" /> Active Event: {{ authStore.user.assignedEventCode }}
+        <div v-else-if="authStore.user?.assignedEventCode" class="h-11 px-4 flex items-center rounded-xl border border-primaryTeal/40 bg-primaryTeal/10 text-teal-400 text-xs font-bold font-mono">
+          <font-awesome-icon icon="trophy" class="mr-2 text-accentYellow" /> Active Event: {{ authStore.user.assignedEventCode }}
         </div>
 
         <!-- Status Filter -->
@@ -53,19 +53,21 @@
         />
 
         <!-- Unified Refresh & Auto-Sync Control -->
-        <div class="relative flex items-stretch w-full sm:w-auto rounded-lg border border-gray-700 bg-bgCard hover:border-gray-600 shadow-sm">
+        <div class="relative flex items-stretch h-10 sm:h-9 w-full sm:w-auto rounded-xl border border-gray-800 bg-bgCard hover:border-gray-700 shadow-sm">
           <button
-            @click="fetchIncidents"
+            type="button"
+            @click="handleManualRefresh"
+            :disabled="isRefreshing"
             title="Refresh Incident Board Now"
-            class="px-3.5 py-2 text-textMain hover:bg-white/10 text-xs font-semibold transition flex items-center justify-center cursor-pointer border-r border-gray-700 rounded-l-lg flex-shrink-0"
+            class="px-3.5 text-gray-300 hover:text-white hover:bg-white/5 text-xs font-semibold transition flex items-center justify-center cursor-pointer border-r border-gray-800 rounded-l-xl flex-shrink-0 active:scale-95 disabled:opacity-50"
           >
-            <font-awesome-icon icon="arrows-rotate" :spin="loading && !firstLoad" class="text-xs text-gray-400" />
+            <font-awesome-icon icon="arrows-rotate" :spin="isRefreshing" class="text-xs transition-colors" :class="isRefreshing ? 'text-teal-400' : 'text-gray-400'" />
           </button>
           <CustomSelect
             v-model="refreshInterval"
             :options="refreshOptions"
             @change="updateRefreshInterval"
-            button-class="!border-0 !bg-transparent rounded-r-lg rounded-l-none px-3 py-2 text-xs font-semibold !shadow-none"
+            button-class="!border-0 !bg-transparent rounded-r-xl rounded-l-none px-3 text-xs font-semibold !shadow-none"
             class="w-full sm:w-32 flex-1"
           />
         </div>
@@ -73,33 +75,7 @@
     </PageHeader>
 
     <!-- Main View Tabs: Active Board vs In Triage -->
-    <div class="flex items-center space-x-2 border-b border-gray-800 pb-3">
-      <button
-        type="button"
-        @click="statusFilter = 'ALL'; fetchIncidents();"
-        :class="statusFilter !== 'PENDING_SCREENING' ? 'bg-teal-500/25 text-teal-300 border-teal-500/60 shadow-sm font-bold' : 'bg-bgCard text-gray-300 border-gray-700 hover:text-white hover:border-gray-600'"
-        class="px-4 py-2 rounded-lg text-xs border transition flex items-center space-x-2 cursor-pointer"
-      >
-        <font-awesome-icon icon="list-check" class="text-xs" :class="statusFilter !== 'PENDING_SCREENING' ? 'text-teal-300' : 'text-gray-400'" />
-        <span>Active Board</span>
-      </button>
-
-      <button
-        type="button"
-        @click="statusFilter = 'PENDING_SCREENING'; fetchIncidents();"
-        :class="statusFilter === 'PENDING_SCREENING' ? 'bg-amber-500/25 text-amber-300 border-amber-500/60 shadow-sm font-bold' : 'bg-bgCard text-gray-300 border-gray-700 hover:text-white hover:border-gray-600'"
-        class="px-4 py-2 rounded-lg text-xs border transition flex items-center space-x-2 cursor-pointer relative"
-      >
-        <font-awesome-icon icon="shield-halved" class="text-xs" :class="statusFilter === 'PENDING_SCREENING' ? 'text-amber-300' : 'text-gray-400'" />
-        <span>In Triage</span>
-        <span 
-          v-if="pendingScreeningCount > 0" 
-          class="bg-amber-400 text-gray-950 font-extrabold text-[10px] px-2 py-0.5 rounded-full ml-1"
-        >
-          {{ pendingScreeningCount }}
-        </span>
-      </button>
-    </div>
+    <BaseTabs v-model="activeBoardTab" :tabs="dashboardTabs" />
 
     <!-- Main Content -->
     <LoadingSpinner v-if="loading && firstLoad" text="Loading incident board..." />
@@ -142,7 +118,8 @@ import {
   PageHeader,
   LoadingSpinner,
   AlertBanner,
-  EmptyState
+  EmptyState,
+  BaseTabs
 } from '../components';
 import { getApiUrl } from '../config/api';
 
@@ -158,6 +135,36 @@ const priorityFilter = ref('ALL');
 const eventFilter = ref('ALL');
 const refreshInterval = ref(parseInt(localStorage.getItem('first_assist_refresh_rate')) || 15000);
 const pendingScreeningCount = ref(0);
+const activeBoardCount = ref(0);
+
+const dashboardTabs = computed(() => [
+  { 
+    id: 'ALL', 
+    label: 'Active Board', 
+    icon: 'list-check',
+    count: activeBoardCount.value,
+    activeClass: 'bg-primaryTeal/20 text-teal-300 border-primaryTeal/50 shadow-sm',
+    activeCountClass: 'bg-teal-400/20 text-teal-300 font-bold',
+    inactiveCountClass: 'bg-gray-700/60 text-gray-300 font-bold'
+  },
+  {
+    id: 'PENDING_SCREENING',
+    label: 'In Triage',
+    icon: 'shield-halved',
+    count: pendingScreeningCount.value,
+    activeClass: 'bg-yellow-400/20 text-yellow-300 border-yellow-200/70 shadow-sm',
+    activeCountClass: 'bg-yellow-400/20 text-yellow-300 font-bold',
+    inactiveCountClass: 'bg-gray-700/60 text-gray-300 font-bold'
+  }
+]);
+
+const activeBoardTab = computed({
+  get: () => (statusFilter.value === 'PENDING_SCREENING' ? 'PENDING_SCREENING' : 'ALL'),
+  set: (val) => {
+    statusFilter.value = val;
+    fetchIncidents();
+  }
+});
 
 const statusOptions = [
   { value: 'ALL', label: 'Active' },
@@ -225,6 +232,20 @@ const startPollTimer = () => {
   }
 };
 
+const isRefreshing = ref(false);
+
+const handleManualRefresh = async () => {
+  if (isRefreshing.value) return;
+  isRefreshing.value = true;
+  try {
+    await fetchIncidents();
+  } finally {
+    setTimeout(() => {
+      isRefreshing.value = false;
+    }, 450);
+  }
+};
+
 const updateRefreshInterval = () => {
   localStorage.setItem('first_assist_refresh_rate', String(refreshInterval.value));
   startPollTimer();
@@ -243,21 +264,27 @@ const fetchEvents = async () => {
   }
 };
 
-const fetchPendingCount = async () => {
+const fetchCounts = async () => {
   try {
-    let params = ['status=PENDING_SCREENING'];
-    if (eventFilter.value !== 'ALL') {
-      params.push(`eventCode=${eventFilter.value}`);
-    } else {
-      params.push('eventCode=ALL');
+    let eventParam = eventFilter.value !== 'ALL' ? `eventCode=${eventFilter.value}` : 'eventCode=ALL';
+    const [resPending, resActive] = await Promise.all([
+      fetch(getApiUrl(`/incidents?status=PENDING_SCREENING&${eventParam}`), {
+        headers: { 'Authorization': `Bearer ${authStore.token}` }
+      }),
+      fetch(getApiUrl(`/incidents?status=ALL&${eventParam}`), {
+        headers: { 'Authorization': `Bearer ${authStore.token}` }
+      })
+    ]);
+
+    if (resPending.ok) {
+      const dataPending = await resPending.json();
+      const listPending = dataPending.incidents || dataPending || [];
+      pendingScreeningCount.value = listPending.length;
     }
-    const response = await fetch(getApiUrl(`/incidents?${params.join('&')}`), {
-      headers: { 'Authorization': `Bearer ${authStore.token}` }
-    });
-    if (response.ok) {
-      const data = await response.json();
-      const list = data.incidents || data || [];
-      pendingScreeningCount.value = list.length;
+    if (resActive.ok) {
+      const dataActive = await resActive.json();
+      const listActive = dataActive.incidents || dataActive || [];
+      activeBoardCount.value = listActive.length;
     }
   } catch (err) {
     console.error(err);
@@ -266,7 +293,7 @@ const fetchPendingCount = async () => {
 
 const fetchIncidents = async () => {
   error.value = null;
-  await fetchPendingCount();
+  await fetchCounts();
   try {
     let params = [];
     if (statusFilter.value !== 'ALL') {

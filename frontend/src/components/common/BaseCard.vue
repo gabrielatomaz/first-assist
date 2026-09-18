@@ -2,9 +2,11 @@
   <div
     :class="[
       padding,
-      hover ? 'hover:border-gray-700 hover:shadow-md transition-all' : ''
+      hover ? 'hover:border-gray-700 hover:shadow-lg transition-all duration-150' : '',
+      clickable ? 'cursor-pointer active:scale-[0.99]' : ''
     ]"
     class="bg-bgCard rounded-2xl shadow border border-gray-800"
+    @click="$emit('click', $event)"
   >
     <slot />
   </div>
@@ -19,6 +21,12 @@ defineProps({
   hover: {
     type: Boolean,
     default: false
+  },
+  clickable: {
+    type: Boolean,
+    default: false
   }
 });
+
+defineEmits(['click']);
 </script>

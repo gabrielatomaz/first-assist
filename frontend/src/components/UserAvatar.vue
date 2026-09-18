@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="hasBg"
-    class="rounded-full flex items-center justify-center flex-shrink-0 border border-white/10 transition-all duration-200"
+    class="rounded-full flex items-center justify-center flex-shrink-0 border border-slate-700/60 transition-all duration-200"
     :style="{ backgroundColor: bgStyleColor }"
     :class="containerSizeClass"
     :title="title"

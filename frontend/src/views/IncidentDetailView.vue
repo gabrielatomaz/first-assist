@@ -23,7 +23,7 @@
           loading-text="Accepting..."
           :disabled="triageLoading !== null"
           title="Accept ticket into Open queue"
-          class="flex-1 sm:flex-initial"
+          class="flex-1 sm:w-36 justify-center"
         >
           Accept Ticket
         </BaseButton>
@@ -36,7 +36,7 @@
           loading-text="Rejecting..."
           :disabled="triageLoading !== null"
           title="Reject ticket"
-          class="flex-1 sm:flex-initial"
+          class="flex-1 sm:w-36 justify-center"
         >
           Reject Ticket
         </BaseButton>
@@ -62,7 +62,7 @@
       <div class="flex flex-col sm:flex-row sm:flex-nowrap items-stretch sm:items-center gap-2.5 w-full md:w-auto">
         <!-- 1. Technician selection dropdown (with "Assign to Me") -->
         <div v-if="authStore.isAdmin || authStore.isFTA || authStore.user" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1 sm:space-x-1.5 w-full sm:w-auto flex-shrink-0">
-          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">Technician:</label>
+          <label class="text-xs font-semibold text-gray-300 uppercase tracking-wider whitespace-nowrap">Technician:</label>
           <CustomSelect
             v-model="selectedAssignee"
             :options="technicianOptions"
@@ -73,7 +73,7 @@
 
         <!-- 2. Status update select dropdown -->
         <div v-if="authStore.isAdmin || authStore.isFTA || isAssignee" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1 sm:space-x-1.5 w-full sm:w-auto flex-shrink-0">
-          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">Status:</label>
+          <label class="text-xs font-semibold text-gray-300 uppercase tracking-wider whitespace-nowrap">Status:</label>
           <CustomSelect
             v-model="selectedStatus"
             :options="statusOptions"
@@ -82,8 +82,17 @@
           />
         </div>
 
-        <!-- 3 & 4. Action icon buttons group (Expanded on mobile, compact on desktop) -->
-        <div v-if="canDelete || (incident.status === 'ASSIGNED' || incident.status === 'IN_PROGRESS' || incident.status === 'WAITING')" class="flex items-center space-x-2 w-full sm:w-auto flex-shrink-0">
+        <!-- 3 & 4. Action buttons group -->
+        <div v-if="canDelete || (incident.status === 'ASSIGNED' || incident.status === 'IN_PROGRESS' || incident.status === 'WAITING')" class="flex items-center space-x-2 flex-shrink-0">
+          <BaseButton
+            v-if="incident.status === 'ASSIGNED' || incident.status === 'IN_PROGRESS' || incident.status === 'WAITING'"
+            @click="showResolveModal = true"
+            variant="success"
+            size="icon-sm"
+            icon="check"
+            title="Resolve"
+          />
+
           <BaseButton
             v-if="canDelete"
             @click="showDeleteModal = true"
@@ -91,27 +100,17 @@
             size="icon-sm"
             icon="trash-can"
             title="Delete Incident"
-            class="flex-1 sm:flex-initial h-9 sm:h-8"
-          />
-
-          <BaseButton
-            v-if="incident.status === 'ASSIGNED' || incident.status === 'IN_PROGRESS' || incident.status === 'WAITING'"
-            @click="showResolveModal = true"
-            variant="success"
-            size="icon-sm"
-            icon="check"
-            title="Resolve Incident"
-            class="flex-1 sm:flex-initial h-9 sm:h-8"
+            class="flex-shrink-0"
           />
         </div>
       </div>
     </div>
 
     <!-- Detail Box -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
       <!-- Mobile Technical Assignee Header Card (Visible on mobile only, above Issue Description) -->
-      <div class="block md:hidden bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-4">
-        <div class="flex items-center space-x-2 border-b border-gray-800 pb-2">
+      <BaseCard class="block md:hidden space-y-4">
+        <div class="flex items-center justify-between border-b border-gray-800 pb-2 min-h-[32px]">
           <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">Technical Assignee</h3>
           <RoleBadge v-if="incident.assignedTo" :role="incident.assignedTo?.role" />
         </div>
@@ -120,29 +119,61 @@
           <p class="text-sm font-bold text-white leading-tight">{{ incident.assignedTo?.name }}</p>
         </div>
         <p v-else class="text-xs text-gray-400 font-medium">Unassigned queue</p>
-      </div>
+      </BaseCard>
 
       <div class="md:col-span-2 space-y-6">
         <!-- Description -->
-        <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-3">
-          <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">Issue Description</h3>
+        <BaseCard class="space-y-4">
+          <div class="flex items-center justify-between border-b border-gray-800 pb-2 min-h-[32px]">
+            <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">Issue Description</h3>
+          </div>
           <p class="text-sm text-gray-200 mt-2 whitespace-pre-wrap leading-relaxed">{{ incident.description }}</p>
-        </div>
+        </BaseCard>
+
+        <!-- Mobile Resolution Details Card (Visible on mobile only, above AI Assistant Diagnosis) -->
+        <BaseCard v-if="incident.status === 'RESOLVED' || incident.status === 'CLOSED'" class="block md:hidden space-y-4">
+          <div class="flex items-center justify-between border-b border-gray-800 pb-2 min-h-[32px]">
+            <div class="flex items-center space-x-2">
+              <font-awesome-icon icon="circle-check" class="text-emerald-400 text-xs" />
+              <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">Resolution Details</h3>
+            </div>
+            <StatusBadge :status="incident.status" />
+          </div>
+          <div class="space-y-3">
+            <!-- Root Cause Block (KB Color Matched) -->
+            <div class="p-3.5 bg-teal-500/10 rounded-xl border border-teal-500/25 space-y-1.5">
+              <div class="flex items-center space-x-1.5 text-teal-300 font-bold uppercase tracking-wider text-[10px]">
+                <font-awesome-icon icon="lightbulb" class="text-teal-300 text-xs" />
+                <span>Root Cause</span>
+              </div>
+              <p class="text-xs text-teal-100 leading-relaxed font-medium whitespace-pre-wrap">{{ incident.rootCause || 'None provided' }}</p>
+            </div>
+
+            <!-- Applied Fix Block (KB Color Matched) -->
+            <div class="p-3.5 bg-accentGreen/10 rounded-xl border border-accentGreen/30 space-y-1.5">
+              <div class="flex items-center space-x-1.5 text-emerald-400 font-bold uppercase tracking-wider text-[10px]">
+                <font-awesome-icon icon="circle-check" class="text-emerald-400 text-xs" />
+                <span>Applied Fix</span>
+              </div>
+              <p class="text-xs text-emerald-200 leading-relaxed font-semibold whitespace-pre-wrap">{{ incident.appliedSolution || 'None provided' }}</p>
+            </div>
+          </div>
+        </BaseCard>
 
         <!-- AI Assistant Suggestions -->
         <AISuggestionPanel :incident-id="incident._id" />
 
         <!-- Comments & coordination thread -->
-        <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800">
+        <BaseCard>
           <CommentSection :incident-id="incident._id" />
-        </div>
+        </BaseCard>
       </div>
 
       <!-- Desktop Sidebar Column -->
       <div class="space-y-6">
         <!-- Desktop Assignee Card info -->
-        <div class="hidden md:block bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-4">
-          <div class="flex items-center space-x-2 border-b border-gray-800 pb-2">
+        <BaseCard class="hidden md:block space-y-4">
+          <div class="flex items-center justify-between border-b border-gray-800 pb-2 min-h-[32px]">
             <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">Technical Assignee</h3>
             <RoleBadge v-if="incident.assignedTo" :role="incident.assignedTo?.role" />
           </div>
@@ -151,20 +182,37 @@
             <p class="text-sm font-bold text-white leading-tight">{{ incident.assignedTo?.name }}</p>
           </div>
           <p v-else class="text-xs text-gray-400 font-medium">Unassigned queue</p>
-        </div>
+        </BaseCard>
 
-        <!-- Resolution Details Card -->
-        <div v-if="incident.status === 'RESOLVED' || incident.status === 'CLOSED'" class="bg-accentGreen/10 border border-accentGreen/30 p-6 rounded-2xl space-y-4">
-          <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider border-b border-accentGreen/30 pb-2">Resolution details</h3>
-          <div>
-            <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-1">Root Cause</h4>
-            <p class="text-xs text-gray-200 leading-relaxed font-medium bg-bgMain p-2.5 rounded border border-accentGreen/30">{{ incident.rootCause }}</p>
+        <!-- Desktop Resolution Details Card (Visible on desktop only) -->
+        <BaseCard v-if="incident.status === 'RESOLVED' || incident.status === 'CLOSED'" class="hidden md:block space-y-4">
+          <div class="flex items-center justify-between border-b border-gray-800 pb-2 min-h-[32px]">
+            <div class="flex items-center space-x-2">
+              <font-awesome-icon icon="circle-check" class="text-emerald-400 text-xs" />
+              <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">Resolution Details</h3>
+            </div>
+            <StatusBadge :status="incident.status" />
           </div>
-          <div>
-            <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-1">Applied Fix</h4>
-            <p class="text-xs text-gray-200 leading-relaxed font-medium bg-bgMain p-2.5 rounded border border-accentGreen/30">{{ incident.appliedSolution }}</p>
+          <div class="space-y-3">
+            <!-- Root Cause Block (KB Color Matched) -->
+            <div class="p-3.5 bg-teal-500/10 rounded-xl border border-teal-500/25 space-y-1.5">
+              <div class="flex items-center space-x-1.5 text-teal-300 font-bold uppercase tracking-wider text-[10px]">
+                <font-awesome-icon icon="lightbulb" class="text-teal-300 text-xs" />
+                <span>Root Cause</span>
+              </div>
+              <p class="text-xs text-teal-100 leading-relaxed font-medium whitespace-pre-wrap">{{ incident.rootCause || 'None provided' }}</p>
+            </div>
+
+            <!-- Applied Fix Block (KB Color Matched) -->
+            <div class="p-3.5 bg-accentGreen/10 rounded-xl border border-accentGreen/30 space-y-1.5">
+              <div class="flex items-center space-x-1.5 text-emerald-400 font-bold uppercase tracking-wider text-[10px]">
+                <font-awesome-icon icon="circle-check" class="text-emerald-400 text-xs" />
+                <span>Applied Fix</span>
+              </div>
+              <p class="text-xs text-emerald-200 leading-relaxed font-semibold whitespace-pre-wrap">{{ incident.appliedSolution || 'None provided' }}</p>
+            </div>
           </div>
-        </div>
+        </BaseCard>
 
         <!-- Collapsible Audit Timeline spanning edge to edge when closed -->
         <div class="bg-bgCard rounded-2xl shadow border border-gray-800 overflow-hidden transition">
@@ -273,6 +321,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import {
   BaseButton,
+  BaseCard,
   CommentSection,
   AISuggestionPanel,
   ResolveIncidentModal,

@@ -14,9 +14,12 @@
         <font-awesome-icon :icon="icon" class="text-base" />
       </div>
       <div>
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-teal-400 tracking-tight">
-          {{ title }}
-        </h2>
+        <div class="flex items-center gap-3">
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-teal-400 tracking-tight">
+            {{ title }}
+          </h2>
+          <slot name="titleBadge" />
+        </div>
         <p v-if="subtitle" class="text-sm text-gray-400 font-medium mt-1">
           {{ subtitle }}
         </p>

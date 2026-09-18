@@ -1,7 +1,7 @@
 <template>
   <span
     :class="[badgeClasses, sizeClasses]"
-    class="inline-flex items-center justify-center text-center font-bold font-mono tracking-wider uppercase flex-shrink-0 transition-colors pt-[0.5em] pb-[0.25em]"
+    class="inline-flex items-center justify-center text-center font-bold font-mono tracking-wider uppercase flex-shrink-0 transition-colors leading-none"
   >
     <slot>{{ priority }}</slot>
   </span>
@@ -25,14 +25,14 @@ const props = defineProps({
 const sizeClasses = computed(() => {
   switch (props.size) {
     case 'xs':
-      return 'px-2 text-[10px] rounded';
+      return 'h-5 px-2 text-[10px] rounded';
     case 'sm':
-      return 'px-2.5 text-xs rounded min-w-[70px]';
+      return 'h-5 px-2.5 text-xs rounded';
     case 'lg':
-      return 'px-4 text-sm rounded-lg min-w-[100px]';
+      return 'h-7 px-3.5 text-xs rounded-lg min-w-[90px]';
     case 'md':
     default:
-      return 'px-2.5 text-xs rounded min-w-[85px]';
+      return 'h-6 px-2.5 text-xs rounded-md min-w-[76px]';
   }
 });
 

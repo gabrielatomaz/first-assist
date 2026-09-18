@@ -1,17 +1,22 @@
 <template>
   <div class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 animate-fadeIn">
-    <div class="bg-bgCard w-full max-w-lg p-6 rounded-2xl shadow-2xl border border-gray-700 flex flex-col space-y-5">
-      <div class="flex justify-between items-start border-b border-gray-700 pb-4">
+    <div class="bg-bgCard w-full max-w-lg p-6 rounded-2xl shadow-2xl border border-gray-800 flex flex-col space-y-5">
+      <div class="flex justify-between items-start border-b border-gray-800 pb-4">
         <div>
           <h3 class="text-xl font-extrabold text-white tracking-tight flex items-center space-x-2">
             <font-awesome-icon icon="circle-check" class="text-teal-400" />
-            <span>Resolve Incident</span>
+            <span>Resolve</span>
           </h3>
           <p class="text-xs text-gray-300 mt-1">Document the technical root cause and applied fix to close this ticket.</p>
         </div>
-        <button @click="$emit('close')" class="text-gray-400 hover:text-white transition">
-          <font-awesome-icon icon="xmark" class="text-lg" />
-        </button>
+        <BaseButton 
+          @click="$emit('close')" 
+          variant="ghost" 
+          size="icon-sm" 
+          icon="xmark"
+          class="text-gray-400 hover:text-white"
+          title="Close modal"
+        />
       </div>
 
       <!-- Quick AI Suggestion Shortcut -->
@@ -33,58 +38,56 @@
 
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <!-- Root Cause Field -->
-        <div>
-          <label class="block text-xs font-bold text-teal-400 uppercase tracking-wider mb-2">Root Cause</label>
-          <div class="relative">
-            <textarea
-              v-model="form.rootCause"
-              required
-              rows="3"
-              placeholder="e.g. POE power cable loose terminal"
-              class="w-full px-4 py-2.5 pb-10 rounded-xl bg-bgMain border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-400 text-sm font-medium resize-none"
-            ></textarea>
-            <button
+        <BaseTextarea
+          v-model="form.rootCause"
+          label="Root Cause"
+          required
+          rows="3"
+          placeholder="e.g. POE power cable loose terminal"
+          textarea-class="pb-12"
+        >
+          <template #action>
+            <BaseButton
               type="button"
               @click="isRecording && activeRecordingField === 'rootCause' ? stopRecording() : startRecording('rootCause')"
               :disabled="isTranscribing"
+              :loading="isTranscribing && activeRecordingField === 'rootCause'"
+              :variant="isRecording && activeRecordingField === 'rootCause' ? 'danger' : 'secondary'"
+              size="icon-sm"
+              icon="microphone"
+              :class="{ 'animate-pulse': isRecording && activeRecordingField === 'rootCause' }"
               :title="isTranscribing && activeRecordingField === 'rootCause' ? 'Transcribing audio...' : (isRecording && activeRecordingField === 'rootCause' ? 'Stop recording' : 'Record audio')"
-              :class="isRecording && activeRecordingField === 'rootCause' ? 'bg-red-600 text-white animate-pulse border-red-500' : 'bg-bgCard text-gray-400 hover:text-white border-gray-600 hover:border-gray-500'"
-              class="absolute right-3 bottom-3 w-8 h-8 rounded-lg border text-sm font-semibold flex items-center justify-center transition duration-150 shadow cursor-pointer"
-            >
-              <font-awesome-icon v-if="isTranscribing && activeRecordingField === 'rootCause'" icon="spinner" class="animate-spin text-sm" />
-              <font-awesome-icon v-else icon="microphone" class="text-sm" />
-            </button>
-          </div>
-        </div>
+            />
+          </template>
+        </BaseTextarea>
 
         <!-- Applied Solution Field -->
-        <div>
-          <label class="block text-xs font-bold text-teal-400 uppercase tracking-wider mb-2">Applied Solution</label>
-          <div class="relative">
-            <textarea
-              v-model="form.appliedSolution"
-              required
-              rows="3"
-              placeholder="e.g. Secured ethernet cable connector, added zip-tie support"
-              class="w-full px-4 py-2.5 pb-10 rounded-xl bg-bgMain border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-400 text-sm font-medium resize-none"
-            ></textarea>
-            <button
+        <BaseTextarea
+          v-model="form.appliedSolution"
+          label="Applied Solution"
+          required
+          rows="3"
+          placeholder="e.g. Secured ethernet cable connector, added zip-tie support"
+          textarea-class="pb-12"
+        >
+          <template #action>
+            <BaseButton
               type="button"
               @click="isRecording && activeRecordingField === 'appliedSolution' ? stopRecording() : startRecording('appliedSolution')"
               :disabled="isTranscribing"
+              :loading="isTranscribing && activeRecordingField === 'appliedSolution'"
+              :variant="isRecording && activeRecordingField === 'appliedSolution' ? 'danger' : 'secondary'"
+              size="icon-sm"
+              icon="microphone"
+              :class="{ 'animate-pulse': isRecording && activeRecordingField === 'appliedSolution' }"
               :title="isTranscribing && activeRecordingField === 'appliedSolution' ? 'Transcribing audio...' : (isRecording && activeRecordingField === 'appliedSolution' ? 'Stop recording' : 'Record audio')"
-              :class="isRecording && activeRecordingField === 'appliedSolution' ? 'bg-red-600 text-white animate-pulse border-red-500' : 'bg-bgCard text-gray-400 hover:text-white border-gray-600 hover:border-gray-500'"
-              class="absolute right-3 bottom-3 w-8 h-8 rounded-lg border text-sm font-semibold flex items-center justify-center transition duration-150 shadow cursor-pointer"
-            >
-              <font-awesome-icon v-if="isTranscribing && activeRecordingField === 'appliedSolution'" icon="spinner" class="animate-spin text-sm" />
-              <font-awesome-icon v-else icon="microphone" class="text-sm" />
-            </button>
-          </div>
-        </div>
+            />
+          </template>
+        </BaseTextarea>
 
         <p v-if="audioError" class="text-xs text-accentCoral font-medium">{{ audioError }}</p>
 
-        <div class="flex justify-end space-x-3 pt-4 border-t border-gray-700">
+        <div class="flex justify-end space-x-3 pt-4 border-t border-gray-800">
           <BaseButton
             type="button"
             variant="secondary"
@@ -95,11 +98,12 @@
           </BaseButton>
           <BaseButton
             type="submit"
-            variant="success"
+            variant="primary"
             size="sm"
-            :disabled="submitting"
+            icon="circle-check"
+            :disabled="submitting || !form.rootCause || !form.appliedSolution"
             :loading="submitting"
-            loading-text="Saving..."
+            loading-text="Resolving..."
           >
             Resolve
           </BaseButton>
@@ -112,7 +116,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
-import { BaseButton } from './index';
+import { BaseButton, BaseTextarea } from './index';
 import { useSpeechRecognition } from '../composables/useSpeechRecognition';
 import { getApiUrl } from '../config/api';
 

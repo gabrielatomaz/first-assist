@@ -1,6 +1,6 @@
 <template>
   <div class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn overflow-y-auto">
-    <div class="bg-bgCard border border-gray-700/80 rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4 relative my-auto overflow-hidden">
+    <div class="bg-bgCard border border-gray-800 rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4 relative my-auto overflow-hidden">
       <!-- Styled Cancellation Confirmation Modal Overlay -->
       <ConfirmationModal
         :model-value="!!incidentToCancel"
@@ -18,46 +18,26 @@
         @cancel="incidentToCancel = null"
       />
 
-      <button 
+      <BaseButton 
         @click="$emit('close')" 
-        class="absolute top-3.5 right-3.5 text-gray-400 hover:text-white transition font-bold text-base cursor-pointer z-10"
-      >
-        ✕
-      </button>
+        variant="ghost"
+        size="icon-sm"
+        icon="xmark"
+        class="absolute top-3.5 right-3.5 z-10 text-gray-400 hover:text-white"
+        title="Close modal"
+      />
 
       <!-- Header -->
-      <div class="border-b border-gray-700/80 pb-3 pr-6">
+      <div class="border-b border-gray-800 pb-3 pr-8">
         <h3 class="text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
-          <font-awesome-icon icon="clipboard-list" class="text-primaryTeal text-base" />
+          <font-awesome-icon icon="clipboard-list" class="text-teal-400 text-base" />
           <span>Report Incident (Guest Mode)</span>
         </h3>
         <p class="text-xs text-gray-400 mt-0.5">No login required. Tickets are submitted to the event triage queue.</p>
       </div>
 
       <!-- Navigation Tabs (Form vs My Cached Tickets) -->
-      <div class="flex items-center space-x-2 border-b border-gray-800 pb-2">
-        <button
-          type="button"
-          @click="viewMode = 'form'"
-          :class="viewMode === 'form' ? 'bg-primaryTeal/20 text-primaryTeal border-primaryTeal/40 font-bold' : 'text-gray-400 hover:text-gray-200 border-transparent font-medium'"
-          class="px-3 py-1.5 rounded-lg text-xs border transition cursor-pointer flex items-center space-x-1.5"
-        >
-          <font-awesome-icon icon="plus" class="text-xs" />
-          <span>New Incident</span>
-        </button>
-        <button
-          type="button"
-          @click="viewMode = 'history'; refreshCachedStatus();"
-          :class="viewMode === 'history' ? 'bg-primaryTeal/20 text-primaryTeal border-primaryTeal/40 font-bold' : 'text-gray-400 hover:text-gray-200 border-transparent font-medium'"
-          class="px-3 py-1.5 rounded-lg text-xs border transition cursor-pointer flex items-center space-x-1.5"
-        >
-          <font-awesome-icon icon="clock-rotate-left" class="text-xs" />
-          <span>My Submitted Tickets</span>
-          <span v-if="cachedIncidents.length > 0" class="px-1.5 py-0.2 bg-primaryTeal text-white font-bold rounded-full text-[10px] ml-1 font-mono">
-            {{ cachedIncidents.length }}
-          </span>
-        </button>
-      </div>
+      <BaseTabs v-model="viewMode" :tabs="modalTabs" />
 
       <!-- VIEW 1: Success Notification Screen -->
       <div v-if="viewMode === 'success' && successTicket" class="p-5 bg-bgMain/70 border border-emerald-500/30 rounded-2xl space-y-4 animate-fadeIn">
@@ -70,138 +50,133 @@
         </div>
 
         <!-- Structured Ticket Summary (Team, Event, Match) -->
-        <div class="bg-bgCard border border-gray-700/80 rounded-xl p-3.5 space-y-2.5 text-xs">
-          <div class="grid grid-cols-3 gap-2 text-center border-b border-gray-700/60 pb-2.5">
+        <div class="bg-bgCard border border-gray-800 rounded-xl p-3.5 space-y-2.5 text-xs">
+          <div class="grid grid-cols-3 gap-2 text-center border-b border-gray-800 pb-2.5">
             <div>
-              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Team</span>
+              <span class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Team</span>
               <span class="font-bold text-white text-sm font-mono">Team {{ successTicket.teamNumber }}</span>
             </div>
             <div>
-              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Event</span>
-              <span class="font-bold text-primaryTeal text-sm uppercase font-mono">
+              <span class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Event</span>
+              <span class="font-bold text-teal-400 text-sm uppercase font-mono">
                 {{ successTicket.eventCode || form.eventCode || 'N/A' }}
               </span>
             </div>
             <div>
-              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Match</span>
+              <span class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Match</span>
               <span class="font-bold text-accentYellow text-sm font-mono">
                 {{ successTicket.matchNumber && successTicket.matchNumber !== 'N/A' ? successTicket.matchNumber : (form.matchNumber || 'Pit / Practice') }}
               </span>
             </div>
           </div>
 
-          <div class="flex justify-between items-center text-[11px] pt-0.5">
-            <span class="text-gray-400">Category: <strong class="text-gray-200">{{ successTicket.category || form.category }}</strong></span>
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono">
-              IN_TRIAGE
-            </span>
+          <div class="flex justify-between items-center text-xs pt-0.5">
+            <div class="flex items-center space-x-1.5">
+              <span class="text-xs font-semibold text-gray-300 uppercase tracking-wider">Category</span>
+              <CategoryBadge :category="successTicket.category || form.category" size="xs" />
+            </div>
+            <StatusBadge :status="successTicket.status || 'IN_TRIAGE'" size="xs" />
           </div>
         </div>
 
-        <p class="text-[11px] text-gray-400 text-center leading-relaxed">
+        <p class="text-xs text-gray-400 text-center leading-relaxed">
           Saved to your browser's local cache. Event staff (CSA/FTA) will review and accept your ticket shortly.
         </p>
 
         <!-- Success Actions -->
-        <div class="flex flex-col sm:flex-row gap-2 pt-1">
-          <button 
-            type="button"
-            @click="viewMode = 'history'; refreshCachedStatus();" 
-            class="flex-1 py-2.5 px-4 bg-primaryTeal hover:bg-primaryTeal/90 text-white font-bold rounded-xl transition text-xs flex items-center justify-center space-x-1.5 shadow-md cursor-pointer"
-          >
-            <font-awesome-icon icon="clock-rotate-left" class="text-xs" />
-            <span>Check My Cached Incidents ({{ cachedIncidents.length }})</span>
-          </button>
-          <button 
-            v-if="successTicket && canCancelIncident(successTicket.status)"
-            type="button" 
-            @click="incidentToCancel = successTicket._id" 
-            :disabled="cancelingId === successTicket._id"
-            class="py-2.5 px-3 bg-accentCoral/15 hover:bg-accentCoral text-accentCoral hover:text-white font-bold rounded-xl border border-accentCoral/30 transition text-xs cursor-pointer flex items-center justify-center space-x-1"
-          >
-            <font-awesome-icon v-if="cancelingId === successTicket._id" icon="spinner" spin class="text-xs" />
-            <font-awesome-icon v-else icon="xmark" class="text-xs" />
-            <span>Cancel Ticket</span>
-          </button>
-          <button 
+        <div class="pt-2">
+          <BaseButton 
             type="button"
             @click="resetForm" 
-            class="py-2.5 px-4 bg-bgMain hover:bg-bgMain/80 text-gray-300 hover:text-white font-semibold rounded-xl border border-gray-700 transition text-xs cursor-pointer"
+            variant="primary"
+            size="md"
+            icon="plus"
+            class="w-full"
           >
             Report Another
-          </button>
+          </BaseButton>
         </div>
       </div>
 
       <!-- VIEW 2: My Cached Incidents History Screen -->
-      <div v-else-if="viewMode === 'history'" class="space-y-3 animate-fadeIn">
-        <div class="flex justify-between items-center">
-          <h4 class="text-xs font-bold text-primaryTeal uppercase tracking-wider">
-            Cached Incidents on this Browser ({{ cachedIncidents.length }})
-          </h4>
-          <button 
-            v-if="cachedIncidents.length > 0"
-            type="button" 
+      <div v-else-if="viewMode === 'history'" class="space-y-4 animate-fadeIn">
+        <div class="flex justify-between items-center border-b border-gray-800 pb-2.5 min-h-[32px]">
+          <div class="flex items-center space-x-2">
+            <h4 class="text-xs font-bold text-gray-300 uppercase tracking-wider">
+              Cached Incidents on this Browser
+            </h4>
+            <span class="px-2 py-0.5 text-[10px] font-extrabold bg-bgMain text-gray-300 rounded-full font-mono border border-gray-800">
+              {{ cachedIncidents.length }}
+            </span>
+          </div>
+          <BaseButton 
+            variant="ghost" 
+            size="icon-sm" 
+            icon="arrows-rotate" 
+            :loading="refreshingStatus"
             @click="refreshCachedStatus" 
-            :disabled="refreshingStatus"
-            class="text-[11px] text-primaryTeal hover:underline flex items-center space-x-1 cursor-pointer disabled:opacity-50"
-          >
-            <font-awesome-icon icon="arrows-rotate" :spin="refreshingStatus" class="text-[10px]" />
-            <span>Refresh Status</span>
-          </button>
+            title="Refresh Status"
+          />
         </div>
 
-        <div v-if="cachedIncidents.length === 0" class="p-6 bg-bgMain/40 border border-gray-800 rounded-xl text-center space-y-2">
-          <font-awesome-icon icon="inbox" class="text-2xl text-gray-600" />
-          <p class="text-xs text-gray-400 font-medium">No cached incidents found on this device.</p>
-          <button 
-            type="button" 
-            @click="viewMode = 'form'" 
-            class="mt-2 px-3 py-1.5 bg-primaryTeal text-white font-bold rounded-lg text-xs hover:bg-primaryTeal/90 transition cursor-pointer"
-          >
-            Submit an Incident
-          </button>
+        <!-- Empty State when 0 cached tickets -->
+        <div v-if="cachedIncidents.length === 0" class="py-8 px-4 bg-bgMain/40 border border-gray-800 rounded-2xl text-center space-y-3">
+          <div class="w-12 h-12 bg-gray-800/80 text-gray-400 border border-gray-800 rounded-full flex items-center justify-center mx-auto text-xl shadow-inner">
+            <font-awesome-icon icon="inbox" />
+          </div>
+          <div class="space-y-1">
+            <h5 class="text-sm font-bold text-gray-200">No Cached Incidents</h5>
+            <p class="text-xs text-gray-400 max-w-xs mx-auto leading-relaxed">
+              No submitted incident tickets are currently stored on this browser.
+            </p>
+          </div>
+          <div class="pt-1">
+            <BaseButton 
+              type="button" 
+              @click="viewMode = 'form'" 
+              variant="primary"
+              size="sm"
+              icon="plus"
+            >
+              Submit an Incident
+            </BaseButton>
+          </div>
         </div>
 
+        <!-- Cached tickets list -->
         <div v-else class="space-y-2.5 max-h-72 overflow-y-auto pr-1">
           <div 
             v-for="inc in cachedIncidents" 
             :key="inc._id" 
-            class="p-3 bg-bgMain rounded-xl border border-gray-700/70 hover:border-gray-600 transition space-y-2"
+            class="p-3 bg-bgMain rounded-xl border border-gray-800 hover:border-gray-700 transition space-y-2.5"
           >
-            <div class="flex justify-between items-start">
+            <div class="flex justify-between items-start gap-2">
               <div>
                 <span class="font-extrabold text-white text-xs font-mono">Team {{ inc.teamNumber }}</span>
                 <span class="text-gray-400 text-[11px] ml-1.5 font-mono uppercase font-semibold">
                   {{ inc.eventCode }} • {{ inc.matchNumber && inc.matchNumber !== 'N/A' ? inc.matchNumber : 'Pit / Practice' }}
                 </span>
               </div>
-              <span 
-                :class="getStatusBadgeClass(inc.status)"
-                class="px-2 py-0.5 rounded-full text-[10px] font-bold border font-mono uppercase"
-              >
-                {{ formatStatus(inc.status) }}
-              </span>
+              <StatusBadge :status="inc.status" size="xs" />
             </div>
 
-            <p class="text-[11px] text-gray-300 line-clamp-2">{{ inc.description || 'No description provided' }}</p>
+            <p class="text-[11px] text-gray-300 line-clamp-2 leading-relaxed">{{ inc.description || 'No description provided' }}</p>
 
-            <div class="flex justify-between items-center text-[10px] text-gray-500 pt-1.5 border-t border-gray-800">
-              <div class="flex items-center space-x-1.5">
-                <span>Category: <strong class="text-gray-400">{{ inc.category }}</strong></span>
-                <span>•</span>
-                <span>{{ formatTime(inc.createdAt) }}</span>
+            <div class="flex justify-between items-center text-[10px] text-gray-500 pt-2 border-t border-gray-800">
+              <div class="flex items-center space-x-2">
+                <CategoryBadge :category="inc.category" size="xs" />
+                <span class="text-gray-400">{{ formatTime(inc.createdAt) }}</span>
               </div>
               <button 
                 v-if="canCancelIncident(inc.status)"
                 type="button" 
                 @click="incidentToCancel = inc._id" 
                 :disabled="cancelingId === inc._id"
-                class="px-2 py-0.5 rounded-lg bg-accentCoral/15 hover:bg-accentCoral text-accentCoral hover:text-white border border-accentCoral/30 transition text-[10px] font-bold cursor-pointer flex items-center space-x-1"
+                class="text-xs font-semibold text-accentCoral hover:text-red-300 hover:underline cursor-pointer disabled:opacity-50 inline-flex items-center space-x-1"
                 title="Cancel ticket"
               >
-                <font-awesome-icon v-if="cancelingId === inc._id" icon="spinner" spin class="text-[9px]" />
-                <font-awesome-icon v-else icon="xmark" class="text-[9px]" />
+                <font-awesome-icon v-if="cancelingId === inc._id" icon="spinner" spin class="text-[10px]" />
+                <font-awesome-icon v-else icon="xmark" class="text-[10px]" />
                 <span>Cancel Ticket</span>
               </button>
             </div>
@@ -213,30 +188,29 @@
       <form v-else @submit.prevent="handleSubmit" class="space-y-3.5 animate-fadeIn">
         <!-- Team Number & TBA Search Button -->
         <div>
-          <label class="block text-xs font-bold text-primaryTeal uppercase tracking-wider mb-1.5">Team Number *</label>
+          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5">Team Number <span class="text-accentCoral ml-0.5">*</span></label>
           <div class="flex space-x-2">
-            <div class="relative flex-1">
-              <input 
-                v-model.number="form.teamNumber" 
-                @input="handleTeamNumberChange"
-                @keydown.enter.prevent="searchTeamOnTBA"
-                type="number" 
-                min="1"
-                required 
-                placeholder="e.g. 1156"
-                class="w-full px-3.5 py-2.5 rounded-xl border border-gray-700 bg-bgMain text-textMain text-xs font-mono placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primaryTeal/30 focus:border-primaryTeal transition"
-              >
-            </div>
-            <button 
+            <BaseInput 
+              v-model.number="form.teamNumber" 
+              @input="handleTeamNumberChange"
+              @keydown.enter.prevent="searchTeamOnTBA"
+              type="number" 
+              min="1"
+              required 
+              placeholder="e.g. 1156"
+              input-class="font-mono"
+              class="flex-1"
+            />
+            <BaseButton 
               type="button" 
               @click="searchTeamOnTBA"
               :disabled="!form.teamNumber || loadingEvents"
-              class="w-10 h-[38px] flex items-center justify-center bg-primaryTeal/20 hover:bg-primaryTeal/30 text-primaryTeal font-bold border border-primaryTeal/40 rounded-xl text-xs transition disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0 cursor-pointer shadow-sm"
+              :loading="loadingEvents"
+              variant="primary"
+              size="icon-md"
+              icon="magnifying-glass"
               title="Search on TBA"
-            >
-              <font-awesome-icon v-if="loadingEvents" icon="spinner" spin class="text-sm" />
-              <font-awesome-icon v-else icon="magnifying-glass" class="text-sm" />
-            </button>
+            />
           </div>
 
           <!-- Team Found Badge -->
@@ -258,23 +232,17 @@
         </div>
 
         <!-- Event Selection (only after TBA search completes and team is found) -->
-        <div v-if="searchCompleted && teamFound" class="animate-fadeIn">
-          <label class="block text-xs font-bold text-primaryTeal uppercase tracking-wider mb-1.5">
-            Select Event ({{ currentYear }}) *
+        <div v-if="searchCompleted && teamFound" class="animate-fadeIn space-y-1.5">
+          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider">
+            Select Event ({{ currentYear }}) <span class="text-accentCoral ml-0.5">*</span>
           </label>
-          <div v-if="teamEvents.length > 0" class="relative">
-            <select 
+          <div v-if="teamEvents.length > 0">
+            <CustomSelect 
               v-model="form.eventCode"
+              :options="teamEventOptions"
               @change="handleEventChange"
-              required
               :disabled="loadingEvents"
-              class="w-full px-3.5 py-2.5 rounded-xl border border-gray-700 bg-bgMain text-textMain text-xs focus:outline-none focus:ring-2 focus:ring-primaryTeal/30 focus:border-primaryTeal transition cursor-pointer"
-            >
-              <option value="" disabled>-- Select Competition Event --</option>
-              <option v-for="ev in teamEvents" :key="ev.code" :value="ev.code">
-                {{ ev.name }} ({{ ev.code.toUpperCase() }}) {{ ev.location ? `- ${ev.location}` : '' }}
-              </option>
-            </select>
+            />
           </div>
           <div v-else class="bg-amber-950/40 border border-amber-800/40 p-2.5 rounded-xl text-amber-300 text-xs font-medium flex items-center space-x-2">
             <font-awesome-icon icon="triangle-exclamation" class="text-xs flex-shrink-0" />
@@ -283,87 +251,69 @@
         </div>
 
         <!-- Match Selection -->
-        <div v-if="searchCompleted && teamFound && form.eventCode" class="animate-fadeIn">
-          <label class="block text-xs font-bold text-primaryTeal uppercase tracking-wider mb-1.5" title="Select match number">Match Number</label>
-          <div class="relative">
-            <select 
-              v-model="form.matchNumber" 
-              :disabled="loadingMatches"
-              title="Select match number"
-              class="w-full px-3.5 py-2.5 rounded-xl border border-gray-700 bg-bgMain text-textMain text-xs font-mono focus:outline-none focus:ring-2 focus:ring-primaryTeal/30 focus:border-primaryTeal transition cursor-pointer"
-            >
-              <option value="">Select match number</option>
-              <option v-for="m in eventMatches" :key="m.key" :value="m.key">
-                {{ m.label }}
-              </option>
-            </select>
-          </div>
+        <div v-if="searchCompleted && teamFound && form.eventCode" class="animate-fadeIn space-y-1.5">
+          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider" title="Select match number">Match Number</label>
+          <CustomSelect 
+            v-model="form.matchNumber" 
+            :options="matchOptions"
+            :disabled="loadingMatches"
+          />
         </div>
 
         <!-- Category & Priority -->
         <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold text-primaryTeal uppercase tracking-wider mb-1.5">Category</label>
-            <select 
+          <div class="space-y-1.5">
+            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider">Category</label>
+            <CustomSelect 
               v-model="form.category" 
-              class="w-full px-3.5 py-2.5 rounded-xl border border-gray-700 bg-bgMain text-textMain text-xs focus:outline-none focus:ring-2 focus:ring-primaryTeal/30 focus:border-primaryTeal transition cursor-pointer"
-            >
-              <option value="RADIO_COMMS">RADIO COMMS</option>
-              <option value="ROBOTIC_POWER">ROBOTIC POWER</option>
-              <option value="CAN_BUS">CAN BUS</option>
-              <option value="MECHANICAL">MECHANICAL</option>
-              <option value="CODE_EXCEPTION">CODE EXCEPTION</option>
-              <option value="OTHER">OTHER</option>
-            </select>
+              :options="categoryOptions"
+            />
           </div>
 
-          <div>
-            <label class="block text-xs font-bold text-primaryTeal uppercase tracking-wider mb-1.5">Priority</label>
-            <select 
+          <div class="space-y-1.5">
+            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider">Priority</label>
+            <CustomSelect 
               v-model="form.priority" 
-              class="w-full px-3.5 py-2.5 rounded-xl border border-gray-700 bg-bgMain text-textMain text-xs focus:outline-none focus:ring-2 focus:ring-primaryTeal/30 focus:border-primaryTeal transition cursor-pointer"
-            >
-              <option value="LOW">LOW</option>
-              <option value="MEDIUM">MEDIUM</option>
-              <option value="HIGH">HIGH</option>
-              <option value="CRITICAL">CRITICAL</option>
-            </select>
+              :options="priorityOptions"
+            />
           </div>
         </div>
 
         <!-- Issue Description -->
-        <div>
-          <label class="block text-xs font-bold text-primaryTeal uppercase tracking-wider mb-1.5">Issue Description *</label>
-          <textarea 
-            v-model="form.description" 
-            required 
-            rows="3" 
-            placeholder="Describe the issue observed during match or pit prep..."
-            class="w-full px-3.5 py-2.5 rounded-xl border border-gray-700 bg-bgMain text-textMain text-xs placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primaryTeal/30 focus:border-primaryTeal transition resize-none"
-          ></textarea>
-        </div>
+        <BaseTextarea 
+          v-model="form.description" 
+          label="Issue Description"
+          required 
+          rows="3" 
+          placeholder="Describe the issue observed during match or pit prep..."
+        />
 
         <div v-if="error" class="bg-red-950/40 text-accentCoral p-3 rounded-xl text-xs font-medium border border-red-900/30">
           {{ error }}
         </div>
 
         <!-- Form Actions -->
-        <div class="flex justify-end space-x-2 pt-2 border-t border-gray-700/60">
-          <button 
+        <div class="flex justify-end space-x-2 pt-2 border-t border-gray-800">
+          <BaseButton 
             type="button" 
+            variant="secondary"
+            size="md"
             @click="$emit('close')" 
-            class="px-4 py-2.5 rounded-xl text-xs font-semibold bg-bgMain text-gray-300 hover:text-white border border-gray-700 transition cursor-pointer"
           >
             Cancel
-          </button>
-          <button 
+          </BaseButton>
+          <BaseButton 
+            v-if="isFormValid"
             type="submit" 
+            variant="primary"
+            size="md"
             :disabled="submitting || !form.eventCode || teamEvents.length === 0" 
-            class="px-6 py-2.5 rounded-xl text-xs font-bold bg-primaryTeal hover:brightness-95 text-white shadow-md transition disabled:opacity-50 cursor-pointer flex items-center space-x-1.5"
+            :loading="submitting"
+            loading-text="Submitting..."
+            class="animate-fadeIn"
           >
-            <font-awesome-icon v-if="submitting" icon="spinner" spin class="text-xs" />
-            <span>{{ submitting ? 'Submitting...' : 'Submit' }}</span>
-          </button>
+            Submit
+          </BaseButton>
         </div>
       </form>
     </div>
@@ -371,15 +321,43 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { getApiUrl } from '../config/api';
 import ConfirmationModal from './ConfirmationModal.vue';
+import BaseButton from './common/BaseButton.vue';
+import BaseTextarea from './common/BaseTextarea.vue';
+import BaseInput from './common/BaseInput.vue';
+import BaseTabs from './common/BaseTabs.vue';
+import CustomSelect from './CustomSelect.vue';
+import StatusBadge from './common/StatusBadge.vue';
+import CategoryBadge from './common/CategoryBadge.vue';
 
 const emit = defineEmits(['close']);
 
 const currentYear = new Date().getFullYear();
 
 const viewMode = ref('form'); // 'form' | 'success' | 'history'
+
+const categoryOptions = [
+  { value: 'RADIO_COMMS', label: 'Radio & Wireless Comms' },
+  { value: 'ROBOTIC_POWER', label: 'Robot Power Path & Battery' },
+  { value: 'CAN_BUS', label: 'CAN Bus Connection' },
+  { value: 'MOTOR_CONTROLLER', label: 'Motor Controllers & Sensors' },
+  { value: 'PNEUMATICS', label: 'Pneumatics & Air System' },
+  { value: 'VISION_COPROCESSOR', label: 'Vision & Coprocessors' },
+  { value: 'DRIVER_STATION', label: 'Driver Station & Controls' },
+  { value: 'CODE_EXCEPTION', label: 'Robot User Code' },
+  { value: 'MECHANICAL', label: 'Mechanical & Hardware' },
+  { value: 'FIELD_NETWORK', label: 'Field & FMS Network' },
+  { value: 'OTHER', label: 'Other Issues' }
+];
+
+const priorityOptions = [
+  { value: 'LOW', label: 'LOW' },
+  { value: 'MEDIUM', label: 'MEDIUM' },
+  { value: 'HIGH', label: 'HIGH' },
+  { value: 'CRITICAL', label: 'CRITICAL' }
+];
 
 const form = ref({
   teamNumber: '',
@@ -402,8 +380,44 @@ const error = ref(null);
 const successTicket = ref(null);
 const searchCompleted = ref(false);
 
+const isFormValid = computed(() => {
+  return Boolean(
+    form.value.teamNumber &&
+    Number(form.value.teamNumber) > 0 &&
+    form.value.eventCode &&
+    form.value.description &&
+    form.value.description.trim().length > 0
+  );
+});
+
 const cachedIncidents = ref([]);
 const refreshingStatus = ref(false);
+
+const modalTabs = computed(() => [
+  { id: 'form', label: 'New Incident', icon: 'plus' },
+  {
+    id: 'history',
+    label: 'My Submitted Tickets',
+    icon: 'clock-rotate-left',
+    count: cachedIncidents.value.length || undefined
+  }
+]);
+
+const teamEventOptions = computed(() => [
+  { value: '', label: '-- Select Competition Event --' },
+  ...teamEvents.value.map(ev => ({
+    value: ev.code,
+    label: `${ev.name} (${ev.code.toUpperCase()})${ev.location ? ` - ${ev.location}` : ''}`
+  }))
+]);
+
+const matchOptions = computed(() => [
+  { value: '', label: 'Select match number' },
+  ...eventMatches.value.map(m => ({
+    value: m.key,
+    label: m.label
+  }))
+]);
 
 const loadCachedIncidents = () => {
   try {
@@ -561,33 +575,36 @@ const resetForm = () => {
 };
 
 const refreshCachedStatus = async () => {
-  loadCachedIncidents();
-  if (cachedIncidents.value.length === 0) return;
-  const ids = cachedIncidents.value.map(i => i._id).filter(Boolean);
-  if (ids.length === 0) return;
-
   refreshingStatus.value = true;
   try {
-    const res = await fetch(getApiUrl('/incidents/public/status'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids })
-    });
-    if (res.ok) {
-      const updatedList = await res.json();
-      if (Array.isArray(updatedList) && updatedList.length > 0) {
-        const updateMap = new Map(updatedList.map(item => [String(item._id), item]));
-        cachedIncidents.value = cachedIncidents.value.map(cached => {
-          const fresh = updateMap.get(String(cached._id));
-          return fresh ? { ...cached, ...fresh } : cached;
+    loadCachedIncidents();
+    if (cachedIncidents.value.length > 0) {
+      const ids = cachedIncidents.value.map(i => i._id).filter(Boolean);
+      if (ids.length > 0) {
+        const res = await fetch(getApiUrl('/incidents/public/status'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids })
         });
-        localStorage.setItem('my_submitted_incidents', JSON.stringify(cachedIncidents.value));
+        if (res.ok) {
+          const updatedList = await res.json();
+          if (Array.isArray(updatedList) && updatedList.length > 0) {
+            const updateMap = new Map(updatedList.map(item => [String(item._id), item]));
+            cachedIncidents.value = cachedIncidents.value.map(cached => {
+              const fresh = updateMap.get(String(cached._id));
+              return fresh ? { ...cached, ...fresh } : cached;
+            });
+            localStorage.setItem('my_submitted_incidents', JSON.stringify(cachedIncidents.value));
+          }
+        }
       }
     }
   } catch (err) {
     console.warn('Failed to refresh cached ticket status from server:', err);
   } finally {
-    refreshingStatus.value = false;
+    setTimeout(() => {
+      refreshingStatus.value = false;
+    }, 450);
   }
 };
 

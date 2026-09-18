@@ -2,6 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Dark Theme (Default FIRST Assist System) */
+  --color-bg-main: #1C2633;
+  --color-bg-card: #253344;
+  --color-bg-input: #1C2633;
+  --color-primary-navy: #131C26;
+  --color-primary-teal: #38777E;
+  --color-accent-coral: #E25C43;
+  --color-accent-yellow: #E5B25D;
+  --color-accent-purple: #9D85C5;
+  --color-accent-green: #10B981;
+  --color-accent-lightblue: #D0E8EA;
+  --color-text-main: #E2E8F0;
+  --color-text-muted: #94A3B8;
+  --color-border-default: #334155;
+  --color-border-subtle: #1E293B;
+}
+
+.light {
+  /* Light Theme (From SDD Academic Paper Spec) */
+  --color-bg-main: #F7F6F0;
+  --color-bg-card: #FFFFFF;
+  --color-bg-input: #FFFFFF;
+  --color-primary-navy: #1F3A52;
+  --color-primary-teal: #3A8B8C;
+  --color-accent-coral: #E66A4E;
+  --color-accent-yellow: #DCA951;
+  --color-accent-purple: #7A5B73;
+  --color-accent-green: #10B981;
+  --color-accent-lightblue: #D0E8EA;
+  --color-text-main: #2C3E50;
+  --color-text-muted: #64748B;
+  --color-border-default: #CBD5E1;
+  --color-border-subtle: #E2E8F0;
+}
+
 /* Global Linux-Style Dark Scrollbar for All Windows & App Containers */
 * {
   scrollbar-width: thin;
@@ -33,16 +69,16 @@
 
 @layer base {
   body {
-    @apply bg-bgMain text-textMain;
+    @apply bg-bgMain text-textMain font-sans;
   }
   
-  /* Global Dark Mode Input Styles */
+  /* Global Input Styles */
   input, textarea {
-    @apply bg-bgMain text-textMain border-gray-700 focus:ring-2 focus:ring-primaryTeal/30 focus:border-primaryTeal transition-all duration-150 !important;
+    @apply bg-bgMain text-textMain border-gray-700 focus:ring-2 focus:ring-teal-500/30 focus:border-primaryTeal transition-all duration-150 !important;
   }
   
   input::placeholder, textarea::placeholder {
-    @apply text-gray-400 !important;
+    @apply text-gray-500 !important;
   }
 
   /* Custom Stylized Single Select Dropdowns */
@@ -50,9 +86,9 @@
     appearance: none !important;
     -webkit-appearance: none !important;
     -moz-appearance: none !important;
-    background-color: #253344 !important;
-    color: #E2E8F0 !important;
-    border: 1px solid #384A60 !important;
+    background-color: var(--color-bg-card, #253344) !important;
+    color: var(--color-text-main, #E2E8F0) !important;
+    border: 1px solid var(--color-border-default, #334155) !important;
     border-radius: 0.75rem !important; /* rounded-xl */
     background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338777E' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
     background-repeat: no-repeat !important;
@@ -69,9 +105,9 @@
     appearance: listbox !important;
     -webkit-appearance: listbox !important;
     -moz-appearance: listbox !important;
-    background-color: #1C2633 !important;
-    color: #E2E8F0 !important;
-    border: 1px solid #384A60 !important;
+    background-color: var(--color-bg-main, #1C2633) !important;
+    color: var(--color-text-main, #E2E8F0) !important;
+    border: 1px solid var(--color-border-default, #334155) !important;
     border-radius: 0.75rem !important;
     background-image: none !important;
     padding: 6px !important;
@@ -79,25 +115,25 @@
   }
 
   select:hover {
-    border-color: #38777E !important;
+    border-color: var(--color-primary-teal, #38777E) !important;
   }
 
   select:focus {
     outline: none !important;
-    border-color: #38777E !important;
+    border-color: var(--color-primary-teal, #38777E) !important;
     box-shadow: 0 0 0 3px rgba(56, 119, 126, 0.25) !important;
   }
 
   /* Dark Theme Dropdown Options */
   select option {
-    background-color: #1C2633 !important;
+    background-color: var(--color-bg-main, #1C2633) !important;
     color: #FFFFFF !important;
     padding: 8px 12px !important;
     border-radius: 4px;
   }
 
   select option:checked {
-    background-color: #38777E !important;
+    background-color: var(--color-primary-teal, #38777E) !important;
     color: #FFFFFF !important;
   }
 

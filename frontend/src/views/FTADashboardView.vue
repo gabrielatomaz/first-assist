@@ -51,10 +51,10 @@
 
     <!-- SUB-VIEW 1: MANAGE EVENT TEAMS (PAGINATED & SEARCHABLE) -->
     <div v-if="activeTab === 'manage-teams'" class="space-y-6">
-      <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-6">
+      <BaseCard class="space-y-6">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-800 pb-4">
           <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto max-w-full">
-            <label class="text-xs font-bold text-gray-400 uppercase flex-shrink-0">Select Event:</label>
+            <label class="text-xs font-semibold text-gray-300 uppercase tracking-wider flex-shrink-0">Select Event:</label>
             <div class="flex items-center space-x-2 w-full min-w-0">
               <CustomSelect
                 v-model="selectedEventCode"
@@ -62,67 +62,63 @@
                 @change="loadEventTeams(1)"
                 class="flex-1 min-w-0 sm:flex-initial sm:w-72 font-bold"
               />
-              <button 
+              <BaseButton 
                 v-if="selectedEventCode" 
                 @click="handleSetActiveEvent(selectedEventCode)" 
+                variant="ghost"
+                size="icon-sm"
+                icon="star"
                 title="Set Active Competition Event"
-                class="flex-shrink-0 bg-accentYellow/20 hover:bg-accentYellow/30 text-accentYellow border border-accentYellow/40 w-9 h-9 rounded-lg transition cursor-pointer flex items-center justify-center shadow-sm"
-              >
-                <font-awesome-icon icon="star" class="text-accentYellow text-sm" />
-              </button>
+                class="text-accentYellow border border-accentYellow/40 hover:bg-accentYellow/20 flex-shrink-0"
+              />
             </div>
           </div>
 
           <!-- Add Team to Event inline input -->
           <form @submit.prevent="handleAddTeamToEvent" class="flex items-center space-x-2 w-full sm:w-auto">
-            <input 
+            <BaseInput 
               v-model.number="newTeamNumber" 
               type="number" 
               placeholder="Team #" 
               required
-              class="flex-1 min-w-0 sm:w-28 px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs placeholder-gray-500"
-            >
-            <button 
+              size="sm"
+              input-class="font-mono"
+              class="flex-1 min-w-0 sm:w-28"
+            />
+            <BaseButton 
               type="submit" 
+              variant="primary"
+              size="icon-sm"
+              icon="plus"
               :disabled="!newTeamNumber || !selectedEventCode"
               title="Add Team to Roster" 
-              class="w-9 h-9 flex items-center justify-center bg-primaryTeal hover:bg-primaryTeal/90 text-white rounded-lg transition shadow-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
-            >
-              <font-awesome-icon icon="plus" class="text-sm" />
-            </button>
+            />
           </form>
         </div>
 
         <!-- Alert Banner inside Manage Event Teams -->
-        <div 
+        <AlertBanner 
           v-if="alertMessage" 
-          :class="alertType === 'error' ? 'bg-red-950/40 text-accentCoral border-red-900/30' : 'bg-accentGreen/10 text-accentGreen border-accentGreen/30'" 
-          class="p-4 rounded-xl border text-sm font-medium flex justify-between items-center animate-fadeIn"
-        >
-          <span>{{ alertMessage }}</span>
-          <button @click="alertMessage = null" class="text-xs font-bold opacity-75 hover:opacity-100 cursor-pointer">✕</button>
-        </div>
+          :type="alertType === 'error' ? 'error' : 'success'" 
+          :message="alertMessage" 
+          :dismissible="true"
+          @dismiss="alertMessage = null" 
+        />
 
-        <!-- Search Bar -->
-        <div class="flex items-center space-x-3 bg-bgMain px-4 py-2.5 rounded-xl border border-gray-800">
-          <font-awesome-icon icon="magnifying-glass" class="text-gray-400" />
-          <input 
-            v-model="teamSearchQuery" 
-            type="text" 
-            placeholder="Search by team number or name..." 
-            @input="debouncedSearch"
-            class="w-full bg-transparent text-xs text-textMain placeholder-gray-500 focus:outline-none"
-          >
-          <button v-if="teamSearchQuery" @click="teamSearchQuery = ''; loadEventTeams(1)" class="text-xs text-accentYellow font-bold">
-            Clear
-          </button>
-        </div>
+        <!-- Standardized Search Bar -->
+        <SearchBar
+          v-model="teamSearchQuery"
+          placeholder="Search by team number or name..."
+          :debounce-ms="300"
+          @search="debouncedSearch"
+          @clear="teamSearchQuery = ''; loadEventTeams(1)"
+        />
 
         <!-- Paginated Teams Table -->
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
-              <tr class="bg-bgMain border-b border-gray-800 text-xs font-bold uppercase tracking-wider text-primaryTeal">
+              <tr class="bg-bgMain border-b border-gray-800 text-xs font-bold uppercase tracking-wider text-teal-400">
                 <th class="px-4 py-3">Team #</th>
                 <th class="px-4 py-3">Team Name</th>
                 <th class="px-4 py-3">Rookie Year</th>
@@ -140,10 +136,10 @@
                 <td class="px-4 py-3 font-bold text-white font-mono">Team {{ team.number }}</td>
                 <td class="px-4 py-3 font-semibold text-gray-200">{{ team.name }}</td>
                 <td class="px-4 py-3 text-gray-400 font-mono">{{ team.rookieYear || 'N/A' }}</td>
-                <td class="px-4 py-3 text-right">
+                <td class="px-4 py-3 text-right whitespace-nowrap">
                   <button 
                     @click="handleRemoveTeamFromEvent(team.number)"
-                    class="text-xs font-semibold text-accentCoral hover:text-accentCoral/80 hover:underline transition cursor-pointer"
+                    class="text-xs font-semibold text-accentCoral hover:text-red-300 hover:underline transition cursor-pointer"
                   >
                     Remove
                   </button>
@@ -157,92 +153,103 @@
         <div v-if="totalPages > 1" class="flex justify-between items-center border-t border-gray-800 pt-4 text-xs text-gray-400">
           <span>Showing Page {{ currentPage }} of {{ totalPages }} ({{ totalTeamsCount }} Total Teams)</span>
           <div class="flex space-x-2">
-            <button 
+            <BaseButton 
               :disabled="currentPage === 1" 
               @click="loadEventTeams(currentPage - 1)" 
-              class="w-8 h-8 rounded-lg bg-bgMain border border-gray-700 disabled:opacity-40 font-bold flex items-center justify-center text-textMain hover:border-gray-500 transition cursor-pointer"
+              variant="secondary"
+              size="icon-sm"
+              icon="chevron-left"
               title="Previous Page"
-            >
-              <font-awesome-icon icon="chevron-left" class="text-xs" />
-            </button>
-            <button 
+            />
+            <BaseButton 
               :disabled="currentPage === totalPages" 
               @click="loadEventTeams(currentPage + 1)" 
-              class="w-8 h-8 rounded-lg bg-bgMain border border-gray-700 disabled:opacity-40 font-bold flex items-center justify-center text-textMain hover:border-gray-500 transition cursor-pointer"
+              variant="secondary"
+              size="icon-sm"
+              icon="chevron-right"
               title="Next Page"
-            >
-              <font-awesome-icon icon="chevron-right" class="text-xs" />
-            </button>
+            />
           </div>
         </div>
-      </div>
+      </BaseCard>
     </div>
 
 
 
     <!-- SUB-VIEW 4: ASSIGN CSA EVENT CONTEXTS -->
     <div v-if="activeTab === 'csa-assignment'" class="space-y-6">
-      <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-6">
+      <BaseCard class="space-y-6">
         <div class="border-b border-gray-800 pb-3 flex justify-between items-center">
           <div>
-            <h3 class="text-lg font-bold text-primaryTeal">Manage CSAs & Event Assignments</h3>
-            <p class="text-xs text-gray-400 mt-1">Register Control System Advisors and assign specific competition event contexts.</p>
+            <h3 class="text-base font-bold text-teal-400 tracking-tight">Manage CSAs & Event Assignments</h3>
+            <p class="text-xs text-gray-400 mt-0.5">Register Control System Advisors and assign specific competition event contexts.</p>
           </div>
-          <button
-            @click="showCreateCsaForm = !showCreateCsaForm"
-            :class="showCreateCsaForm ? 'w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 rounded-lg transition cursor-pointer flex-shrink-0' : 'bg-primaryTeal hover:brightness-95 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center space-x-1.5 shadow-sm'"
-            :title="showCreateCsaForm ? 'Cancel' : 'Register New CSA'"
+          <BaseButton
+            v-if="showCreateCsaForm"
+            size="icon-sm"
+            variant="secondary"
+            icon="xmark"
+            @click="showCreateCsaForm = false"
+            title="Cancel"
+          />
+          <BaseButton
+            v-else
+            size="sm"
+            variant="primary"
+            icon="user-plus"
+            @click="showCreateCsaForm = true"
+            title="Register"
+            class="w-8 h-8 sm:w-auto px-0 sm:px-3 flex-shrink-0"
           >
-            <font-awesome-icon :icon="showCreateCsaForm ? 'xmark' : 'user-plus'" class="text-xs" />
-            <span v-if="!showCreateCsaForm">Register</span>
-          </button>
+            <span class="hidden sm:inline">Register</span>
+          </BaseButton>
         </div>
 
         <!-- Alert Banner inside Manage CSAs & Event Assignments -->
-        <div 
+        <AlertBanner 
           v-if="alertMessage" 
-          :class="alertType === 'error' ? 'bg-red-950/40 text-accentCoral border-red-900/30' : 'bg-accentGreen/10 text-accentGreen border-accentGreen/30'" 
-          class="p-4 rounded-xl border text-sm font-medium flex justify-between items-center animate-fadeIn"
-        >
-          <span>{{ alertMessage }}</span>
-          <button @click="alertMessage = null" class="text-xs font-bold opacity-75 hover:opacity-100 cursor-pointer">✕</button>
-        </div>
+          :type="alertType === 'error' ? 'error' : 'success'" 
+          :message="alertMessage" 
+          :dismissible="true" 
+          @dismiss="alertMessage = null" 
+        />
 
         <!-- Inline Register CSA Form -->
         <div v-if="showCreateCsaForm" class="p-5 bg-bgMain rounded-xl border border-gray-800 space-y-4 animate-fadeIn">
-          <h4 class="text-xs font-bold text-primaryTeal uppercase tracking-wider">Register Control System Advisor (CSA)</h4>
-          <form @submit.prevent="handleRegisterCSA" class="space-y-3">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Name</label>
-                <input v-model="csaForm.name" type="text" required placeholder="e.g. John Doe" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgCard text-textMain text-xs">
-              </div>
-              <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Email</label>
-                <input v-model="csaForm.email" type="email" required placeholder="csa@first.org" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgCard text-textMain text-xs">
-              </div>
-              <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Temporary Password</label>
-                <input v-model="csaForm.password" type="password" required placeholder="******" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgCard text-textMain text-xs font-mono">
-              </div>
-              <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Confirm Password</label>
-                <input v-model="csaForm.confirmPassword" type="password" required placeholder="******" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgCard text-textMain text-xs font-mono">
-              </div>
+          <div>
+            <h4 class="text-xs font-bold text-teal-400 uppercase tracking-wider">Register Control System Advisor (CSA)</h4>
+          </div>
+          <form @submit.prevent="handleRegisterCSA" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <BaseInput v-model="csaForm.name" label="Name" required placeholder="e.g. John Doe" />
+              <BaseInput v-model="csaForm.email" type="email" label="Email" required placeholder="csa@first.org" />
+              <BaseInput v-model="csaForm.password" type="password" label="Temporary Password" required placeholder="******" input-class="font-mono" />
+              <BaseInput v-model="csaForm.confirmPassword" type="password" label="Confirm Password" required placeholder="******" input-class="font-mono" />
             </div>
-            <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Assigned Event Context</label>
-              <CustomSelect v-model="csaForm.assignedEventCode" :options="csaEventOptions" button-class="py-2 px-3 text-xs" />
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider">Assigned Event Context</label>
+              <CustomSelect v-model="csaForm.assignedEventCode" :options="csaEventOptions" />
             </div>
 
-            <div class="flex justify-end pt-2">
-              <button 
-                type="submit" 
-                :disabled="registeringCSA || !csaForm.name || !csaForm.email || !csaForm.password || !csaForm.confirmPassword" 
-                class="bg-primaryTeal hover:bg-primaryTeal/90 text-white font-bold px-5 py-2 rounded-lg text-xs transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            <div class="flex justify-end gap-2 pt-2">
+              <BaseButton 
+                type="button" 
+                variant="secondary" 
+                size="sm" 
+                @click="showCreateCsaForm = false"
               >
-                {{ registeringCSA ? 'Registering...' : 'Register' }}
-              </button>
+                Cancel
+              </BaseButton>
+              <BaseButton 
+                type="submit" 
+                variant="primary"
+                size="sm"
+                :disabled="registeringCSA || !csaForm.name || !csaForm.email || !csaForm.password || !csaForm.confirmPassword" 
+                :loading="registeringCSA"
+                loading-text="Registering..."
+              >
+                Register
+              </BaseButton>
             </div>
           </form>
         </div>
@@ -250,47 +257,44 @@
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
-              <tr class="bg-bgMain border-b border-gray-800 text-xs font-bold uppercase tracking-wider text-primaryTeal">
+              <tr class="bg-bgMain border-b border-gray-800 text-xs font-bold uppercase tracking-wider text-teal-400">
                 <th class="px-4 py-3">CSA Name</th>
                 <th class="px-4 py-3">Email</th>
-                <th class="px-4 py-3">Role</th>
                 <th class="px-4 py-3">Status</th>
                 <th class="px-4 py-3">Assigned Event Context</th>
                 <th class="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-800 text-xs">
-              <tr v-for="csa in csaUsers" :key="csa._id" class="hover:bg-bgMain/30 transition">
+              <tr v-if="loadingCsaUsers">
+                <td colspan="5" class="text-center py-8 text-gray-400">Loading CSAs list...</td>
+              </tr>
+              <tr v-else-if="!csaUsers || csaUsers.length === 0">
+                <td colspan="5" class="text-center py-8 text-gray-400">No Control System Advisors registered yet.</td>
+              </tr>
+              <tr v-else v-for="csa in csaUsers" :key="csa._id" class="hover:bg-bgMain/30 transition">
                 <td class="px-4 py-3 font-bold text-white">{{ csa.name }}</td>
                 <td class="px-4 py-3 text-gray-400 font-mono">{{ csa.email }}</td>
                 <td class="px-4 py-3">
-                  <span class="px-2.5 py-1 rounded-md text-xs font-bold uppercase font-mono bg-primaryTeal/15 text-primaryTeal border border-primaryTeal/25">
-                    {{ csa.role }}
-                  </span>
-                </td>
-                <td class="px-4 py-3">
-                  <span :class="{
-                    'bg-emerald-950/40 text-emerald-400 border border-emerald-900/30': csa.status === 'ACTIVE',
-                    'bg-red-950/40 text-accentCoral border border-red-900/30': csa.status === 'INACTIVE'
-                  }" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase font-mono">
-                    {{ csa.status || 'ACTIVE' }}
-                  </span>
+                  <StatusBadge :status="csa.status || 'ACTIVE'" />
                 </td>
                 <td class="px-4 py-3">
                   <CustomSelect
                     v-model="csa.assignedEventCode"
                     :options="csaEventOptions"
                     @change="saveCSAEventAssignment(csa)"
-                    class="w-60 font-bold"
+                    size="sm"
+                    class="w-56 font-bold"
                   />
                 </td>
                 <td class="px-4 py-3 text-right whitespace-nowrap">
                   <button
                     @click="toggleCSAStatus(csa)"
                     :disabled="updatingCsaStatus === csa._id"
-                    :class="csa.status === 'ACTIVE' ? 'text-accentCoral hover:text-accentCoral/80' : 'text-accentGreen hover:text-accentGreen/80'"
+                    :class="csa.status === 'ACTIVE' ? 'text-accentCoral hover:text-red-300' : 'text-emerald-400 hover:text-emerald-300'"
                     class="text-xs font-semibold hover:underline disabled:opacity-50 transition cursor-pointer"
                   >
+                    <font-awesome-icon v-if="updatingCsaStatus === csa._id" icon="spinner" spin class="mr-1" />
                     {{ csa.status === 'ACTIVE' ? 'Deactivate' : 'Reactivate' }}
                   </button>
                 </td>
@@ -298,7 +302,7 @@
             </tbody>
           </table>
         </div>
-      </div>
+      </BaseCard>
     </div>
   </div>
 </template>
@@ -307,10 +311,16 @@
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import {
+  BaseButton,
+  BaseCard,
+  BaseInput,
+  RoleBadge,
+  StatusBadge,
   CustomSelect,
   ConfirmationModal,
   PageHeader,
-  AlertBanner
+  AlertBanner,
+  SearchBar
 } from '../components';
 import { getApiUrl } from '../config/api';
 
@@ -383,6 +393,7 @@ const importingTBAEvent = ref(false);
 const creatingEvent = ref(false);
 
 const csaUsers = ref([]);
+const loadingCsaUsers = ref(false);
 
 // API calls
 const loadEvents = async () => {
@@ -613,6 +624,7 @@ const handleSetActiveEvent = async (code) => {
 
 // CSA Event Assignment (FTAs assign active event context to CSAs)
 const loadCSAUsers = async () => {
+  loadingCsaUsers.value = true;
   try {
     const res = await fetch(getApiUrl('/users'), {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
@@ -623,6 +635,8 @@ const loadCSAUsers = async () => {
     }
   } catch (err) {
     console.error('Failed to load users:', err);
+  } finally {
+    loadingCsaUsers.value = false;
   }
 };
 

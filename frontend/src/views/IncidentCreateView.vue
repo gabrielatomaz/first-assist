@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-2xl mx-auto bg-bgCard p-8 rounded-2xl shadow border border-gray-800 mt-8 animate-fadeIn space-y-6">
+  <BaseCard padding="p-8" class="max-w-2xl mx-auto mt-8 animate-fadeIn space-y-6">
     <PageHeader
       title="Report Technical Incident"
       subtitle="Document issues immediately to request field support"
@@ -14,15 +14,15 @@
     <form @submit.prevent="submitIncident" class="space-y-6">
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Team Number</label>
-          <input 
-            v-model.number="form.teamNumber" 
+          <BaseInput 
+            v-model="form.teamNumber" 
             type="number" 
+            label="Team Number"
             list="eventTeamsList" 
             required 
-            class="w-full h-11 px-4 py-2.5 rounded-xl border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500 font-mono" 
             placeholder="e.g. 254 (or select below)"
-          >
+            input-class="font-mono"
+          />
           <datalist id="eventTeamsList">
             <option v-for="team in activeEventTeams" :key="team._id" :value="team.number">
               Team {{ team.number }} — {{ team.name }}
@@ -30,16 +30,14 @@
           </datalist>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2" title="Select match number">Match Number</label>
-          <input 
+          <BaseInput 
             v-model="form.matchNumber" 
-            type="text" 
+            label="Match Number"
             list="matchSuggestionsList" 
             :disabled="!form.teamNumber"
-            title="Select match number"
-            class="w-full h-11 px-4 py-2.5 rounded-xl border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500 font-mono disabled:opacity-50 disabled:cursor-not-allowed" 
             :placeholder="form.teamNumber ? 'e.g. Q12 (select match)' : 'Select Team Number first...'"
-          >
+            input-class="font-mono"
+          />
           <datalist id="matchSuggestionsList">
             <option v-for="m in availableMatchSuggestions" :key="m" :value="m">{{ m }}</option>
           </datalist>
@@ -49,60 +47,60 @@
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Category</label>
+        <div class="space-y-1.5">
+          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider">Category</label>
           <CustomSelect
             v-model="form.category"
             :options="categoryOptions"
-            button-class="h-11 px-4 py-2.5 text-sm rounded-xl bg-bgMain"
           />
         </div>
 
-        <div>
-          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Priority</label>
+        <div class="space-y-1.5">
+          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider">Priority</label>
           <CustomSelect
             v-model="form.priority"
             :options="priorityOptions"
-            button-class="h-11 px-4 py-2.5 text-sm rounded-xl bg-bgMain"
           />
         </div>
       </div>
 
       <div>
-        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Description</label>
-        <div class="relative">
-          <textarea 
-            v-model="form.description" 
-            required 
-            rows="4" 
-            class="w-full px-4 py-2.5 pb-10 rounded-xl border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500 leading-relaxed resize-none" 
-            placeholder="Detailed explanation of the issue (e.g., Radio lost power on hit, CAN error on drive motor, etc.)"
-          ></textarea>
-          <button
-            type="button"
-            @click="recording ? stopRecording() : startRecording()"
-            :disabled="transcribing"
-            :title="transcribing ? 'Transcribing audio...' : (recording ? 'Stop recording' : 'Record voice description')"
-            :class="recording ? 'bg-red-600 text-white animate-pulse border-red-500' : 'bg-bgCard text-gray-400 hover:text-white border-gray-600 hover:border-gray-500'"
-            class="absolute right-3 bottom-3 w-8 h-8 rounded-lg border text-sm font-semibold flex items-center justify-center transition duration-150 shadow cursor-pointer"
-          >
-            <font-awesome-icon v-if="transcribing" icon="spinner" class="animate-spin text-sm" />
-            <font-awesome-icon v-else icon="microphone" class="text-sm" />
-          </button>
-        </div>
+        <BaseTextarea 
+          v-model="form.description" 
+          label="Description"
+          required 
+          rows="4" 
+          placeholder="Detailed explanation of the issue (e.g., Radio lost power on hit, CAN error on drive motor, etc.)"
+          textarea-class="pb-12"
+        >
+          <template #action>
+            <BaseButton
+              type="button"
+              @click="recording ? stopRecording() : startRecording()"
+              :disabled="transcribing"
+              :loading="transcribing"
+              :variant="recording ? 'danger' : 'secondary'"
+              size="icon-sm"
+              icon="microphone"
+              :class="{ 'animate-pulse': recording }"
+              :title="transcribing ? 'Transcribing audio...' : (recording ? 'Stop recording' : 'Record voice description')"
+            />
+          </template>
+        </BaseTextarea>
       </div>
 
       <!-- Recording status and wave animation indicator -->
       <div v-if="recording" class="flex items-center space-x-3 bg-red-950/40 border border-red-900/40 p-3 rounded-xl text-accentCoral text-xs animate-pulse">
         <font-awesome-icon icon="circle-dot" class="text-accentCoral text-base" />
         <span class="font-bold flex-1">Recording voice audio... Speak clearly into your microphone.</span>
-        <button 
+        <BaseButton 
           type="button" 
+          variant="danger"
+          size="sm"
           @click="stopRecording" 
-          class="px-3 py-1 bg-accentCoral text-white font-bold rounded-lg text-xs shadow hover:bg-opacity-90 cursor-pointer"
         >
           Stop Recording
-        </button>
+        </BaseButton>
       </div>
 
       <div v-if="transcribing" class="flex items-center space-x-2 text-xs text-primaryTeal font-medium bg-primaryTeal/10 p-3 rounded-xl border border-primaryTeal/20">
@@ -110,9 +108,9 @@
         <span>Transcribing audio...</span>
       </div>
 
-      <div v-if="transcriptionSource" class="text-xs text-emerald-400 font-medium bg-emerald-950/40 p-3 rounded-xl border border-emerald-900/30 flex items-center justify-between">
+      <div v-if="transcriptionSource" class="text-xs text-emerald-400 font-medium bg-emerald-950/40 border border-emerald-900/30 p-3 rounded-xl flex items-center justify-between">
         <span><font-awesome-icon icon="circle-check" class="mr-1.5" /> Incident details transcribed successfully via voice</span>
-        <button type="button" @click="transcriptionSource = false" class="text-gray-400 hover:text-white text-xs">✕</button>
+        <BaseButton variant="ghost" size="icon-sm" icon="xmark" @click="transcriptionSource = false" class="text-gray-400 hover:text-white" />
       </div>
 
       <!-- Speech Recognition Error -->
@@ -121,7 +119,7 @@
           <font-awesome-icon icon="triangle-exclamation" class="text-accentCoral" />
           <span>{{ transcriptionError }}</span>
         </div>
-        <button type="button" @click="transcriptionError = null" class="text-gray-400 hover:text-white text-xs cursor-pointer">✕</button>
+        <BaseButton variant="ghost" size="icon-sm" icon="xmark" @click="transcriptionError = null" class="text-gray-400 hover:text-white" />
       </div>
 
       <AlertBanner v-if="error" type="error" :message="error" />
@@ -129,7 +127,7 @@
       <div class="pt-4 border-t border-gray-800">
         <BaseButton
           type="submit"
-          :disabled="submitting || transcribing || recording"
+          :disabled="!isFormValid || submitting || transcribing || recording"
           :loading="submitting"
           loading-text="Submitting..."
           variant="primary"
@@ -140,7 +138,7 @@
         </BaseButton>
       </div>
     </form>
-  </div>
+  </BaseCard>
 </template>
 
 <script setup>
@@ -149,6 +147,9 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { useSpeechRecognition } from '../composables/useSpeechRecognition';
 import {
+  BaseCard,
+  BaseInput,
+  BaseTextarea,
   CustomSelect,
   PageHeader,
   BaseButton,
@@ -172,11 +173,16 @@ const activeEvent = ref(null);
 const activeEventTeams = ref([]);
 
 const categoryOptions = [
-  { value: 'RADIO_COMMS', label: 'Radio & Comms' },
-  { value: 'ROBOTIC_POWER', label: 'Robot Power Path' },
+  { value: 'RADIO_COMMS', label: 'Radio & Wireless Comms' },
+  { value: 'ROBOTIC_POWER', label: 'Robot Power Path & Battery' },
   { value: 'CAN_BUS', label: 'CAN Bus Connection' },
-  { value: 'MECHANICAL', label: 'Mechanical Issue' },
+  { value: 'MOTOR_CONTROLLER', label: 'Motor Controllers & Sensors' },
+  { value: 'PNEUMATICS', label: 'Pneumatics & Air System' },
+  { value: 'VISION_COPROCESSOR', label: 'Vision & Coprocessors' },
+  { value: 'DRIVER_STATION', label: 'Driver Station & Controls' },
   { value: 'CODE_EXCEPTION', label: 'Robot User Code' },
+  { value: 'MECHANICAL', label: 'Mechanical & Hardware' },
+  { value: 'FIELD_NETWORK', label: 'Field & FMS Network' },
   { value: 'OTHER', label: 'Other Issues' }
 ];
 
@@ -190,6 +196,15 @@ const priorityOptions = [
 const form = ref({ teamNumber: null, matchNumber: '', eventCode: '', description: '', category: 'OTHER', priority: 'MEDIUM' });
 const submitting = ref(false);
 const error = ref(null);
+
+const isFormValid = computed(() => {
+  return Boolean(
+    form.value.teamNumber &&
+    Number(form.value.teamNumber) > 0 &&
+    form.value.description &&
+    form.value.description.trim().length > 0
+  );
+});
 
 const availableMatchSuggestions = computed(() => {
   if (!form.value.teamNumber) return [];

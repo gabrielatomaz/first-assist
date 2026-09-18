@@ -1,162 +1,153 @@
 <template>
-  <div class="space-y-6">
-    <!-- AI Suggestion Container -->
-    <div class="bg-accentPurple/5 border-accentPurple/20 border-2 p-6 rounded-2xl transition-all duration-300 space-y-6">
-      <div class="border-b border-gray-700/50 pb-3 space-y-2">
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center space-x-2 min-w-0">
-            <!-- AI Icon -->
-            <font-awesome-icon icon="robot" class="text-accentPurple text-xl flex-shrink-0" />
-            <h3 class="text-base sm:text-lg font-bold text-accentPurple font-sans tracking-tight truncate">AI Assistant Diagnosis</h3>
-          </div>
-
-          <!-- Action Button: Only Refresh on top -->
-          <div v-if="suggestion && !loading && !generating" class="flex items-center flex-shrink-0">
-            <button
-              @click="generateDiagnosis"
-              :disabled="generating"
-              class="w-9 h-9 flex items-center justify-center bg-bgMain text-gray-300 hover:text-white border border-gray-700 hover:bg-gray-800 rounded-xl transition duration-150 shadow-sm cursor-pointer disabled:opacity-50 text-sm"
-              title="Re-generate AI diagnosis"
-            >
-              <font-awesome-icon icon="arrows-rotate" :class="{ 'animate-spin': generating }" class="text-sm" />
-            </button>
-          </div>
-        </div>
-
-        <!-- Knowledge Base Status Badge (Below Title) -->
-        <div class="pt-0.5">
-          <span v-if="suggestion?.isRagGrounded" class="inline-flex items-center justify-center text-center px-2.5 pt-[0.5em] pb-[0.25em] rounded-md text-xs font-bold font-mono uppercase tracking-wider bg-primaryTeal/15 text-primaryTeal border border-primaryTeal/30 shadow-sm">
-            <font-awesome-icon icon="database" class="mr-1.5 text-[10px]" /> Knowledge Base Solution
-          </span>
-          <span v-else-if="suggestion" class="inline-flex items-center justify-center text-center px-2.5 pt-[0.5em] pb-[0.25em] rounded-md text-xs font-bold font-mono uppercase tracking-wider bg-accentPurple/15 text-accentPurple border border-accentPurple/30 shadow-sm">
-            <font-awesome-icon icon="wand-magic-sparkles" class="mr-1.5 text-[10px]" /> AI Generated Suggestion
-          </span>
-        </div>
+  <BaseCard class="space-y-4">
+    <!-- Header -->
+    <div class="flex items-center justify-between border-b border-gray-800 pb-2 min-h-[32px]">
+      <div class="flex items-center space-x-2 min-w-0">
+        <font-awesome-icon icon="robot" class="text-accentPurple text-sm flex-shrink-0" />
+        <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">AI Assistant Diagnosis</h3>
       </div>
 
-      <!-- Graceful Fallback Notice (Network / System Issue / Response Not Found) -->
-      <div v-if="error" class="bg-amber-950/40 border border-amber-900/50 p-4 rounded-xl text-amber-300 text-xs flex flex-col space-y-1">
-        <span class="font-bold flex items-center gap-1.5 text-amber-400">
-          <font-awesome-icon icon="triangle-exclamation" /> Response Not Found
+      <div class="flex items-center space-x-2 flex-shrink-0">
+        <span v-if="suggestion?.isRagGrounded" class="h-6 px-2.5 rounded-md text-xs font-bold font-mono uppercase tracking-wider bg-teal-500/15 text-teal-400 border border-teal-500/30 inline-flex items-center justify-center leading-none flex-shrink-0">
+          <font-awesome-icon icon="database" class="mr-1.5 text-[10px]" /> KB Solution
         </span>
-        <span class="text-gray-200 font-medium">Diagnostic response could not be determined due to a network or service issue ({{ error }}). Please inspect hardware connections manually.</span>
-      </div>
-
-      <!-- Initial Loading / Generating State -->
-      <div v-else-if="loading || generating" class="text-center py-6">
-        <div class="inline-block animate-spin rounded-full h-6 w-6 border-2 border-accentPurple border-t-transparent"></div>
-        <p class="text-xs text-accentPurple/80 mt-2 font-medium">
-          {{ generating ? 'Searching Knowledge Base & analyzing incident details with AI...' : 'Checking AI diagnosis status...' }}
-        </p>
-      </div>
-
-      <!-- Main suggestions -->
-      <div v-else-if="suggestion" class="space-y-4">
-        <div class="space-y-4 text-sm text-textMain">
-          <!-- Not Found in Knowledge Base Notice -->
-          <div v-if="!suggestion.isRagGrounded && (!suggestion.suggestedCause || !suggestion.suggestedCause.toLowerCase().includes('response not found'))" class="p-3 bg-accentPurple/10 border border-accentPurple/25 rounded-xl text-xs text-textMain flex items-center space-x-2 animate-fadeIn">
-            <font-awesome-icon icon="circle-info" class="text-sm text-accentPurple flex-shrink-0" />
-            <span class="font-medium">It was not found in our knowledge base, but here is an AI suggestion:</span>
-          </div>
-
-          <!-- Response Not Found Warning Banner if AI/RAG could not determine diagnosis -->
-          <div v-if="suggestion.suggestedCause && suggestion.suggestedCause.toLowerCase().includes('response not found')" class="bg-amber-950/30 border border-amber-800/40 p-3.5 rounded-xl space-y-1.5 text-xs">
-            <div class="flex items-center gap-1.5 font-bold text-amber-400">
-              <font-awesome-icon icon="triangle-exclamation" />
-              <span>Response Not Found</span>
-            </div>
-            <p class="text-amber-200/90 font-medium leading-relaxed">{{ suggestion.suggestedCause }}</p>
-          </div>
-          <div v-else>
-            <h4 class="font-bold text-accentPurple text-xs uppercase tracking-wider mb-1">Likely Root Cause</h4>
-            <p class="bg-bgMain p-3 rounded-lg border border-gray-700 text-gray-200 leading-relaxed font-medium">
-              {{ suggestion.suggestedCause }}
-            </p>
-          </div>
-
-          <div>
-            <h4 class="font-bold text-accentPurple text-xs uppercase tracking-wider mb-1">Recommended Solution</h4>
-            <p class="bg-bgMain p-3 rounded-lg border border-gray-700 text-gray-200 leading-relaxed font-medium">
-              {{ suggestion.suggestedSolution }}
-            </p>
-          </div>
-
-          <!-- Cited Knowledge Base Resolutions (Clickable Tickets) -->
-          <div v-if="suggestion.isRagGrounded && suggestion.citedIncidents && suggestion.citedIncidents.length > 0" class="pt-2 border-t border-gray-700/60 space-y-2">
-            <h4 class="font-bold text-accentPurple text-xs uppercase tracking-wider mb-2">Cited Knowledge Base Resolutions</h4>
-            <router-link
-              v-for="cite in suggestion.citedIncidents" 
-              :key="cite.incidentId || cite.teamNumber"
-              :to="cite.incidentId ? `/incidents/${cite.incidentId}` : '#'"
-              class="block bg-bgMain p-3 rounded-xl border border-gray-700 hover:border-primaryTeal/50 hover:bg-bgMain/80 transition duration-150 text-xs space-y-1 cursor-pointer group shadow-sm"
-            >
-                <div class="flex justify-between items-center font-bold text-gray-200">
-                  <span class="group-hover:text-primaryTeal group-hover:underline transition flex items-center gap-1.5">
-                    <span>Team {{ cite.teamNumber }} ({{ (cite.eventCode || 'brba').toUpperCase() }} • {{ cite.matchNumber }})</span>
-                    <font-awesome-icon icon="arrow-up-right-from-square" class="text-[10px] text-gray-400 group-hover:text-primaryTeal" />
-                  </span>
-                  <span v-if="cite.similarityScore" class="text-[10px] font-mono font-bold text-accentGreen bg-accentGreen/10 border border-accentGreen/30 px-2 py-0.5 rounded-md">
-                    {{ cite.similarityScore }}% Match
-                  </span>
-                </div>
-                <p class="text-gray-300 text-[11px] font-medium leading-relaxed">
-                  <span class="text-gray-400 font-semibold">Applied Fix:</span> {{ cite.appliedSolution }}
-                </p>
-              </router-link>
-          </div>
-
-          <!-- Bottom Feedback / Thumbs Rating Section -->
-          <div class="pt-3 border-t border-gray-700/60 flex items-center justify-between">
-            <span class="text-xs text-gray-400 font-medium">Was this suggestion helpful?</span>
-            <div class="inline-flex rounded-xl shadow-sm border border-gray-700 bg-bgMain overflow-hidden">
-              <!-- Thumbs Up Button -->
-              <button
-                @click="rateSuggestion('HELPFUL')"
-                :class="suggestion.rating === 'HELPFUL' ? 'bg-accentGreen/25 text-emerald-400 font-bold' : 'text-gray-300 hover:text-accentGreen hover:bg-accentGreen/10'"
-                class="w-9 h-9 transition duration-150 text-sm font-semibold flex items-center justify-center cursor-pointer border-r border-gray-700"
-                title="Helpful"
-              >
-                <font-awesome-icon icon="thumbs-up" class="text-sm" />
-              </button>
-
-              <!-- Thumbs Down Button -->
-              <button
-                @click="rateSuggestion('NOT_HELPFUL')"
-                :class="suggestion.rating === 'NOT_HELPFUL' ? 'bg-accentCoral/25 text-red-400 font-bold' : 'text-gray-300 hover:text-accentCoral hover:bg-accentCoral/10'"
-                class="w-9 h-9 transition duration-150 text-sm font-semibold flex items-center justify-center cursor-pointer"
-                title="Reject suggestion"
-              >
-                <font-awesome-icon icon="thumbs-down" class="text-sm" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- On-Demand Trigger Button State (when no suggestion generated yet) -->
-      <div v-else-if="!suggestion" class="text-center py-4 space-y-3">
-        <p class="text-xs text-gray-300 font-medium">No AI diagnostic recommendation generated yet for this incident.</p>
+        <span v-else-if="suggestion" class="h-6 px-2.5 rounded-md text-xs font-bold font-mono uppercase tracking-wider bg-accentPurple/15 text-accentPurple border border-accentPurple/30 inline-flex items-center justify-center leading-none flex-shrink-0">
+          <font-awesome-icon icon="wand-magic-sparkles" class="mr-1.5 text-[10px]" /> AI Generated
+        </span>
         <BaseButton
+          v-if="suggestion && !loading"
           @click="generateDiagnosis"
           :disabled="generating"
           :loading="generating"
-          loading-text="Analyzing incident details..."
-          variant="ai"
-          size="sm"
-          icon="wand-magic-sparkles"
-          class="mx-auto"
-        >
-          Generate AI Diagnosis
-        </BaseButton>
+          variant="ghost"
+          size="icon-sm"
+          icon="arrows-rotate"
+          title="Re-generate AI diagnosis"
+        />
       </div>
     </div>
-  </div>
+
+    <!-- Graceful Fallback Notice (Network / System Issue / Response Not Found) -->
+    <div v-if="error" class="bg-amber-950/40 border border-amber-900/50 p-3 rounded-xl text-amber-300 text-xs flex flex-col space-y-1">
+      <span class="font-bold flex items-center gap-1.5 text-amber-400">
+        <font-awesome-icon icon="triangle-exclamation" /> Response Not Found
+      </span>
+      <span class="text-gray-200 font-medium">Diagnostic response could not be determined due to a network or service issue ({{ error }}). Please inspect hardware connections manually.</span>
+    </div>
+
+    <!-- Initial Loading / Generating State -->
+    <div v-else-if="loading || generating" class="text-center py-6">
+      <div class="inline-block animate-spin rounded-full h-6 w-6 border-2 border-accentPurple border-t-transparent"></div>
+      <p class="text-xs text-accentPurple/80 mt-2 font-medium">
+        {{ generating ? 'Searching Knowledge Base & analyzing incident details with AI...' : 'Checking AI diagnosis status...' }}
+      </p>
+    </div>
+
+    <!-- Main suggestions -->
+    <div v-else-if="suggestion" class="space-y-4">
+      <div class="space-y-3 text-sm text-textMain">
+        <!-- Not Found in Knowledge Base Notice -->
+        <div v-if="!suggestion.isRagGrounded && (!suggestion.suggestedCause || !suggestion.suggestedCause.toLowerCase().includes('response not found'))" class="p-3 bg-accentPurple/10 border border-accentPurple/25 rounded-xl text-xs text-textMain flex items-center space-x-2 animate-fadeIn">
+          <font-awesome-icon icon="circle-info" class="text-sm text-accentPurple flex-shrink-0" />
+          <span class="font-medium">Not found in historical knowledge base. Generated via live diagnosis:</span>
+        </div>
+
+        <!-- Response Not Found Warning Banner if AI/RAG could not determine diagnosis -->
+        <div v-if="suggestion.suggestedCause && suggestion.suggestedCause.toLowerCase().includes('response not found')" class="bg-amber-950/30 border border-amber-800/40 p-3.5 rounded-xl space-y-1.5 text-xs">
+          <div class="flex items-center gap-1.5 font-bold text-amber-400">
+            <font-awesome-icon icon="triangle-exclamation" />
+            <span>Response Not Found</span>
+          </div>
+          <p class="text-amber-200/90 font-medium leading-relaxed">{{ suggestion.suggestedCause }}</p>
+        </div>
+        <div v-else>
+          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5">Likely Root Cause</label>
+          <div class="bg-bgMain p-3 rounded-xl border border-gray-800/80 text-xs text-gray-200 leading-relaxed font-medium">
+            {{ suggestion.suggestedCause }}
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5">Recommended Solution</label>
+          <div class="bg-bgMain p-3 rounded-xl border border-gray-800/80 text-xs text-gray-200 leading-relaxed font-medium">
+            {{ suggestion.suggestedSolution }}
+          </div>
+        </div>
+
+        <!-- Cited Knowledge Base Resolutions (Clickable Tickets) -->
+        <div v-if="suggestion.isRagGrounded && suggestion.citedIncidents && suggestion.citedIncidents.length > 0" class="pt-2 border-t border-gray-800 space-y-2">
+          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Cited Knowledge Base Resolutions</label>
+          <router-link
+            v-for="cite in suggestion.citedIncidents" 
+            :key="cite.incidentId || cite.teamNumber"
+            :to="cite.incidentId ? `/incidents/${cite.incidentId}` : '#'"
+            class="block bg-bgMain p-3 rounded-xl border border-gray-800 hover:border-primaryTeal/50 hover:bg-bgMain/80 transition duration-150 text-xs space-y-1 cursor-pointer group shadow-sm"
+          >
+            <div class="flex justify-between items-center font-bold text-gray-200">
+              <span class="group-hover:text-primaryTeal group-hover:underline transition flex items-center gap-1.5">
+                <span>Team {{ cite.teamNumber }} ({{ (cite.eventCode || 'brba').toUpperCase() }} • {{ cite.matchNumber }})</span>
+                <font-awesome-icon icon="arrow-up-right-from-square" class="text-[10px] text-gray-400 group-hover:text-primaryTeal" />
+              </span>
+              <span v-if="cite.similarityScore" class="text-[10px] font-mono font-bold text-teal-400 bg-teal-500/15 border border-teal-500/30 px-2 py-0.5 rounded-md">
+                {{ cite.similarityScore }}% Match
+              </span>
+            </div>
+            <p class="text-gray-300 text-[11px] font-medium leading-relaxed">
+              <span class="text-gray-400 font-semibold">Applied Fix:</span> {{ cite.appliedSolution }}
+            </p>
+          </router-link>
+        </div>
+
+        <!-- Bottom Feedback / Thumbs Rating Section -->
+        <div class="pt-3 border-t border-gray-800 flex items-center justify-between">
+          <span class="text-xs text-gray-400 font-medium">Was this diagnosis helpful?</span>
+          <div class="inline-flex rounded-xl shadow-sm border border-gray-800 bg-bgMain overflow-hidden">
+            <!-- Thumbs Up Button -->
+            <button
+              @click="rateSuggestion('HELPFUL')"
+              :class="suggestion.rating === 'HELPFUL' ? 'bg-accentGreen/25 text-emerald-400 font-bold' : 'text-gray-300 hover:text-emerald-400 hover:bg-emerald-500/10'"
+              class="w-8 h-8 transition duration-150 text-xs font-semibold flex items-center justify-center cursor-pointer border-r border-gray-800"
+              title="Helpful"
+            >
+              <font-awesome-icon icon="thumbs-up" />
+            </button>
+
+            <!-- Thumbs Down Button -->
+            <button
+              @click="rateSuggestion('NOT_HELPFUL')"
+              :class="suggestion.rating === 'NOT_HELPFUL' ? 'bg-accentCoral/25 text-red-400 font-bold' : 'text-gray-300 hover:text-accentCoral hover:bg-accentCoral/10'"
+              class="w-8 h-8 transition duration-150 text-xs font-semibold flex items-center justify-center cursor-pointer"
+              title="Reject suggestion"
+            >
+              <font-awesome-icon icon="thumbs-down" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- On-Demand Trigger Button State (when no suggestion generated yet) -->
+    <div v-else-if="!suggestion" class="text-center py-4 space-y-3">
+      <p class="text-xs text-gray-300 font-medium">No AI diagnostic recommendation generated yet for this incident.</p>
+      <BaseButton
+        @click="generateDiagnosis"
+        :loading="generating"
+        loading-text="Analyzing incident..."
+        variant="ai"
+        size="sm"
+        icon="wand-magic-sparkles"
+      >
+        Generate AI Diagnosis
+      </BaseButton>
+    </div>
+  </BaseCard>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { getApiUrl } from '../config/api';
+import BaseCard from './common/BaseCard.vue';
 import BaseButton from './common/BaseButton.vue';
 
 const props = defineProps({

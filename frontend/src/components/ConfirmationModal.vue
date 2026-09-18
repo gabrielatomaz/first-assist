@@ -30,49 +30,49 @@
 
       <!-- Optional Input/Textarea field for Prompts / Reasons -->
       <div v-if="showInput" class="text-left space-y-1.5 pt-1">
-        <label v-if="inputLabel" class="block text-[11px] font-bold text-gray-300 uppercase tracking-wider">
-          {{ inputLabel }}
-        </label>
-        <textarea
+        <BaseTextarea
           v-if="inputType === 'textarea'"
-          :value="inputValue"
-          @input="$emit('update:inputValue', $event.target.value)"
+          :model-value="inputValue"
+          @update:model-value="$emit('update:inputValue', $event)"
+          :label="inputLabel"
           :placeholder="inputPlaceholder"
           rows="3"
-          class="w-full px-3.5 py-2.5 rounded-xl border border-gray-700 bg-bgMain text-textMain text-xs placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primaryTeal/30 focus:border-primaryTeal transition resize-none"
-        ></textarea>
-        <input
+        />
+        <BaseInput
           v-else
-          type="text"
-          :value="inputValue"
-          @input="$emit('update:inputValue', $event.target.value)"
+          :model-value="inputValue"
+          @update:model-value="$emit('update:inputValue', $event)"
+          :label="inputLabel"
           :placeholder="inputPlaceholder"
           @keydown.enter.prevent="handleConfirm"
-          class="w-full px-3.5 py-2.5 rounded-xl border border-gray-700 bg-bgMain text-textMain text-xs placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primaryTeal/30 focus:border-primaryTeal transition"
         />
       </div>
 
       <!-- Action Buttons -->
       <div class="flex items-center justify-center gap-2.5 pt-2">
-        <button 
+        <BaseButton 
           type="button" 
+          variant="secondary"
+          size="md"
           @click="handleCancel" 
           :disabled="loading"
-          class="flex-1 py-2.5 px-4 bg-bgMain hover:bg-bgMain/80 text-gray-300 hover:text-white font-semibold rounded-xl border border-gray-700 transition text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+          class="flex-1"
         >
           {{ cancelText }}
-        </button>
-        <button 
+        </BaseButton>
+        <BaseButton 
           type="button" 
+          :variant="variant === 'danger' ? 'danger' : (variant === 'success' ? 'success' : 'primary')"
+          size="md"
           @click="handleConfirm" 
           :disabled="loading || (inputRequired && !inputValue)"
-          class="flex-1 py-2.5 px-4 font-bold rounded-xl shadow-md transition text-sm cursor-pointer flex items-center justify-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
-          :class="confirmButtonClass"
+          :loading="loading"
+          :loading-text="loadingText"
+          :icon="confirmIcon || ''"
+          class="flex-1"
         >
-          <font-awesome-icon v-if="loading" icon="spinner" spin class="text-xs" />
-          <font-awesome-icon v-else-if="confirmIcon" :icon="confirmIcon" class="text-xs" />
-          <span>{{ loading ? loadingText : confirmText }}</span>
-        </button>
+          {{ confirmText }}
+        </BaseButton>
       </div>
     </div>
   </div>
@@ -80,6 +80,9 @@
 
 <script setup>
 import { computed } from 'vue';
+import BaseButton from './common/BaseButton.vue';
+import BaseInput from './common/BaseInput.vue';
+import BaseTextarea from './common/BaseTextarea.vue';
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -109,21 +112,21 @@ const emit = defineEmits(['update:modelValue', 'update:inputValue', 'confirm', '
 
 const borderClass = computed(() => {
   switch (props.variant) {
-    case 'danger': return 'border-accentCoral/40';
+    case 'danger': return 'border-red-500/40';
     case 'warning': return 'border-amber-500/40';
     case 'success': return 'border-emerald-500/40';
-    case 'primary': return 'border-primaryTeal/40';
-    default: return 'border-gray-700/80';
+    case 'primary': return 'border-teal-500/40';
+    default: return 'border-gray-800';
   }
 });
 
 const iconContainerClass = computed(() => {
   switch (props.variant) {
-    case 'danger': return 'bg-accentCoral/15 text-accentCoral border-accentCoral/30';
-    case 'warning': return 'bg-amber-500/15 text-amber-400 border-amber-500/30';
-    case 'success': return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
-    case 'primary': return 'bg-primaryTeal/15 text-primaryTeal border-primaryTeal/30';
-    default: return 'bg-gray-800 text-gray-300 border-gray-700';
+    case 'danger': return 'bg-red-500/15 text-accentCoral border border-red-500/30';
+    case 'warning': return 'bg-amber-500/15 text-amber-400 border border-amber-500/30';
+    case 'success': return 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30';
+    case 'primary': return 'bg-teal-500/15 text-teal-400 border border-teal-500/30';
+    default: return 'bg-gray-800 text-gray-300 border border-gray-800';
   }
 });
 

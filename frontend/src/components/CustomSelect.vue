@@ -3,13 +3,18 @@
     <button
       type="button"
       @click="toggleDropdown"
+      :disabled="disabled"
       :class="[
-        'w-full rounded-lg bg-bgCard px-3 py-2 text-left text-xs font-semibold text-textMain border border-gray-700 hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal transition flex items-center justify-between shadow-sm cursor-pointer',
+        'w-full text-left text-textMain border transition flex items-center justify-between shadow-sm cursor-pointer select-none',
+        'focus:outline-none focus:ring-2 focus:ring-primaryTeal/30 focus:border-primaryTeal',
+        'disabled:opacity-50 disabled:cursor-not-allowed',
+        sizeClasses,
+        error ? 'border-accentCoral' : 'border-gray-800 hover:border-gray-700 bg-bgCard',
         buttonClass
       ]"
     >
       <span class="truncate pr-2" :class="selectedOption?.class">{{ selectedLabel }}</span>
-      <font-awesome-icon icon="chevron-down" class="text-[10px] text-gray-400 flex-shrink-0 transition-transform duration-200" :class="{ 'rotate-180': isOpen }" />
+      <font-awesome-icon icon="chevron-down" class="text-xs text-gray-400 flex-shrink-0 transition-transform duration-200" :class="{ 'rotate-180': isOpen }" />
     </button>
 
     <Teleport to="body">
@@ -24,7 +29,7 @@
         <div
           v-if="isOpen"
           :style="menuStyle"
-          class="fixed z-[99999] rounded-xl bg-bgCard shadow-2xl border border-gray-700 py-1 max-h-60 overflow-y-auto custom-scrollbar"
+          class="fixed z-[99999] rounded-xl bg-bgCard shadow-2xl border border-gray-800 py-1 max-h-60 overflow-y-auto custom-scrollbar"
         >
           <button
             v-for="opt in options"
@@ -60,9 +65,22 @@ const props = defineProps({
     type: String,
     default: 'Select option'
   },
+  size: {
+    type: String,
+    default: 'md',
+    validator: (val) => ['sm', 'md'].includes(val)
+  },
   buttonClass: {
     type: String,
     default: ''
+  },
+  disabled: {
+    type: Boolean,
+    default: false
+  },
+  error: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -71,6 +89,13 @@ const emit = defineEmits(['update:modelValue', 'change']);
 const isOpen = ref(false);
 const dropdownRef = ref(null);
 const menuStyle = ref({});
+
+const sizeClasses = computed(() => {
+  if (props.size === 'sm') {
+    return 'h-8 px-3 py-1 rounded-xl text-xs font-semibold';
+  }
+  return 'h-10 sm:h-9 px-3.5 py-1 sm:py-1.5 rounded-xl text-sm font-medium';
+});
 
 const isSelected = (optValue) => {
   if (optValue === props.modelValue) return true;
@@ -104,6 +129,7 @@ const updateMenuPosition = () => {
 };
 
 const toggleDropdown = async () => {
+  if (props.disabled) return;
   isOpen.value = !isOpen.value;
   if (isOpen.value) {
     await nextTick();

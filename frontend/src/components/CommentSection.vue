@@ -76,37 +76,40 @@
         <!-- Inline Edit Mode -->
         <template v-else>
           <div class="space-y-2 mt-1">
-            <textarea
+            <BaseTextarea
               v-model="editText"
               rows="2"
-              class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgCard text-textMain text-sm focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal"
-            ></textarea>
+            />
             
             <!-- Image Edit / Remove -->
             <div v-if="editImageUrl" class="relative inline-block">
-              <img :src="editImageUrl" class="h-20 rounded border border-gray-700 object-cover" />
+              <img :src="editImageUrl" class="h-20 rounded-xl border border-gray-700 object-cover" />
               <button 
                 @click="editImageUrl = null" 
-                class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow"
+                class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow cursor-pointer"
               >
                 <font-awesome-icon icon="xmark" />
               </button>
             </div>
 
             <div class="flex justify-end space-x-2">
-              <button 
+              <BaseButton 
+                size="sm"
+                variant="secondary"
                 @click="cancelEditing" 
-                class="px-2.5 py-1 rounded text-xs font-semibold bg-gray-800 text-gray-300 hover:text-white border border-gray-700"
               >
                 Cancel
-              </button>
-              <button 
+              </BaseButton>
+              <BaseButton 
+                size="sm"
+                variant="primary"
                 @click="handleUpdateComment(comment._id)" 
                 :disabled="updating" 
-                class="px-3 py-1 rounded text-xs font-bold bg-primaryTeal text-white shadow hover:bg-primaryTeal/90"
+                :loading="updating"
+                loading-text="Saving..."
               >
-                {{ updating ? 'Saving...' : 'Save' }}
-              </button>
+                Save
+              </BaseButton>
             </div>
           </div>
         </template>
@@ -118,11 +121,11 @@
     </div>
 
     <!-- Image Attachment Preview before submission -->
-    <div v-if="attachedImage" class="relative inline-block bg-bgMain p-1.5 rounded-lg border border-gray-800">
-      <img :src="attachedImage" alt="Preview" class="h-20 rounded object-cover border border-gray-700" />
+    <div v-if="attachedImage" class="relative inline-block bg-bgMain p-1.5 rounded-xl border border-borderDefault">
+      <img :src="attachedImage" alt="Preview" class="h-20 rounded-lg object-cover border border-gray-700" />
       <button 
         @click="attachedImage = null" 
-        class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow hover:bg-red-700"
+        class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow hover:bg-red-700 cursor-pointer"
         title="Remove Picture"
       >
         <font-awesome-icon icon="xmark" />
@@ -131,15 +134,15 @@
 
     <!-- Post Comment Form with Attachment Icon & Lighter Color Compact Send Button -->
     <form @submit.prevent="handlePostComment" class="flex items-center space-x-2">
-      <!-- Paperclip Attachment Icon Button -->
-      <button
+      <!-- Paperclip Attachment Icon Button (h-11 matching BaseInput) -->
+      <BaseButton
         type="button"
         @click="triggerFileInput"
-        class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-bgMain border border-gray-700 hover:border-primaryTeal text-gray-400 hover:text-primaryTeal rounded-lg shadow-sm transition duration-150 cursor-pointer"
+        variant="secondary"
+        size="icon-md"
+        icon="paperclip"
         title="Attach Picture"
-      >
-        <font-awesome-icon icon="paperclip" class="text-sm" />
-      </button>
+      />
       <input 
         type="file" 
         ref="fileInputRef" 
@@ -148,24 +151,23 @@
         @change="handleFileSelected" 
       />
 
-      <!-- Text Input -->
-      <input
+      <!-- Text Input (h-11) -->
+      <BaseInput
         v-model="newComment"
-        type="text"
         placeholder="Type an update or attach a picture..."
-        class="h-10 flex-grow px-3 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-xs placeholder-gray-500 shadow-sm"
-      >
+        class="flex-1"
+      />
 
-      <!-- Compact Send Button -->
-      <button
+      <!-- Send Button (h-11) -->
+      <BaseButton
         type="submit"
         :disabled="posting || (!newComment.trim() && !attachedImage)"
-        class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-bgMain border border-gray-700 hover:border-primaryTeal text-primaryTeal hover:text-white hover:bg-primaryTeal rounded-lg shadow-sm transition duration-150 disabled:opacity-30 cursor-pointer"
+        :loading="posting"
+        variant="primary"
+        size="icon-md"
+        icon="paper-plane"
         title="Send Update"
-      >
-        <font-awesome-icon v-if="posting" icon="spinner" spin class="text-sm" />
-        <font-awesome-icon v-else icon="paper-plane" class="text-sm" />
-      </button>
+      />
     </form>
 
     <!-- Expanded Image View Modal -->
@@ -193,7 +195,7 @@
       message="Are you sure you want to permanently delete this update comment? This action cannot be undone."
       icon="trash-can"
       variant="danger"
-      confirm-text="Delete Update"
+      confirm-text="Delete"
       confirm-icon="trash-can"
       cancel-text="Cancel"
       :loading="deleting"
@@ -210,6 +212,9 @@ import { useAuthStore } from '../stores/auth';
 import { getApiUrl } from '../config/api';
 import UserAvatar from './UserAvatar.vue';
 import ConfirmationModal from './ConfirmationModal.vue';
+import BaseButton from './common/BaseButton.vue';
+import BaseInput from './common/BaseInput.vue';
+import BaseTextarea from './common/BaseTextarea.vue';
 
 const props = defineProps({
   incidentId: { type: String, required: true }

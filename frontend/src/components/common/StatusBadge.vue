@@ -1,7 +1,7 @@
 <template>
   <span
     :class="[badgeClasses, sizeClasses]"
-    class="inline-flex items-center justify-center text-center font-bold font-mono tracking-wider uppercase flex-shrink-0 transition-colors pt-[0.5em] pb-[0.25em]"
+    class="inline-flex items-center justify-center text-center font-bold font-mono tracking-wider uppercase flex-shrink-0 transition-colors leading-none"
   >
     <slot>{{ displayLabel }}</slot>
   </span>
@@ -36,44 +36,43 @@ const displayLabel = computed(() => {
 const sizeClasses = computed(() => {
   switch (props.size) {
     case 'xs':
-      return 'px-2 text-[10px] rounded';
+      return 'h-5 px-2 text-[10px] rounded';
     case 'sm':
-      return 'px-2.5 text-xs rounded min-w-[70px]';
+      return 'h-5 px-2.5 text-xs rounded';
     case 'lg':
-      return 'px-4 text-sm rounded-lg min-w-[100px]';
+      return 'h-7 px-3.5 text-xs rounded-lg min-w-[90px]';
     case 'md':
     default:
-      return 'px-2.5 text-xs rounded min-w-[85px]';
+      return 'h-6 px-2.5 text-xs rounded-md min-w-[76px]';
   }
 });
 
 const badgeClasses = computed(() => {
   const s = (props.status || '').toUpperCase();
   switch (s) {
+    case 'OPEN':
+      return 'bg-accentCoral/15 text-accentCoral border border-accentCoral/30';
+    case 'INVESTIGATING':
     case 'PENDING_SCREENING':
     case 'IN_TRIAGE':
     case 'TRIAGE':
-      return 'bg-amber-500/15 text-amber-400 border border-amber-500/30';
-    case 'OPEN':
-      return 'bg-teal-500/15 text-teal-400 border border-teal-500/30';
+    case 'PENDING':
+      return 'bg-accentYellow/15 text-accentYellow border border-accentYellow/30';
     case 'ASSIGNED':
-      return 'bg-accentYellow/15 text-accentYellow border border-accentYellow/25';
+      return 'bg-teal-500/15 text-teal-400 border border-teal-500/30';
     case 'IN_PROGRESS':
-      return 'bg-accentPurple/15 text-accentPurple border border-accentPurple/25';
-    case 'WAITING':
-      return 'bg-gray-800 text-gray-400 border border-gray-700';
+      return 'bg-accentPurple/15 text-accentPurple border border-accentPurple/30';
     case 'RESOLVED':
       return 'bg-accentGreen/15 text-accentGreen border border-accentGreen/30';
-    case 'CLOSED':
-      return 'bg-gray-800/80 text-gray-400 border border-gray-700/50';
-    case 'REJECTED':
-      return 'bg-accentCoral/15 text-accentCoral border border-accentCoral/30';
     case 'ACTIVE':
       return 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30';
+    case 'WAITING':
+      return 'bg-gray-800 text-gray-300 border border-gray-700';
+    case 'CLOSED':
     case 'INACTIVE':
-      return 'bg-gray-800 text-gray-500 border border-gray-700';
-    case 'PENDING':
-      return 'bg-amber-500/15 text-amber-400 border border-amber-500/30';
+      return 'bg-gray-800/80 text-gray-400 border border-gray-700/50';
+    case 'REJECTED':
+      return 'bg-red-950/40 text-accentCoral border border-red-900/30';
     default:
       return 'bg-gray-800 text-gray-400 border border-gray-700';
   }

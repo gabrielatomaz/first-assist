@@ -6,49 +6,85 @@
     >
       <template #actions>
         <BaseButton
-          @click="showCreateForm = !showCreateForm"
-          :variant="showCreateForm ? 'secondary' : 'primary'"
+          v-if="showCreateForm"
+          size="icon-sm"
+          variant="secondary"
+          icon="xmark"
+          @click="showCreateForm = false"
+          title="Cancel"
+        />
+        <BaseButton
+          v-else
           size="sm"
-          :icon="showCreateForm ? 'xmark' : 'user-plus'"
+          variant="primary"
+          icon="user-plus"
+          @click="showCreateForm = true"
+          title="Register"
+          class="w-8 h-8 sm:w-auto px-0 sm:px-3 flex-shrink-0"
         >
-          <span v-if="!showCreateForm">Register</span>
+          <span class="hidden sm:inline">Register</span>
         </BaseButton>
       </template>
     </PageHeader>
 
     <!-- Create User Card -->
-    <div v-if="showCreateForm" class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 animate-fadeIn">
-      <h3 class="text-lg font-bold text-teal-400 mb-4">Register Authorized Volunteer</h3>
+    <BaseCard v-if="showCreateForm" class="animate-fadeIn">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-base font-bold text-teal-400">Register Authorized Volunteer</h3>
+        <BaseButton
+          variant="ghost"
+          size="icon-sm"
+          icon="xmark"
+          @click="showCreateForm = false"
+          title="Close form"
+        />
+      </div>
       <form @submit.prevent="handleCreateUser" class="space-y-4">
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Name</label>
-            <input v-model="form.name" type="text" required placeholder="e.g. John Doe" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Email Address</label>
-            <input v-model="form.email" type="email" required placeholder="csa@first.org" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500">
-          </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <BaseInput
+            v-model="form.name"
+            label="Name"
+            required
+            placeholder="e.g. John Doe"
+          />
+          <BaseInput
+            v-model="form.email"
+            type="email"
+            label="Email Address"
+            required
+            placeholder="csa@first.org"
+          />
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Temporary Password</label>
-            <input v-model="form.password" type="password" required placeholder="******" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500 font-mono">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">System Role</label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <BaseInput
+            v-model="form.password"
+            type="password"
+            label="Temporary Password"
+            required
+            placeholder="******"
+            input-class="font-mono"
+          />
+          <div class="space-y-1.5">
+            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider">System Role</label>
             <CustomSelect
               v-model="form.role"
               :options="roleOptions"
-              button-class="py-2.5 px-4 text-sm"
             />
           </div>
         </div>
 
         <AlertBanner v-if="createError" type="error" :message="createError" />
 
-        <div class="flex justify-end pt-2">
+        <div class="flex justify-end gap-2 pt-2">
+          <BaseButton
+            type="button"
+            variant="secondary"
+            size="sm"
+            @click="showCreateForm = false"
+          >
+            Cancel
+          </BaseButton>
           <BaseButton
             type="submit"
             variant="primary"
@@ -61,7 +97,7 @@
           </BaseButton>
         </div>
       </form>
-    </div>
+    </BaseCard>
 
     <!-- Users Table -->
     <div class="bg-bgCard rounded-2xl shadow overflow-hidden border border-gray-800">
@@ -117,7 +153,7 @@
                     <span
                       v-for="code in (user.assignedEventCodes || [])"
                       :key="code"
-                      class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded-md text-[11px] font-bold font-mono bg-teal-500/15 text-teal-400 border border-teal-500/25"
+                      class="inline-flex items-center space-x-1.5 h-6 px-2.5 rounded-md text-xs font-bold font-mono bg-teal-500/15 text-teal-400 border border-teal-500/25"
                     >
                       <span>{{ code }}</span>
                       <button
@@ -137,16 +173,17 @@
               </td>
 
               <td class="px-6 py-4">
-                <StatusBadge :status="user.status || 'ACTIVE'" size="sm" />
+                <StatusBadge :status="user.status || 'ACTIVE'" />
               </td>
-              <td class="px-6 py-4 text-right">
+              <td class="px-6 py-4 text-right whitespace-nowrap">
                 <button
                   v-if="canModifyUser(user)"
                   @click="toggleUserStatus(user)"
                   :disabled="updatingStatus === user._id"
-                  :class="user.status === 'ACTIVE' ? 'text-accentCoral hover:text-accentCoral/80' : 'text-accentGreen hover:text-accentGreen/80'"
-                  class="text-xs font-semibold hover:underline disabled:opacity-50 transition"
+                  :class="user.status === 'ACTIVE' ? 'text-accentCoral hover:text-red-300' : 'text-emerald-400 hover:text-emerald-300'"
+                  class="text-xs font-semibold hover:underline disabled:opacity-50 transition cursor-pointer"
                 >
+                  <font-awesome-icon v-if="updatingStatus === user._id" icon="spinner" spin class="mr-1" />
                   {{ user.status === 'ACTIVE' ? 'Deactivate' : 'Reactivate' }}
                 </button>
                 <span v-else class="text-xs text-gray-400 italic">Protected</span>
@@ -163,6 +200,8 @@
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import {
+  BaseCard,
+  BaseInput,
   CustomSelect,
   PageHeader,
   RoleBadge,

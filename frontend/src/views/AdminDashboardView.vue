@@ -8,13 +8,6 @@
       :card="true"
     />
 
-    <!-- Health Metrics Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <StatCard title="Backend Node API Status" value="ONLINE" variant="green" />
-      <StatCard title="Total Logged System Actions" :value="auditLogs.length" variant="teal" />
-      <StatCard title="MongoDB Atlas Cluster" value="CONNECTED" variant="purple" />
-    </div>
-
     <!-- Styled Reject Access Request Modal -->
     <ConfirmationModal
       v-model="rejectModal.open"
@@ -49,12 +42,14 @@
         <div v-if="approvalModal.requesterName" class="p-3 bg-bgMain rounded-xl border border-gray-800 text-xs text-primaryTeal font-mono font-bold">
           <font-awesome-icon icon="user-check" class="mr-1 text-emerald-400" /> {{ approvalModal.requesterName }} is now Active (Role: FTA)
         </div>
-        <button 
+        <BaseButton 
           @click="approvalModal.open = false" 
-          class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl shadow transition cursor-pointer text-sm"
+          variant="success"
+          size="md"
+          class="w-full"
         >
           Done
-        </button>
+        </BaseButton>
       </div>
     </div>
 
@@ -75,7 +70,7 @@
     </div>
 
     <!-- FTA Access Requests Section -->
-    <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-4">
+    <BaseCard class="space-y-4">
       <div class="flex justify-between items-center border-b border-gray-800 pb-3">
         <div class="flex items-center space-x-2">
           <font-awesome-icon icon="id-card" class="text-teal-400" />
@@ -84,12 +79,17 @@
             {{ pendingRequests.length }}
           </span>
         </div>
-        <button @click="fetchAccessRequests" class="text-xs text-teal-400 hover:text-teal-300 hover:underline font-bold cursor-pointer">
-          Refresh List
-        </button>
+        <BaseButton 
+          variant="ghost" 
+          size="icon-sm" 
+          icon="arrows-rotate" 
+          :loading="loadingRequests"
+          @click="fetchAccessRequests"
+          title="Refresh List"
+        />
       </div>
 
-      <div v-if="loadingRequests" class="text-center py-6 text-xs text-gray-400">
+      <div v-if="loadingRequests && accessRequests.length === 0" class="text-center py-6 text-xs text-gray-400">
         Loading access requests...
       </div>
       <div v-else-if="pendingRequests.length === 0" class="text-center py-8 text-xs text-gray-400 font-medium italic">
@@ -113,83 +113,89 @@
               <td class="px-4 py-3 text-xs text-gray-300 font-mono">{{ req.email }}</td>
               <td class="px-4 py-3">
                 <div class="flex flex-wrap items-center gap-1.5">
-                  <span v-for="code in req.requestedEventCodes" :key="code" class="px-2.5 py-1 rounded-md text-xs font-bold font-mono bg-teal-500/15 text-teal-400 border border-teal-500/25">
+                  <span v-for="code in req.requestedEventCodes" :key="code" class="h-6 px-2.5 rounded-md text-xs font-bold font-mono bg-teal-500/15 text-teal-400 border border-teal-500/25 inline-flex items-center justify-center leading-none">
                     {{ code }}
                   </span>
-                  <span v-if="req.tbaEventKey" class="px-2.5 py-1 rounded-md text-xs font-bold font-mono bg-accentPurple/15 text-purple-300 border border-accentPurple/25 flex items-center gap-1.5">
+                  <span v-if="req.tbaEventKey" class="h-6 px-2.5 rounded-md text-xs font-bold font-mono bg-accentPurple/15 text-purple-300 border border-accentPurple/25 inline-flex items-center gap-1.5 leading-none">
                     <font-awesome-icon icon="bolt" class="text-accentYellow text-xs" /> {{ req.tbaEventKey }} (TBA)
                   </span>
                 </div>
               </td>
               <td class="px-4 py-3 text-xs text-gray-300 max-w-xs truncate" :title="req.notes">{{ req.notes || 'N/A' }}</td>
               <td class="px-4 py-3 text-xs text-gray-300 font-mono">{{ formatDate(req.createdAt) }}</td>
-              <td class="px-4 py-3 text-right space-x-1.5 whitespace-nowrap">
-                <button 
-                  @click="handleApproveRequest(req)"
-                  :disabled="processingReq === req._id"
-                  title="Approve Request"
-                  class="w-7 h-7 rounded-md bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40 inline-flex items-center justify-center transition cursor-pointer disabled:opacity-50"
-                >
-                  <font-awesome-icon icon="check" class="text-[11px]" />
-                </button>
-                <button 
-                  @click="openRejectModal(req)"
-                  :disabled="processingReq === req._id"
-                  title="Reject Request"
-                  class="w-7 h-7 rounded-md bg-red-950/60 hover:bg-red-900/60 text-accentCoral border border-red-900/40 inline-flex items-center justify-center transition cursor-pointer disabled:opacity-50"
-                >
-                  <font-awesome-icon icon="xmark" class="text-[11px]" />
-                </button>
+              <td class="px-4 py-3 text-right whitespace-nowrap">
+                <div class="flex items-center justify-end space-x-2">
+                  <BaseButton 
+                    @click="handleApproveRequest(req)"
+                    :disabled="processingReq === req._id"
+                    :loading="processingReq === req._id"
+                    variant="success"
+                    size="icon-xs"
+                    icon="check"
+                    title="Approve Request"
+                  />
+                  <BaseButton 
+                    @click="openRejectModal(req)"
+                    :disabled="processingReq === req._id"
+                    variant="danger"
+                    size="icon-xs"
+                    icon="xmark"
+                    title="Reject Request"
+                  />
+                </div>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-    </div>
+    </BaseCard>
 
     <!-- System User Accounts Management Section -->
-    <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-4">
+    <BaseCard class="space-y-4">
       <div class="flex justify-between items-center border-b border-gray-800 pb-3">
         <div>
           <h3 class="text-base font-bold text-teal-400 tracking-tight">System User Accounts</h3>
           <p class="text-xs text-gray-400 mt-0.5">Manage system accounts, access roles (Admin, FTA, CSA), and regional assignments</p>
         </div>
         <BaseButton
-          @click="showCreateUserForm = !showCreateUserForm"
-          :variant="showCreateUserForm ? 'secondary' : 'primary'"
+          v-if="showCreateUserForm"
+          size="icon-sm"
+          variant="secondary"
+          icon="xmark"
+          @click="showCreateUserForm = false"
+          title="Cancel"
+        />
+        <BaseButton
+          v-else
           size="sm"
-          :icon="showCreateUserForm ? 'xmark' : 'user-plus'"
+          variant="primary"
+          icon="user-plus"
+          @click="showCreateUserForm = true"
+          title="Register"
+          class="w-8 h-8 sm:w-auto px-0 sm:px-3 flex-shrink-0"
         >
-          <span v-if="!showCreateUserForm">Register</span>
+          <span class="hidden sm:inline">Register</span>
         </BaseButton>
       </div>
 
       <!-- Create User Form Card -->
-      <div v-if="showCreateUserForm" class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 animate-fadeIn">
-        <h4 class="text-xs font-bold text-teal-400 uppercase tracking-wider mb-4">Register Authorized System User</h4>
+      <BaseCard v-if="showCreateUserForm" class="animate-fadeIn">
+        <div class="mb-4">
+          <h4 class="text-xs font-bold text-teal-400 uppercase tracking-wider">Register Authorized System User</h4>
+        </div>
         <form @submit.prevent="handleCreateUser" class="space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Name</label>
-              <input v-model="userForm.name" type="text" required placeholder="e.g. John Doe" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Email Address</label>
-              <input v-model="userForm.email" type="email" required placeholder="user@first.org" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400">
-            </div>
+            <BaseInput v-model="userForm.name" label="Name" required placeholder="e.g. John Doe" />
+            <BaseInput v-model="userForm.email" type="email" label="Email Address" required placeholder="user@first.org" />
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Temporary Password</label>
-              <input v-model="userForm.password" type="password" required placeholder="******" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-sm font-mono focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">System Role</label>
+            <BaseInput v-model="userForm.password" type="password" label="Temporary Password" required placeholder="******" input-class="font-mono" />
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider">System Role</label>
               <CustomSelect
                 v-model="userForm.role"
                 :options="userRoleOptions"
-                button-class="py-2.5 px-4 text-sm"
               />
             </div>
           </div>
@@ -198,7 +204,15 @@
             {{ createUserError }}
           </div>
 
-          <div class="flex justify-end pt-2">
+          <div class="flex justify-end gap-2 pt-2">
+            <BaseButton
+              type="button"
+              variant="secondary"
+              size="sm"
+              @click="showCreateUserForm = false"
+            >
+              Cancel
+            </BaseButton>
             <BaseButton
               type="submit"
               variant="primary"
@@ -211,7 +225,7 @@
             </BaseButton>
           </div>
         </form>
-      </div>
+      </BaseCard>
 
       <!-- Users Table -->
       <div v-if="loadingUsers" class="text-center py-6 text-xs text-gray-400">
@@ -278,7 +292,7 @@
                 <span :class="{
                   'bg-accentGreen/10 text-accentGreen border border-accentGreen/30': u.status === 'ACTIVE',
                   'bg-red-950/40 text-accentCoral border border-red-900/30': u.status === 'INACTIVE'
-                }" class="px-2.5 py-1 rounded-md text-xs font-bold uppercase font-mono tracking-wider">
+                }" class="h-6 px-2.5 rounded-md text-xs font-bold uppercase font-mono tracking-wider inline-flex items-center justify-center leading-none">
                   {{ u.status }}
                 </span>
               </td>
@@ -286,9 +300,10 @@
                 <button
                   @click="toggleUserStatus(u)"
                   :disabled="updatingUserStatus === u._id"
-                  :class="u.status === 'ACTIVE' ? 'text-accentCoral hover:text-accentCoral/80' : 'text-accentGreen hover:text-accentGreen/80'"
+                  :class="u.status === 'ACTIVE' ? 'text-accentCoral hover:text-red-300' : 'text-emerald-400 hover:text-emerald-300'"
                   class="text-xs font-semibold hover:underline disabled:opacity-50 transition cursor-pointer"
                 >
+                  <font-awesome-icon v-if="updatingUserStatus === u._id" icon="spinner" spin class="mr-1" />
                   {{ u.status === 'ACTIVE' ? 'Deactivate' : 'Reactivate' }}
                 </button>
               </td>
@@ -296,61 +311,66 @@
           </tbody>
         </table>
       </div>
-    </div>
+    </BaseCard>
 
     <!-- TBA Event & Team Management Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- Register FRC Event Card -->
-      <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-5">
+      <BaseCard class="space-y-5">
         <div class="border-b border-gray-800 pb-3 flex justify-between items-center">
           <h3 class="text-base font-bold text-teal-400">Register FRC Event</h3>
-          <span class="px-2.5 py-1 rounded-md text-xs font-bold font-mono bg-accentPurple/15 text-purple-300 border border-accentPurple/25">TBA 1-Click Import</span>
+          <span class="h-6 px-2.5 rounded-md text-xs font-bold font-mono bg-accentPurple/15 text-purple-300 border border-accentPurple/25 inline-flex items-center justify-center leading-none">TBA 1-Click Import</span>
         </div>
 
         <!-- TBA Event Import Section -->
-        <div class="p-4 bg-bgMain rounded-xl border border-gray-800 space-y-3">
-          <label class="block text-xs font-bold text-teal-400 uppercase">Import Event & Roster from TBA</label>
+        <div class="p-4 bg-bgMain rounded-xl border border-borderDefault space-y-3">
+          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5">Import Event & Roster from TBA</label>
           <div class="flex space-x-2">
-            <input v-model="tbaEventKey" type="text" placeholder="Enter TBA Event Key (e.g. 2026brsp)" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgCard text-textMain text-xs font-mono focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400">
-            <button 
+            <BaseInput 
+              v-model="tbaEventKey" 
+              placeholder="Enter TBA Event Key (e.g. 2026brsp)" 
+              input-class="font-mono"
+              class="flex-1"
+            />
+            <BaseButton
               @click="handleImportTBAEvent" 
               :disabled="importingTBAEvent || !tbaEventKey" 
+              :loading="importingTBAEvent"
+              variant="primary"
+              size="icon-md"
+              icon="download"
               title="Import Event and Attending Teams from TBA"
-              class="bg-primaryTeal hover:brightness-110 text-gray-200 font-bold px-3.5 py-2 rounded-lg text-sm transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center shadow-sm whitespace-nowrap flex-shrink-0 border border-primaryTeal/30"
-            >
-              <font-awesome-icon :icon="importingTBAEvent ? 'spinner' : 'download'" :spin="importingTBAEvent" class="text-sm" />
-            </button>
+            />
           </div>
         </div>
 
         <div class="text-center text-[10px] text-gray-400 font-bold uppercase">— OR Manual Creation —</div>
 
         <form @submit.prevent="handleCreateEvent" class="space-y-3">
-          <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Event Key/Code</label>
-            <input v-model="eventForm.code" type="text" required placeholder="e.g. 2026brsp" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400">
-          </div>
-          <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Event Name</label>
-            <input v-model="eventForm.name" type="text" required placeholder="e.g. Brazil Regional" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400">
-          </div>
-          <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Location</label>
-            <input v-model="eventForm.location" type="text" placeholder="e.g. Sao Paulo, Brazil" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400">
-          </div>
-          <div class="flex items-center space-x-2">
-            <input v-model="eventForm.isActive" type="checkbox" id="isActiveEvent" class="rounded text-teal-400 focus:ring-teal-500/20">
+          <BaseInput v-model="eventForm.code" label="Event Key/Code" required placeholder="e.g. 2026brsp" input-class="font-mono" />
+          <BaseInput v-model="eventForm.name" label="Event Name" required placeholder="e.g. Brazil Regional" />
+          <BaseInput v-model="eventForm.location" label="Location" placeholder="e.g. Sao Paulo, Brazil" />
+          <div class="flex items-center space-x-2 pt-1">
+            <input v-model="eventForm.isActive" type="checkbox" id="isActiveEvent" class="rounded text-primaryTeal focus:ring-teal-500/20">
             <label for="isActiveEvent" class="text-xs text-gray-300 font-medium">Set as Active Competition Event</label>
           </div>
 
-          <button type="submit" :disabled="creatingEvent || !eventForm.code || !eventForm.name" class="w-full bg-primaryTeal hover:brightness-110 text-gray-200 font-bold py-2.5 rounded-lg shadow text-sm transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer border border-primaryTeal/30">
-            {{ creatingEvent ? 'Creating...' : 'Create' }}
-          </button>
+          <BaseButton 
+            type="submit" 
+            :disabled="creatingEvent || !eventForm.code || !eventForm.name" 
+            :loading="creatingEvent" 
+            loading-text="Creating..." 
+            variant="primary" 
+            size="md" 
+            class="w-full"
+          >
+            Create
+          </BaseButton>
         </form>
-      </div>
+      </BaseCard>
 
       <!-- Register FRC Team Card -->
-      <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-5">
+      <BaseCard class="space-y-5">
         <div class="border-b border-gray-800 pb-3 flex justify-between items-center">
           <h3 class="text-base font-bold text-teal-400">Register FRC Team</h3>
           <span class="px-2.5 py-1 rounded-md text-xs font-bold font-mono bg-teal-500/15 text-teal-400 border border-teal-500/25">TBA API Enabled</span>
@@ -358,32 +378,33 @@
 
         <form @submit.prevent="handleRegisterTeam" class="space-y-3">
           <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Team Number</label>
+            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5">Team Number</label>
             <div class="flex space-x-2">
-              <input v-model.number="teamForm.number" type="number" required placeholder="e.g. 254" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400">
-              <button type="button" @click="fetchFromTBA" :disabled="fetchingTBA || !teamForm.number" class="bg-accentPurple/15 hover:bg-accentPurple/25 text-purple-300 border border-accentPurple/25 disabled:opacity-40 disabled:cursor-not-allowed font-bold px-3.5 py-2 rounded-lg text-sm whitespace-nowrap transition cursor-pointer flex items-center">
-                <font-awesome-icon icon="bolt" class="mr-1 text-accentYellow text-sm" /> {{ fetchingTBA ? 'Syncing...' : 'Lookup TBA' }}
-              </button>
+              <BaseInput v-model.number="teamForm.number" type="number" required placeholder="e.g. 254" input-class="font-mono" class="flex-1" />
+              <BaseButton type="button" @click="fetchFromTBA" :disabled="fetchingTBA || !teamForm.number" :loading="fetchingTBA" loading-text="Syncing..." variant="purple" size="md" icon="bolt">
+                Lookup TBA
+              </BaseButton>
             </div>
           </div>
 
-          <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Team Name / Nickname</label>
-            <input v-model="teamForm.name" type="text" required placeholder="e.g. The Cheesy Poofs" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400">
-          </div>
+          <BaseInput v-model="teamForm.name" label="Team Name / Nickname" required placeholder="e.g. The Cheesy Poofs" />
+          <BaseInput v-model.number="teamForm.rookieYear" type="number" label="Rookie Year" placeholder="e.g. 1999" input-class="font-mono" />
 
-          <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Rookie Year</label>
-            <input v-model.number="teamForm.rookieYear" type="number" placeholder="e.g. 1999" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400">
-          </div>
-
-          <div class="pt-6">
-            <button type="submit" :disabled="registeringTeam || !teamForm.number || !teamForm.name" class="w-full bg-primaryTeal hover:brightness-110 text-gray-200 font-bold py-2.5 rounded-lg shadow text-sm transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer border border-primaryTeal/30">
-              {{ registeringTeam ? 'Saving...' : 'Save' }}
-            </button>
+          <div class="pt-4">
+            <BaseButton 
+              type="submit" 
+              :disabled="registeringTeam || !teamForm.number || !teamForm.name" 
+              :loading="registeringTeam" 
+              loading-text="Saving..." 
+              variant="primary" 
+              size="md" 
+              class="w-full"
+            >
+              Save
+            </BaseButton>
           </div>
         </form>
-      </div>
+      </BaseCard>
     </div>
 
     <!-- System Audit Logs Section -->
@@ -452,10 +473,11 @@ import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import {
   BaseButton,
+  BaseCard,
+  BaseInput,
   CustomSelect,
   ConfirmationModal,
   PageHeader,
-  StatCard,
   RoleBadge
 } from '../components';
 import { getApiUrl } from '../config/api';
@@ -502,7 +524,9 @@ const fetchAccessRequests = async () => {
   } catch (err) {
     console.error('Failed to fetch access requests:', err);
   } finally {
-    loadingRequests.value = false;
+    setTimeout(() => {
+      loadingRequests.value = false;
+    }, 450);
   }
 };
 

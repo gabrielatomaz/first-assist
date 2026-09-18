@@ -6,7 +6,7 @@
     />
 
     <!-- Search & Filters Container -->
-    <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-4">
+    <BaseCard class="space-y-4">
       <SearchBar
         v-model="searchQuery"
         placeholder="Type keywords (e.g. radio, fuse, breaker, CAN)..."
@@ -16,9 +16,9 @@
       />
 
       <!-- Advanced filters (Category, Priority, Team Number, Event Code) -->
-      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Category</label>
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+        <div class="space-y-1.5">
+          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider">Category</label>
           <CustomSelect
             v-model="filters.category"
             :options="categoryOptions"
@@ -26,8 +26,8 @@
           />
         </div>
 
-        <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Priority</label>
+        <div class="space-y-1.5">
+          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider">Priority</label>
           <CustomSelect
             v-model="filters.priority"
             :options="priorityOptions"
@@ -35,8 +35,8 @@
           />
         </div>
 
-        <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Event Context</label>
+        <div class="space-y-1.5">
+          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider">Event Context</label>
           <CustomSelect
             v-model="filters.eventCode"
             :options="eventOptions"
@@ -45,17 +45,17 @@
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Team Number</label>
-          <input
-            v-model.number="filters.teamNumber"
+          <BaseInput
+            v-model="filters.teamNumber"
             type="number"
+            label="Team Number"
             placeholder="e.g. 254"
             @input="debouncedSearch"
-            class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgCard focus:outline-none focus:ring-2 focus:ring-teal-500/20 text-xs text-textMain placeholder-gray-500 font-medium"
-          >
+            input-class="font-mono"
+          />
         </div>
       </div>
-    </div>
+    </BaseCard>
 
     <!-- Results -->
     <LoadingSpinner v-if="searching" text="Searching knowledge base..." />
@@ -77,7 +77,7 @@
               <PriorityBadge v-if="incident.priority" :priority="incident.priority" />
 
               <!-- Event Code Badge -->
-              <span v-if="incident.eventCode" class="inline-flex items-center justify-center text-center px-2.5 pt-[0.5em] pb-[0.25em] rounded text-xs font-bold text-accentYellow/90 bg-accentYellow/10 border border-accentYellow/20 font-mono uppercase tracking-wider flex-shrink-0">
+              <span v-if="incident.eventCode" class="h-6 px-2.5 rounded-md text-xs font-bold text-accentYellow/90 bg-accentYellow/10 border border-accentYellow/20 font-mono uppercase tracking-wider inline-flex items-center justify-center leading-none flex-shrink-0">
                 <font-awesome-icon icon="trophy" class="mr-1 text-[10px]" /> {{ incident.eventCode }}
               </span>
             </div>
@@ -91,15 +91,16 @@
 
           <!-- Actions (Top Right) -->
           <div class="flex items-center space-x-2 flex-shrink-0">
-            <button
+            <BaseButton
               v-if="authStore.user"
               @click.stop.prevent="rollbackIncidentStatus(incident)"
               :disabled="rollingBackId === incident._id"
-              class="h-9 w-9 flex items-center justify-center bg-gray-800/80 hover:bg-gray-700 text-gray-400 hover:text-gray-200 border border-gray-700/60 rounded-xl transition cursor-pointer disabled:opacity-40 shadow-sm"
+              :loading="rollingBackId === incident._id"
+              variant="secondary"
+              size="icon-sm"
+              icon="rotate-left"
               title="Re-open ticket and return to Dashboard"
-            >
-              <font-awesome-icon :icon="rollingBackId === incident._id ? 'spinner' : 'rotate-left'" :class="{ 'animate-spin': rollingBackId === incident._id }" class="text-sm" />
-            </button>
+            />
           </div>
         </div>
 
@@ -146,22 +147,22 @@
       <div v-if="totalPages > 1" class="flex justify-between items-center bg-bgCard p-4 rounded-xl border border-gray-800 text-xs text-gray-400">
         <span>Page {{ currentPage }} of {{ totalPages }} ({{ totalCount }} Total Resolved Tickets)</span>
         <div class="flex space-x-2">
-          <button 
+          <BaseButton 
             :disabled="currentPage === 1" 
             @click="executeSearch(currentPage - 1)"
-            class="w-8 h-8 rounded-lg bg-bgMain border border-gray-700 disabled:opacity-40 font-bold hover:bg-gray-800 transition flex items-center justify-center text-textMain cursor-pointer"
+            variant="secondary"
+            size="icon-sm"
+            icon="chevron-left"
             title="Previous Page"
-          >
-            <font-awesome-icon icon="chevron-left" class="text-xs" />
-          </button>
-          <button 
+          />
+          <BaseButton 
             :disabled="currentPage === totalPages" 
             @click="executeSearch(currentPage + 1)"
-            class="w-8 h-8 rounded-lg bg-bgMain border border-gray-700 disabled:opacity-40 font-bold hover:bg-gray-800 transition flex items-center justify-center text-textMain cursor-pointer"
+            variant="secondary"
+            size="icon-sm"
+            icon="chevron-right"
             title="Next Page"
-          >
-            <font-awesome-icon icon="chevron-right" class="text-xs" />
-          </button>
+          />
         </div>
       </div>
     </div>
@@ -171,6 +172,9 @@
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import {
+  BaseButton,
+  BaseCard,
+  BaseInput,
   CustomSelect,
   PageHeader,
   SearchBar,
@@ -189,11 +193,16 @@ const events = ref([]);
 
 const categoryOptions = [
   { value: '', label: 'All' },
-  { value: 'RADIO_COMMS', label: 'Radio & Comms' },
-  { value: 'ROBOTIC_POWER', label: 'Robot Power Path' },
+  { value: 'RADIO_COMMS', label: 'Radio & Wireless Comms' },
+  { value: 'ROBOTIC_POWER', label: 'Robot Power Path & Battery' },
   { value: 'CAN_BUS', label: 'CAN Bus Connection' },
-  { value: 'MECHANICAL', label: 'Mechanical Issue' },
+  { value: 'MOTOR_CONTROLLER', label: 'Motor Controllers & Sensors' },
+  { value: 'PNEUMATICS', label: 'Pneumatics & Air System' },
+  { value: 'VISION_COPROCESSOR', label: 'Vision & Coprocessors' },
+  { value: 'DRIVER_STATION', label: 'Driver Station & Controls' },
   { value: 'CODE_EXCEPTION', label: 'Robot User Code' },
+  { value: 'MECHANICAL', label: 'Mechanical & Hardware' },
+  { value: 'FIELD_NETWORK', label: 'Field & FMS Network' },
   { value: 'OTHER', label: 'Other Issues' }
 ];
 

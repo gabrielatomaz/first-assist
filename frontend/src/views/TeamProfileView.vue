@@ -7,9 +7,14 @@
       :card="true"
     >
       <template #actions>
-        <router-link to="/" class="text-xs text-teal-400 hover:underline font-bold uppercase tracking-wider">
+        <BaseButton 
+          variant="ghost" 
+          size="sm" 
+          icon="arrow-left" 
+          @click="$router.push('/')"
+        >
           Back to Dashboard
-        </router-link>
+        </BaseButton>
       </template>
     </PageHeader>
 
@@ -21,7 +26,7 @@
     </div>
 
     <!-- History Timeline List -->
-    <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-6">
+    <BaseCard class="space-y-6">
       <div class="border-b border-gray-800 pb-3">
         <h3 class="text-lg font-bold text-textMain tracking-tight">Incident History Log</h3>
       </div>
@@ -46,7 +51,7 @@
               <span class="text-xs font-bold font-mono text-gray-400 uppercase">Match {{ inc.matchNumber || 'N/A' }}</span>
               <CategoryBadge :category="inc.category" />
             </div>
-            <StatusBadge :status="inc.status" size="xs" />
+            <StatusBadge :status="inc.status" />
           </div>
 
           <p class="text-xs text-gray-200 leading-relaxed font-medium">{{ inc.description }}</p>
@@ -68,7 +73,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </BaseCard>
   </div>
 </template>
 
@@ -78,6 +83,8 @@ import { useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { getApiUrl } from '../config/api';
 import {
+  BaseCard,
+  BaseButton,
   PageHeader,
   StatCard,
   CategoryBadge,

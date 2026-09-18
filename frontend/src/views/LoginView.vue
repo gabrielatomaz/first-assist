@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center justify-center min-h-[80vh] px-4">
-    <div class="w-full max-w-md bg-bgCard p-8 rounded-2xl shadow-xl border border-gray-800 transition duration-300 hover:shadow-2xl">
+    <BaseCard padding="p-8" class="w-full max-w-md shadow-xl hover:shadow-2xl transition duration-300">
       <div class="text-center mb-8 flex flex-col items-center">
         <!-- FIRST Assist Master Vector Brand Logo Emblem -->
         <div class="w-16 h-16 mb-4 shadow-xl rounded-2xl overflow-hidden transform hover:scale-105 transition duration-200">
@@ -23,27 +23,24 @@
       </div>
 
       <form @submit.prevent="handleLogin" class="space-y-6">
-        <div>
-          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Email Address</label>
-          <input
-            v-model="email"
-            type="email"
-            required
-            placeholder="csa@first.org"
-            class="w-full px-4 py-3 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 transition duration-200"
-          >
-        </div>
+        <BaseInput
+          v-model="email"
+          type="email"
+          label="Email Address"
+          required
+          placeholder="csa@first.org"
+          autocomplete="email"
+        />
 
-        <div>
-          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Password</label>
-          <input
-            v-model="password"
-            type="password"
-            required
-            placeholder="******"
-            class="w-full px-4 py-3 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 transition duration-200 font-mono"
-          >
-        </div>
+        <BaseInput
+          v-model="password"
+          type="password"
+          label="Password"
+          required
+          placeholder="******"
+          autocomplete="current-password"
+          input-class="font-mono"
+        />
 
         <AlertBanner v-if="error" type="error" :message="error" />
 
@@ -52,7 +49,7 @@
           :loading="loading"
           loading-text="Signing in..."
           variant="primary"
-          size="lg"
+          size="md"
           class="w-full"
         >
           Sign In
@@ -69,35 +66,39 @@
         </div>
       </div>
 
-      <!-- Guest Incident Action (Clean Text Link) -->
-      <div class="bg-bgMain p-4 rounded-xl border border-gray-800 text-center space-y-2">
-        <p class="text-xs text-gray-400 font-medium">Need technical assistance at the pits?</p>
+      <!-- Guest Incident Action -->
+      <div class="bg-bgMain p-4 rounded-xl border border-borderDefault text-center space-y-2.5">
+        <p class="text-xs text-textMuted font-medium">Need technical assistance at the pits?</p>
         <div>
-          <button 
+          <BaseButton 
             type="button" 
             @click="showPublicModal = true"
-            class="text-xs font-bold text-teal-400 hover:text-teal-300 hover:underline inline-flex items-center space-x-1.5 cursor-pointer transition duration-150"
+            variant="secondary"
+            size="sm"
+            icon="circle-plus"
+            class="text-teal-400 hover:text-teal-300"
           >
-            <font-awesome-icon icon="plus-circle" class="text-xs" />
-            <span>Request CSA Support</span>
-          </button>
+            Request CSA Support
+          </BaseButton>
         </div>
       </div>
 
-      <div class="mt-6 text-center text-xs text-gray-400 border-t border-gray-800 pt-5 space-y-2">
+      <div class="mt-6 text-center text-xs text-textMuted border-t border-borderSubtle pt-5 space-y-2.5">
         <p>If you need account access, please see the FTA or event Administrator.</p>
         <div>
-          <button 
+          <BaseButton 
             type="button" 
             @click="showRequestModal = true"
-            class="text-xs font-bold text-teal-400 hover:text-teal-300 hover:underline inline-flex items-center space-x-1.5 cursor-pointer transition duration-150"
+            variant="secondary"
+            size="sm"
+            icon="id-card"
+            class="text-accentYellow hover:text-amber-300"
           >
-            <font-awesome-icon icon="id-card" class="text-xs" />
-            <span>Request FTA Event Access</span>
-          </button>
+            Request FTA Event Access
+          </BaseButton>
         </div>
       </div>
-    </div>
+    </BaseCard>
 
     <!-- Access Request Modal -->
     <AccessRequestModal 
@@ -119,6 +120,8 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import {
+  BaseCard,
+  BaseInput,
   AccessRequestModal,
   PublicReportModal,
   AlertBanner,

@@ -1,7 +1,7 @@
 <template>
   <span
     :class="[badgeClasses, sizeClasses]"
-    class="inline-flex items-center justify-center text-center font-bold font-mono tracking-wider uppercase flex-shrink-0 transition-colors pt-[0.5em] pb-[0.25em]"
+    class="inline-flex items-center justify-center text-center font-bold font-mono tracking-wider uppercase flex-shrink-0 transition-colors leading-none"
   >
     <slot>{{ displayRole }}</slot>
   </span>
@@ -17,8 +17,8 @@ const props = defineProps({
   },
   size: {
     type: String,
-    default: 'sm',
-    validator: (val) => ['xs', 'sm', 'md'].includes(val)
+    default: 'md',
+    validator: (val) => ['xs', 'sm', 'md', 'lg'].includes(val)
   }
 });
 
@@ -30,12 +30,13 @@ const displayRole = computed(() => {
 const sizeClasses = computed(() => {
   switch (props.size) {
     case 'xs':
-      return 'px-2 text-[9px] rounded';
-    case 'md':
-      return 'px-3 text-xs rounded-md';
     case 'sm':
+      return 'h-5 px-2 text-[10px] rounded';
+    case 'lg':
+      return 'h-7 px-3 text-xs rounded-lg';
+    case 'md':
     default:
-      return 'px-2.5 text-xs rounded-md';
+      return 'h-6 px-2.5 text-xs rounded-md';
   }
 });
 

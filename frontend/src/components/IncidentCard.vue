@@ -1,37 +1,41 @@
 <template>
-  <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 flex flex-col justify-between space-y-4 hover:shadow-md transition h-full">
+  <div class="bg-bgCard p-6 rounded-2xl shadow border border-borderDefault flex flex-col justify-between space-y-4 hover:shadow-md transition h-full">
     <div class="space-y-4">
       <!-- Quick Triage Action Buttons on Top of the Incident with Separator Line -->
-      <div v-if="incident.status === 'PENDING_SCREENING' && isStaffUser" class="border-b border-gray-800/80 pb-3 flex items-center justify-end space-x-2" @click.stop.prevent>
-        <button 
-          @click.stop.prevent="emit('accept-triage', incident._id)" 
+      <div v-if="incident.status === 'PENDING_SCREENING' && isStaffUser" class="border-b border-borderSubtle pb-3 flex items-center justify-end space-x-2" @click.stop.prevent>
+        <BaseButton
+          size="sm"
+          variant="success"
+          icon="check"
+          :loading="triageLoadingAction === 'accept'"
           :disabled="!!triageLoadingAction"
-          class="px-3 py-1 bg-accentGreen/20 hover:bg-accentGreen text-accentGreen hover:text-white border border-accentGreen/40 rounded-lg text-xs font-bold transition flex items-center space-x-1 cursor-pointer shadow-sm disabled:opacity-50"
+          @click.stop.prevent="emit('accept-triage', incident._id)"
           title="Accept ticket into Open queue"
+          class="min-w-[80px] justify-center"
         >
-          <font-awesome-icon v-if="triageLoadingAction === 'accept'" icon="spinner" spin class="text-[10px]" />
-          <font-awesome-icon v-else icon="check" class="text-[10px]" />
-          <span>{{ triageLoadingAction === 'accept' ? 'Accepting...' : 'Accept' }}</span>
-        </button>
-        <button 
-          @click.stop.prevent="emit('reject-triage', incident._id)" 
+          {{ triageLoadingAction === 'accept' ? 'Accepting...' : 'Accept' }}
+        </BaseButton>
+        <BaseButton
+          size="sm"
+          variant="danger"
+          icon="xmark"
+          :loading="triageLoadingAction === 'reject'"
           :disabled="!!triageLoadingAction"
-          class="px-3 py-1 bg-accentCoral/20 hover:bg-accentCoral text-accentCoral hover:text-white border border-accentCoral/40 rounded-lg text-xs font-bold transition flex items-center space-x-1 cursor-pointer shadow-sm disabled:opacity-50"
+          @click.stop.prevent="emit('reject-triage', incident._id)"
           title="Reject ticket"
+          class="min-w-[80px] justify-center"
         >
-          <font-awesome-icon v-if="triageLoadingAction === 'reject'" icon="spinner" spin class="text-[10px]" />
-          <font-awesome-icon v-else icon="xmark" class="text-[10px]" />
-          <span>{{ triageLoadingAction === 'reject' ? 'Rejecting...' : 'Reject' }}</span>
-        </button>
+          {{ triageLoadingAction === 'reject' ? 'Rejecting...' : 'Reject' }}
+        </BaseButton>
       </div>
 
       <div class="flex justify-between items-start">
         <div class="space-y-1">
-          <router-link :to="`/teams/${incident.teamNumber}`" @click.stop class="font-extrabold text-white text-lg hover:text-teal-400 hover:underline">
+          <router-link :to="`/teams/${incident.teamNumber}`" @click.stop class="font-extrabold text-white text-lg hover:text-primaryTeal hover:underline font-mono">
             Team {{ incident.teamNumber }}
           </router-link>
-          <p class="text-xs text-gray-400 font-medium">
-            Match: <span class="text-gray-300 font-semibold">{{ incident.matchNumber || 'N/A' }}</span>
+          <p class="text-xs text-textMuted font-medium">
+            Match: <span class="text-textMain font-mono font-semibold">{{ incident.matchNumber || 'N/A' }}</span>
           </p>
         </div>
 
@@ -46,23 +50,23 @@
         <CategoryBadge :category="incident.category" />
       </div>
 
-      <p class="text-sm text-gray-300 line-clamp-2 leading-relaxed min-h-[2.5rem]">{{ incident.description }}</p>
+      <p class="text-sm text-textMain line-clamp-2 leading-relaxed min-h-[2.5rem]">{{ incident.description }}</p>
     </div>
 
     <!-- Footer: Assigned Technical (Left) & Event Code Badge (Right) -->
-    <div class="border-t border-gray-800/80 pt-3 flex items-center justify-between text-xs">
+    <div class="border-t border-borderSubtle pt-3 flex items-center justify-between text-xs">
       <div v-if="incident.assignedTo" class="flex items-center space-x-2">
         <UserAvatar :icon="incident.assignedTo?.avatarIcon" :color="incident.assignedTo?.avatarColor" size="xs" />
-        <span class="text-xs font-bold text-gray-200 truncate max-w-[140px]" :title="incident.assignedTo?.name">
+        <span class="text-xs font-bold text-textMain truncate max-w-[140px]" :title="incident.assignedTo?.name">
           {{ incident.assignedTo?.name }}
         </span>
       </div>
-      <div v-else class="text-[11px] text-gray-400 italic flex items-center space-x-1">
-        <font-awesome-icon icon="user" class="text-gray-400 text-[10px]" />
+      <div v-else class="text-[11px] text-textMuted italic flex items-center space-x-1">
+        <font-awesome-icon icon="user" class="text-textMuted text-[10px]" />
         <span>Unassigned</span>
       </div>
 
-      <span v-if="incident.eventCode" class="inline-flex items-center justify-center text-center px-2.5 pt-[0.5em] pb-[0.25em] rounded text-xs font-bold text-accentYellow/90 bg-accentYellow/10 border border-accentYellow/20 font-mono uppercase tracking-wider flex-shrink-0" title="Event Code">
+      <span v-if="incident.eventCode" class="h-6 px-2.5 rounded-md text-xs font-bold text-accentYellow/90 bg-accentYellow/10 border border-accentYellow/20 font-mono uppercase tracking-wider inline-flex items-center justify-center leading-none flex-shrink-0" title="Event Code">
         <font-awesome-icon icon="trophy" class="mr-1 text-[10px]" />{{ incident.eventCode }}
       </span>
     </div>
@@ -76,6 +80,7 @@ import UserAvatar from './UserAvatar.vue';
 import StatusBadge from './common/StatusBadge.vue';
 import PriorityBadge from './common/PriorityBadge.vue';
 import CategoryBadge from './common/CategoryBadge.vue';
+import BaseButton from './common/BaseButton.vue';
 
 const props = defineProps({
   incident: { type: Object, required: true },
