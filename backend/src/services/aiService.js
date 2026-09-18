@@ -124,3 +124,95 @@ Instructions:
     citedIncidents: []
   };
 };
+
+/**
+ * Transcribe spoken voice audio using Gemini Multimodal Audio API and optionally extract structured FRC incident entities.
+ * @param {Buffer} audioBuffer - Binary audio buffer from client
+ * @param {string} mimeType - Audio mime type (e.g. 'audio/webm;codecs=opus' or 'audio/webm')
+ * @param {string} mode - 'create' | 'resolve'
+ * @returns {Promise<{text: string, teamNumber?: number|null, matchNumber?: string|null, category?: string|null, priority?: string|null}>}
+ */
+export const transcribeAudioWithGemini = async (audioBuffer, mimeType = 'audio/webm', mode = 'create') => {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
+    console.warn('GEMINI_API_KEY missing in environment. Using fallback speech parser.');
+    return {
+      text: 'Audio recorded successfully. (Note: Configure GEMINI_API_KEY for live AI transcription).',
+      teamNumber: null,
+      matchNumber: null,
+      category: null,
+      priority: null
+    };
+  }
+
+  // Clean mime type (strip codecs parameters like ;codecs=opus)
+  const cleanMimeType = (mimeType || 'audio/webm').split(';')[0].trim();
+  const base64Audio = audioBuffer.toString('base64');
+  const ai = new GoogleGenAI({ apiKey });
+
+  const prompt = mode === 'create'
+    ? `You are an expert FIRST Robotics Competition (FRC) technical assistant.
+Transcribe the spoken audio into clear, technical English prose.
+In addition, extract any competition entities mentioned in the voice report:
+1. teamNumber: The numeric team number (e.g., 254, 1156, 1678), or null if not spoken.
+2. matchNumber: The match identifier (e.g., "Q14", "Qualification 14", "Practice 2", "Playoff 4"), or null if not spoken.
+3. category: The best-matching FRC incident category strictly from this list: ["RADIO_COMMS", "ROBOTIC_POWER", "CAN_BUS", "MECHANICAL", "CODE_EXCEPTION", "OTHER"], or null if undetermined.
+4. priority: The urgency level strictly from this list: ["LOW", "MEDIUM", "HIGH", "CRITICAL"], or null if not mentioned.
+
+Return strictly a valid JSON object matching this schema:
+{
+  "text": "Full, clear transcript of the spoken report.",
+  "teamNumber": 254,
+  "matchNumber": "Q14",
+  "category": "RADIO_COMMS",
+  "priority": "HIGH"
+}`
+    : `You are an expert FIRST Robotics Competition (FRC) technical assistant.
+Transcribe the spoken technical resolution details accurately and cleanly into clear technical prose.
+Return strictly a valid JSON object matching this schema:
+{
+  "text": "Full, clear transcript of the spoken technical resolution."
+}`;
+
+  const candidateModels = ['gemini-2.5-flash-lite', 'gemini-flash-latest', 'gemini-3.6-flash'];
+
+  for (const modelName of candidateModels) {
+    try {
+      const response = await ai.models.generateContent({
+        model: modelName,
+        contents: [
+          {
+            inlineData: {
+              mimeType: cleanMimeType,
+              data: base64Audio
+            }
+          },
+          {
+            text: prompt
+          }
+        ],
+        config: {
+          responseMimeType: 'application/json'
+        }
+      });
+
+      const responseText = response.text || '{}';
+      console.log(`Gemini Audio Transcription (${modelName}):`, responseText);
+      const json = JSON.parse(responseText);
+
+      return {
+        text: json.text || '',
+        teamNumber: typeof json.teamNumber === 'number' ? json.teamNumber : (parseInt(json.teamNumber, 10) || null),
+        matchNumber: json.matchNumber || null,
+        category: json.category || null,
+        priority: json.priority || null
+      };
+    } catch (error) {
+      console.warn(`Gemini model ${modelName} failed for audio transcription (${error.status || error.message}). Trying fallback...`);
+    }
+  }
+
+  throw new Error('All Gemini AI models failed to process audio transcription.');
+};
+

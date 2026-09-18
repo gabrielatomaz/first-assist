@@ -55,16 +55,16 @@ const props = defineProps({
 const sizeClasses = computed(() => {
   switch (props.size) {
     case 'sm':
-      return 'px-3 py-1.5 text-xs rounded-lg';
+      return 'h-9 px-4 text-sm rounded-xl';
     case 'lg':
-      return 'px-6 py-3 text-base rounded-xl shadow-md';
+      return 'h-12 px-6 text-base rounded-xl shadow-md';
     case 'icon-sm':
       return 'w-8 h-8 rounded-lg flex items-center justify-center p-0 flex-shrink-0';
     case 'icon-md':
       return 'w-10 h-10 rounded-xl flex items-center justify-center p-0 flex-shrink-0';
     case 'md':
     default:
-      return 'h-11 px-4 text-sm rounded-xl shadow-sm';
+      return 'h-11 px-5 text-sm rounded-xl shadow-sm';
   }
 });
 

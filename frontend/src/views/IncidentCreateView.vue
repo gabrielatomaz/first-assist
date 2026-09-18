@@ -107,7 +107,7 @@
 
       <div v-if="transcribing" class="flex items-center space-x-2 text-xs text-primaryTeal font-medium bg-primaryTeal/10 p-3 rounded-xl border border-primaryTeal/20">
         <font-awesome-icon icon="spinner" spin />
-        <span>Transcribing audio with Gemini Flash...</span>
+        <span>Transcribing audio...</span>
       </div>
 
       <div v-if="transcriptionSource" class="text-xs text-emerald-400 font-medium bg-emerald-950/40 p-3 rounded-xl border border-emerald-900/30 flex items-center justify-between">
@@ -115,28 +115,13 @@
         <button type="button" @click="transcriptionSource = false" class="text-gray-400 hover:text-white text-xs">✕</button>
       </div>
 
-      <!-- Transcription Error with Graceful Retry / Circuit-Breaker options -->
-      <div v-if="transcriptionError" class="bg-red-950/40 border border-red-900/30 text-accentCoral p-3.5 rounded-xl space-y-2 text-xs">
+      <!-- Speech Recognition Error -->
+      <div v-if="transcriptionError" class="bg-red-950/40 border border-red-900/30 text-accentCoral p-3.5 rounded-xl text-xs flex items-center justify-between">
         <div class="flex items-center space-x-1.5 font-bold">
           <font-awesome-icon icon="triangle-exclamation" class="text-accentCoral" />
           <span>{{ transcriptionError }}</span>
         </div>
-        <div class="flex items-center space-x-2 pt-1">
-          <button
-            type="button"
-            @click="retryTranscription(true)"
-            class="bg-purple-700 hover:bg-purple-600 text-white text-xs font-bold py-1.5 px-3 rounded shadow border border-purple-500/30 transition cursor-pointer"
-          >
-            Force Fail Retry
-          </button>
-          <button
-            type="button"
-            @click="retryTranscription(false)"
-            class="bg-primaryTeal hover:brightness-110 text-gray-200 text-xs font-bold py-1.5 px-3 rounded shadow transition cursor-pointer border border-primaryTeal/30"
-          >
-            Retry Transcription
-          </button>
-        </div>
+        <button type="button" @click="transcriptionError = null" class="text-gray-400 hover:text-white text-xs cursor-pointer">✕</button>
       </div>
 
       <AlertBanner v-if="error" type="error" :message="error" />
@@ -162,16 +147,29 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { useSpeechRecognition } from '../composables/useSpeechRecognition';
 import {
   CustomSelect,
   PageHeader,
-  AlertBanner,
-  BaseButton
+  BaseButton,
+  AlertBanner
 } from '../components';
 import { getApiUrl } from '../config/api';
 
 const router = useRouter();
 const authStore = useAuthStore();
+
+const {
+  isRecording: recording,
+  isTranscribing: transcribing,
+  audioError: transcriptionError,
+  startRecording: startSpeechRec,
+  stopRecording: stopSpeechRec
+} = useSpeechRecognition();
+
+const transcriptionSource = ref(false);
+const activeEvent = ref(null);
+const activeEventTeams = ref([]);
 
 const categoryOptions = [
   { value: 'RADIO_COMMS', label: 'Radio & Comms' },
@@ -192,13 +190,6 @@ const priorityOptions = [
 const form = ref({ teamNumber: null, matchNumber: '', eventCode: '', description: '', category: 'OTHER', priority: 'MEDIUM' });
 const submitting = ref(false);
 const error = ref(null);
-
-const recording = ref(false);
-const transcribing = ref(false);
-const transcriptionError = ref(null);
-const transcriptionSource = ref(false);
-const activeEvent = ref(null);
-const activeEventTeams = ref([]);
 
 const availableMatchSuggestions = computed(() => {
   if (!form.value.teamNumber) return [];
@@ -239,9 +230,7 @@ watch(() => form.value.teamNumber, (newTeam) => {
   }
 });
 
-let mediaRecorder = null;
-let audioChunks = [];
-let cachedAudioBlob = null;
+
 
 const fetchActiveEvent = async () => {
   try {
@@ -316,76 +305,16 @@ const fetchActiveEventTeams = async (eventCode) => {
   }
 };
 
-const startRecording = async () => {
-  audioChunks = [];
-  transcriptionError.value = null;
+const startRecording = () => {
   transcriptionSource.value = false;
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRecorder = new MediaRecorder(stream);
-    
-    mediaRecorder.ondataavailable = (event) => {
-      if (event.data.size > 0) {
-        audioChunks.push(event.data);
-      }
-    };
-
-    mediaRecorder.onstop = async () => {
-      cachedAudioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-      await sendAudioForTranscription(cachedAudioBlob);
-    };
-
-    mediaRecorder.start();
-    recording.value = true;
-  } catch (err) {
-    transcriptionError.value = "Microphone access denied. Please allow microphone permissions.";
-  }
+  startSpeechRec('description');
 };
 
-const stopRecording = () => {
-  if (mediaRecorder && recording.value) {
-    mediaRecorder.stop();
-    recording.value = false;
-  }
-};
-
-const sendAudioForTranscription = async (audioBlob, forceError = false) => {
-  transcribing.value = true;
-  transcriptionError.value = null;
-  try {
-    const formData = new FormData();
-    formData.append('audio', audioBlob, 'incident.webm');
-    
-    const errorParam = forceError ? '?simulate_error=true' : '';
-    const response = await fetch(getApiUrl(`/incidents/transcribe${errorParam}`), {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${authStore.token}`
-      },
-      body: formData
-    });
-    
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to process audio transcription');
-    }
-    
+const stopRecording = async () => {
+  const data = await stopSpeechRec();
+  if (data && data.text) {
     form.value.description = data.text;
-    if (data.teamNumber) form.value.teamNumber = data.teamNumber;
-    if (data.matchNumber) form.value.matchNumber = data.matchNumber;
-    if (data.category) form.value.category = data.category;
-    if (data.priority) form.value.priority = data.priority;
     transcriptionSource.value = true;
-  } catch (err) {
-    transcriptionError.value = err.message;
-  } finally {
-    transcribing.value = false;
-  }
-};
-
-const retryTranscription = async (forceFail = false) => {
-  if (cachedAudioBlob) {
-    await sendAudioForTranscription(cachedAudioBlob, forceFail);
   }
 };
 

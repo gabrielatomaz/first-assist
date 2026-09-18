@@ -136,14 +136,18 @@
       <!-- On-Demand Trigger Button State (when no suggestion generated yet) -->
       <div v-else-if="!suggestion" class="text-center py-4 space-y-3">
         <p class="text-xs text-gray-300 font-medium">No AI diagnostic recommendation generated yet for this incident.</p>
-        <button
+        <BaseButton
           @click="generateDiagnosis"
           :disabled="generating"
-          class="px-5 py-2.5 bg-purple-700 hover:bg-purple-600 text-white text-xs font-bold rounded-xl transition duration-150 flex items-center justify-center space-x-2 mx-auto shadow-md border border-purple-500/30 cursor-pointer"
+          :loading="generating"
+          loading-text="Analyzing incident details..."
+          variant="ai"
+          size="sm"
+          icon="wand-magic-sparkles"
+          class="mx-auto"
         >
-          <font-awesome-icon icon="wand-magic-sparkles" class="mr-1 text-purple-200" />
-          <span>Generate AI Diagnosis</span>
-        </button>
+          Generate AI Diagnosis
+        </BaseButton>
       </div>
     </div>
   </div>
@@ -153,6 +157,7 @@
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { getApiUrl } from '../config/api';
+import BaseButton from './common/BaseButton.vue';
 
 const props = defineProps({
   incidentId: { type: String, required: true }

@@ -27,7 +27,7 @@
           size="sm"
           icon="wand-magic-sparkles"
         >
-          Use AI Suggestion
+          Apply
         </BaseButton>
       </div>
 
@@ -45,13 +45,13 @@
             ></textarea>
             <button
               type="button"
-              @click="activeRecordingField === 'rootCause' ? stopRecording() : startRecording('rootCause')"
-              :disabled="transcribingField === 'rootCause'"
-              :title="transcribingField === 'rootCause' ? 'Transcribing audio...' : (activeRecordingField === 'rootCause' ? 'Stop recording' : 'Record audio')"
-              :class="activeRecordingField === 'rootCause' ? 'bg-red-600 text-white animate-pulse border-red-500' : 'bg-bgCard text-gray-400 hover:text-white border-gray-600 hover:border-gray-500'"
+              @click="isRecording && activeRecordingField === 'rootCause' ? stopRecording() : startRecording('rootCause')"
+              :disabled="isTranscribing"
+              :title="isTranscribing && activeRecordingField === 'rootCause' ? 'Transcribing audio...' : (isRecording && activeRecordingField === 'rootCause' ? 'Stop recording' : 'Record audio')"
+              :class="isRecording && activeRecordingField === 'rootCause' ? 'bg-red-600 text-white animate-pulse border-red-500' : 'bg-bgCard text-gray-400 hover:text-white border-gray-600 hover:border-gray-500'"
               class="absolute right-3 bottom-3 w-8 h-8 rounded-lg border text-sm font-semibold flex items-center justify-center transition duration-150 shadow cursor-pointer"
             >
-              <font-awesome-icon v-if="transcribingField === 'rootCause'" icon="spinner" class="animate-spin text-sm" />
+              <font-awesome-icon v-if="isTranscribing && activeRecordingField === 'rootCause'" icon="spinner" class="animate-spin text-sm" />
               <font-awesome-icon v-else icon="microphone" class="text-sm" />
             </button>
           </div>
@@ -70,13 +70,13 @@
             ></textarea>
             <button
               type="button"
-              @click="activeRecordingField === 'appliedSolution' ? stopRecording() : startRecording('appliedSolution')"
-              :disabled="transcribingField === 'appliedSolution'"
-              :title="transcribingField === 'appliedSolution' ? 'Transcribing audio...' : (activeRecordingField === 'appliedSolution' ? 'Stop recording' : 'Record audio')"
-              :class="activeRecordingField === 'appliedSolution' ? 'bg-red-600 text-white animate-pulse border-red-500' : 'bg-bgCard text-gray-400 hover:text-white border-gray-600 hover:border-gray-500'"
+              @click="isRecording && activeRecordingField === 'appliedSolution' ? stopRecording() : startRecording('appliedSolution')"
+              :disabled="isTranscribing"
+              :title="isTranscribing && activeRecordingField === 'appliedSolution' ? 'Transcribing audio...' : (isRecording && activeRecordingField === 'appliedSolution' ? 'Stop recording' : 'Record audio')"
+              :class="isRecording && activeRecordingField === 'appliedSolution' ? 'bg-red-600 text-white animate-pulse border-red-500' : 'bg-bgCard text-gray-400 hover:text-white border-gray-600 hover:border-gray-500'"
               class="absolute right-3 bottom-3 w-8 h-8 rounded-lg border text-sm font-semibold flex items-center justify-center transition duration-150 shadow cursor-pointer"
             >
-              <font-awesome-icon v-if="transcribingField === 'appliedSolution'" icon="spinner" class="animate-spin text-sm" />
+              <font-awesome-icon v-if="isTranscribing && activeRecordingField === 'appliedSolution'" icon="spinner" class="animate-spin text-sm" />
               <font-awesome-icon v-else icon="microphone" class="text-sm" />
             </button>
           </div>
@@ -113,6 +113,7 @@
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { BaseButton } from './index';
+import { useSpeechRecognition } from '../composables/useSpeechRecognition';
 import { getApiUrl } from '../config/api';
 
 const props = defineProps({
@@ -126,11 +127,14 @@ const form = ref({ rootCause: '', appliedSolution: '' });
 const submitting = ref(false);
 const aiSuggestion = ref(null);
 
-const activeRecordingField = ref(null);
-const transcribingField = ref(null);
-const audioError = ref(null);
-let mediaRecorder = null;
-let audioChunks = [];
+const {
+  isRecording,
+  isTranscribing,
+  audioError,
+  activeField: activeRecordingField,
+  startRecording: startSpeechRec,
+  stopRecording: stopSpeechRec
+} = useSpeechRecognition();
 
 const fetchAISuggestion = async () => {
   try {
@@ -158,67 +162,18 @@ const applyAISuggestion = () => {
   }
 };
 
-const startRecording = async (field) => {
-  audioChunks = [];
-  audioError.value = null;
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRecorder = new MediaRecorder(stream);
-    
-    mediaRecorder.ondataavailable = (event) => {
-      if (event.data.size > 0) {
-        audioChunks.push(event.data);
-      }
-    };
-
-    mediaRecorder.onstop = async () => {
-      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-      await transcribeAudio(audioBlob, field);
-    };
-
-    mediaRecorder.start();
-    activeRecordingField.value = field;
-  } catch (err) {
-    audioError.value = "Microphone access denied. Please check permissions.";
-  }
+const startRecording = (field) => {
+  startSpeechRec(field);
 };
 
-const stopRecording = () => {
-  if (mediaRecorder && activeRecordingField.value) {
-    mediaRecorder.stop();
-    activeRecordingField.value = null;
-  }
-};
-
-const transcribeAudio = async (blob, field) => {
-  transcribingField.value = field;
-  audioError.value = null;
-  try {
-    const formData = new FormData();
-    formData.append('audio', blob, `${field}.webm`);
-    
-    const response = await fetch(getApiUrl('/incidents/transcribe'), {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${authStore.token}`
-      },
-      body: formData
-    });
-    
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || 'Failed to process audio transcription');
-    
-    if (data.text) {
-      if (form.value[field]) {
-        form.value[field] += ' ' + data.text;
-      } else {
-        form.value[field] = data.text;
-      }
+const stopRecording = async () => {
+  const data = await stopSpeechRec();
+  if (data && data.text && data.field) {
+    if (form.value[data.field]) {
+      form.value[data.field] += ' ' + data.text;
+    } else {
+      form.value[data.field] = data.text;
     }
-  } catch (err) {
-    audioError.value = err.message;
-  } finally {
-    transcribingField.value = null;
   }
 };
 

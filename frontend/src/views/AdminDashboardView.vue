@@ -316,9 +316,9 @@
               @click="handleImportTBAEvent" 
               :disabled="importingTBAEvent || !tbaEventKey" 
               title="Import Event and Attending Teams from TBA"
-              class="bg-primaryTeal hover:brightness-110 text-gray-200 font-bold px-3.5 py-2 rounded-lg text-xs transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center shadow-sm whitespace-nowrap flex-shrink-0 border border-primaryTeal/30"
+              class="bg-primaryTeal hover:brightness-110 text-gray-200 font-bold px-3.5 py-2 rounded-lg text-sm transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center shadow-sm whitespace-nowrap flex-shrink-0 border border-primaryTeal/30"
             >
-              <font-awesome-icon :icon="importingTBAEvent ? 'spinner' : 'download'" :spin="importingTBAEvent" class="text-xs" />
+              <font-awesome-icon :icon="importingTBAEvent ? 'spinner' : 'download'" :spin="importingTBAEvent" class="text-sm" />
             </button>
           </div>
         </div>
@@ -343,7 +343,7 @@
             <label for="isActiveEvent" class="text-xs text-gray-300 font-medium">Set as Active Competition Event</label>
           </div>
 
-          <button type="submit" :disabled="creatingEvent || !eventForm.code || !eventForm.name" class="w-full bg-primaryTeal hover:brightness-110 text-gray-200 font-bold py-2.5 rounded-lg shadow text-xs transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer border border-primaryTeal/30">
+          <button type="submit" :disabled="creatingEvent || !eventForm.code || !eventForm.name" class="w-full bg-primaryTeal hover:brightness-110 text-gray-200 font-bold py-2.5 rounded-lg shadow text-sm transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer border border-primaryTeal/30">
             {{ creatingEvent ? 'Creating...' : 'Create' }}
           </button>
         </form>
@@ -361,8 +361,8 @@
             <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Team Number</label>
             <div class="flex space-x-2">
               <input v-model.number="teamForm.number" type="number" required placeholder="e.g. 254" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400">
-              <button type="button" @click="fetchFromTBA" :disabled="fetchingTBA || !teamForm.number" class="bg-accentPurple/15 hover:bg-accentPurple/25 text-purple-300 border border-accentPurple/25 disabled:opacity-40 disabled:cursor-not-allowed font-bold px-3.5 py-2 rounded-lg text-xs whitespace-nowrap transition cursor-pointer flex items-center">
-                <font-awesome-icon icon="bolt" class="mr-1 text-accentYellow text-xs" /> {{ fetchingTBA ? 'Syncing...' : 'Lookup TBA' }}
+              <button type="button" @click="fetchFromTBA" :disabled="fetchingTBA || !teamForm.number" class="bg-accentPurple/15 hover:bg-accentPurple/25 text-purple-300 border border-accentPurple/25 disabled:opacity-40 disabled:cursor-not-allowed font-bold px-3.5 py-2 rounded-lg text-sm whitespace-nowrap transition cursor-pointer flex items-center">
+                <font-awesome-icon icon="bolt" class="mr-1 text-accentYellow text-sm" /> {{ fetchingTBA ? 'Syncing...' : 'Lookup TBA' }}
               </button>
             </div>
           </div>
@@ -378,7 +378,7 @@
           </div>
 
           <div class="pt-6">
-            <button type="submit" :disabled="registeringTeam || !teamForm.number || !teamForm.name" class="w-full bg-primaryTeal hover:brightness-110 text-gray-200 font-bold py-2.5 rounded-lg shadow text-xs transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer border border-primaryTeal/30">
+            <button type="submit" :disabled="registeringTeam || !teamForm.number || !teamForm.name" class="w-full bg-primaryTeal hover:brightness-110 text-gray-200 font-bold py-2.5 rounded-lg shadow text-sm transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer border border-primaryTeal/30">
               {{ registeringTeam ? 'Saving...' : 'Save' }}
             </button>
           </div>

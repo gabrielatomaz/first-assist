@@ -77,7 +77,7 @@
               <PriorityBadge v-if="incident.priority" :priority="incident.priority" />
 
               <!-- Event Code Badge -->
-              <span v-if="incident.eventCode" class="inline-flex items-center justify-center text-center px-2.5 py-0.5 rounded text-xs font-bold text-accentYellow/90 bg-accentYellow/10 border border-accentYellow/20 font-mono uppercase tracking-wider flex-shrink-0">
+              <span v-if="incident.eventCode" class="inline-flex items-center justify-center text-center px-2.5 pt-[0.5em] pb-[0.25em] rounded text-xs font-bold text-accentYellow/90 bg-accentYellow/10 border border-accentYellow/20 font-mono uppercase tracking-wider flex-shrink-0">
                 <font-awesome-icon icon="trophy" class="mr-1 text-[10px]" /> {{ incident.eventCode }}
               </span>
             </div>

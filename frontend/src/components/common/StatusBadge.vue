@@ -28,10 +28,9 @@ const props = defineProps({
 
 const displayLabel = computed(() => {
   if (!props.status) return '';
-  const s = props.status.toUpperCase();
+  const s = props.status.toUpperCase().replace(/\s+/g, '_');
   if (s === 'PENDING_SCREENING') return 'IN_TRIAGE';
-  if (!props.format) return props.status;
-  return props.status.replace(/_/g, ' ');
+  return s;
 });
 
 const sizeClasses = computed(() => {

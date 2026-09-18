@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { incidentService } from '../services/incidentService.js';
+import { transcribeAudioWithGemini } from '../services/aiService.js';
 import { Event } from '../models/Event.js';
 
 export const incidentController = {
@@ -348,23 +349,18 @@ export const incidentController = {
 
   transcribeAudio: async (req, res) => {
     try {
-      const { simulate_error } = req.query;
-      
-      // Simulate network transcription failure (for testing retry flows)
-      if (simulate_error === 'true' || Math.random() < 0.2) {
-        return res.status(503).json({ error: 'Speech-to-Text transcription service timeout. Please try again.' });
+      if (!req.file || !req.file.buffer) {
+        return res.status(400).json({ error: 'No audio file provided in request.' });
       }
 
-      // Return simulated text translation along with structured parameters
-      res.json({
-        text: 'Simulated Voice Transcription: Team 254 in match Q12 has a loose CAN bus connector causing code exceptions. This is critical!',
-        teamNumber: 254,
-        matchNumber: 'Q12',
-        category: 'CAN_BUS',
-        priority: 'CRITICAL'
-      });
+      const mode = req.body.mode || req.query.mode || 'create';
+      const mimeType = req.file.mimetype || 'audio/webm';
+
+      const result = await transcribeAudioWithGemini(req.file.buffer, mimeType, mode);
+      res.json(result);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('Audio transcription error:', error);
+      res.status(500).json({ error: error.message || 'Failed to transcribe audio.' });
     }
   },
 

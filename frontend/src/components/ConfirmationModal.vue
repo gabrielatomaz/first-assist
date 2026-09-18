@@ -58,7 +58,7 @@
           type="button" 
           @click="handleCancel" 
           :disabled="loading"
-          class="flex-1 py-2.5 px-4 bg-bgMain hover:bg-bgMain/80 text-gray-300 hover:text-white font-semibold rounded-xl border border-gray-700 transition text-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+          class="flex-1 py-2.5 px-4 bg-bgMain hover:bg-bgMain/80 text-gray-300 hover:text-white font-semibold rounded-xl border border-gray-700 transition text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
         >
           {{ cancelText }}
         </button>
@@ -66,7 +66,7 @@
           type="button" 
           @click="handleConfirm" 
           :disabled="loading || (inputRequired && !inputValue)"
-          class="flex-1 py-2.5 px-4 font-bold rounded-xl shadow-md transition text-xs cursor-pointer flex items-center justify-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="flex-1 py-2.5 px-4 font-bold rounded-xl shadow-md transition text-sm cursor-pointer flex items-center justify-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
           :class="confirmButtonClass"
         >
           <font-awesome-icon v-if="loading" icon="spinner" spin class="text-xs" />
