@@ -7,12 +7,12 @@
       sizeClasses,
       disabled || loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:scale-[0.98]'
     ]"
-    class="font-bold transition-all duration-150 inline-flex items-center justify-center space-x-2 select-none"
+    class="font-bold transition-all duration-150 inline-flex items-center justify-center gap-2 select-none"
   >
     <font-awesome-icon v-if="loading" icon="spinner" spin class="text-xs" />
     <font-awesome-icon v-else-if="icon" :icon="icon" class="text-xs" />
     <span v-if="loading && loadingText">{{ loadingText }}</span>
-    <span v-else><slot /></span>
+    <span v-else-if="$slots.default"><slot /></span>
   </button>
 </template>
 
@@ -27,7 +27,7 @@ const props = defineProps({
   variant: {
     type: String,
     default: 'primary',
-    validator: (val) => ['primary', 'secondary', 'danger', 'success', 'ghost', 'outline'].includes(val)
+    validator: (val) => ['primary', 'secondary', 'danger', 'success', 'purple', 'ai', 'ghost', 'outline'].includes(val)
   },
   size: {
     type: String,
@@ -64,7 +64,7 @@ const sizeClasses = computed(() => {
       return 'w-10 h-10 rounded-xl flex items-center justify-center p-0 flex-shrink-0';
     case 'md':
     default:
-      return 'px-4 py-2.5 text-sm rounded-xl shadow-sm';
+      return 'h-11 px-4 text-sm rounded-xl shadow-sm';
   }
 });
 
@@ -75,7 +75,10 @@ const variantClasses = computed(() => {
     case 'danger':
       return 'bg-accentCoral hover:brightness-110 text-white shadow-sm';
     case 'success':
-      return 'bg-emerald-600 hover:bg-emerald-500 text-gray-200 font-bold shadow-sm';
+      return 'bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-md border border-emerald-500/30';
+    case 'purple':
+    case 'ai':
+      return 'bg-accentPurple/20 hover:bg-accentPurple/30 text-accentPurple hover:text-white border border-accentPurple/30 shadow-sm';
     case 'ghost':
       return 'bg-transparent hover:bg-white/10 text-gray-300 hover:text-white';
     case 'outline':

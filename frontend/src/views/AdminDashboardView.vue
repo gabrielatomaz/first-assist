@@ -154,14 +154,14 @@
           <h3 class="text-base font-bold text-teal-400 tracking-tight">System User Accounts</h3>
           <p class="text-xs text-gray-400 mt-0.5">Manage system accounts, access roles (Admin, FTA, CSA), and regional assignments</p>
         </div>
-        <button
+        <BaseButton
           @click="showCreateUserForm = !showCreateUserForm"
-          :class="showCreateUserForm ? 'w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 rounded-lg transition cursor-pointer flex-shrink-0' : 'bg-primaryTeal hover:brightness-110 text-gray-200 font-bold px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center space-x-1.5 shadow-sm border border-primaryTeal/30'"
-          :title="showCreateUserForm ? 'Cancel' : 'Register'"
+          :variant="showCreateUserForm ? 'secondary' : 'primary'"
+          size="sm"
+          :icon="showCreateUserForm ? 'xmark' : 'user-plus'"
         >
-          <font-awesome-icon :icon="showCreateUserForm ? 'xmark' : 'user-plus'" class="text-xs" />
           <span v-if="!showCreateUserForm">Register</span>
-        </button>
+        </BaseButton>
       </div>
 
       <!-- Create User Form Card -->
@@ -199,13 +199,16 @@
           </div>
 
           <div class="flex justify-end pt-2">
-            <button
+            <BaseButton
               type="submit"
+              variant="primary"
+              size="sm"
               :disabled="creatingUser || !userForm.name || !userForm.email || !userForm.password"
-              class="bg-primaryTeal hover:brightness-110 text-gray-200 font-bold py-2.5 px-6 rounded-lg text-sm shadow transition disabled:opacity-40 cursor-pointer border border-primaryTeal/30"
+              :loading="creatingUser"
+              loading-text="Registering..."
             >
-              {{ creatingUser ? 'Registering...' : 'Register' }}
-            </button>
+              Register
+            </BaseButton>
           </div>
         </form>
       </div>
@@ -448,6 +451,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import {
+  BaseButton,
   CustomSelect,
   ConfirmationModal,
   PageHeader,

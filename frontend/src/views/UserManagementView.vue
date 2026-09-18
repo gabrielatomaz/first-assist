@@ -5,14 +5,14 @@
       subtitle="Manage system accounts, access levels, and active volunteers"
     >
       <template #actions>
-        <button
+        <BaseButton
           @click="showCreateForm = !showCreateForm"
-          :class="showCreateForm ? 'w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 rounded-lg transition cursor-pointer flex-shrink-0' : 'bg-teal-600 hover:bg-teal-500 text-gray-200 font-bold px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center space-x-1.5 shadow-sm'"
-          :title="showCreateForm ? 'Cancel' : 'Register'"
+          :variant="showCreateForm ? 'secondary' : 'primary'"
+          size="sm"
+          :icon="showCreateForm ? 'xmark' : 'user-plus'"
         >
-          <font-awesome-icon :icon="showCreateForm ? 'xmark' : 'user-plus'" class="text-xs" />
           <span v-if="!showCreateForm">Register</span>
-        </button>
+        </BaseButton>
       </template>
     </PageHeader>
 
@@ -48,13 +48,18 @@
 
         <AlertBanner v-if="createError" type="error" :message="createError" />
 
-        <button
-          type="submit"
-          :disabled="creating"
-          class="bg-teal-600 hover:bg-teal-500 text-gray-200 font-bold py-2.5 px-6 rounded-lg text-sm shadow hover:shadow-md transition duration-150 disabled:opacity-50 cursor-pointer"
-        >
-          {{ creating ? 'Registering...' : 'Register' }}
-        </button>
+        <div class="flex justify-end pt-2">
+          <BaseButton
+            type="submit"
+            variant="primary"
+            size="sm"
+            :disabled="creating"
+            :loading="creating"
+            loading-text="Registering..."
+          >
+            Register
+          </BaseButton>
+        </div>
       </form>
     </div>
 
@@ -163,7 +168,8 @@ import {
   RoleBadge,
   StatusBadge,
   LoadingSpinner,
-  AlertBanner
+  AlertBanner,
+  BaseButton
 } from '../components';
 import { getApiUrl } from '../config/api';
 

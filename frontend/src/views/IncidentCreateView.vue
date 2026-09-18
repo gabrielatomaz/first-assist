@@ -20,7 +20,7 @@
             type="number" 
             list="eventTeamsList" 
             required 
-            class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500 font-mono" 
+            class="w-full h-11 px-4 py-2.5 rounded-xl border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500 font-mono" 
             placeholder="e.g. 254 (or select below)"
           >
           <datalist id="eventTeamsList">
@@ -37,7 +37,7 @@
             list="matchSuggestionsList" 
             :disabled="!form.teamNumber"
             title="Select match number"
-            class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500 font-mono disabled:opacity-50 disabled:cursor-not-allowed" 
+            class="w-full h-11 px-4 py-2.5 rounded-xl border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500 font-mono disabled:opacity-50 disabled:cursor-not-allowed" 
             :placeholder="form.teamNumber ? 'e.g. Q12 (select match)' : 'Select Team Number first...'"
           >
           <datalist id="matchSuggestionsList">
@@ -54,6 +54,7 @@
           <CustomSelect
             v-model="form.category"
             :options="categoryOptions"
+            button-class="h-11 px-4 py-2.5 text-sm rounded-xl bg-bgMain"
           />
         </div>
 
@@ -62,19 +63,33 @@
           <CustomSelect
             v-model="form.priority"
             :options="priorityOptions"
+            button-class="h-11 px-4 py-2.5 text-sm rounded-xl bg-bgMain"
           />
         </div>
       </div>
 
       <div>
         <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Description</label>
-        <textarea 
-          v-model="form.description" 
-          required 
-          rows="4" 
-          class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500 leading-relaxed" 
-          placeholder="Detailed explanation of the issue (e.g., Radio lost power on hit, CAN error on drive motor, etc.)"
-        ></textarea>
+        <div class="relative">
+          <textarea 
+            v-model="form.description" 
+            required 
+            rows="4" 
+            class="w-full px-4 py-2.5 pb-10 rounded-xl border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500 leading-relaxed resize-none" 
+            placeholder="Detailed explanation of the issue (e.g., Radio lost power on hit, CAN error on drive motor, etc.)"
+          ></textarea>
+          <button
+            type="button"
+            @click="recording ? stopRecording() : startRecording()"
+            :disabled="transcribing"
+            :title="transcribing ? 'Transcribing audio...' : (recording ? 'Stop recording' : 'Record voice description')"
+            :class="recording ? 'bg-red-600 text-white animate-pulse border-red-500' : 'bg-bgCard text-gray-400 hover:text-white border-gray-600 hover:border-gray-500'"
+            class="absolute right-3 bottom-3 w-8 h-8 rounded-lg border text-sm font-semibold flex items-center justify-center transition duration-150 shadow cursor-pointer"
+          >
+            <font-awesome-icon v-if="transcribing" icon="spinner" class="animate-spin text-sm" />
+            <font-awesome-icon v-else icon="microphone" class="text-sm" />
+          </button>
+        </div>
       </div>
 
       <!-- Recording status and wave animation indicator -->
@@ -126,24 +141,15 @@
 
       <AlertBanner v-if="error" type="error" :message="error" />
 
-      <div class="flex items-center justify-between pt-4 border-t border-gray-800">
-        <button
-          type="button"
-          @click="startRecording"
-          :disabled="recording || transcribing"
-          class="w-10 h-10 flex items-center justify-center rounded-xl text-teal-400 hover:bg-teal-500/10 disabled:opacity-50 transition border border-teal-500/30 shadow-sm flex-shrink-0 cursor-pointer"
-          title="Voice Record"
-        >
-          <font-awesome-icon icon="microphone" class="text-sm" />
-        </button>
-
+      <div class="pt-4 border-t border-gray-800">
         <BaseButton
           type="submit"
-          :disabled="submitting || transcribing"
+          :disabled="submitting || transcribing || recording"
           :loading="submitting"
           loading-text="Submitting..."
           variant="primary"
           size="md"
+          class="w-full"
         >
           Submit
         </BaseButton>

@@ -15,19 +15,20 @@
       </div>
 
       <!-- Quick AI Suggestion Shortcut -->
-      <div v-if="aiSuggestion" class="bg-accentPurple/10 border border-accentPurple/30 p-3 rounded-xl flex items-center justify-between">
-        <div class="flex items-center space-x-2 text-xs text-accentPurple font-medium">
-          <font-awesome-icon icon="robot" class="text-sm" />
+      <div v-if="aiSuggestion" class="bg-accentPurple/10 border border-accentPurple/25 p-3 rounded-xl flex items-center justify-between">
+        <div class="flex items-center space-x-2 text-xs text-purple-200 font-semibold">
+          <font-awesome-icon icon="robot" class="text-sm text-accentPurple" />
           <span>AI diagnostic recommendation available</span>
         </div>
-        <button
+        <BaseButton
           type="button"
           @click="applyAISuggestion"
-          class="px-3 py-1 bg-purple-700 hover:bg-purple-600 text-white text-xs font-bold rounded-lg transition duration-150 shadow border border-purple-500/30 flex items-center space-x-1 cursor-pointer"
+          variant="ai"
+          size="sm"
+          icon="wand-magic-sparkles"
         >
-          <font-awesome-icon icon="wand-magic-sparkles" class="mr-1 text-purple-200" />
-          <span>Use AI Suggestion</span>
-        </button>
+          Use AI Suggestion
+        </BaseButton>
       </div>
 
       <form @submit.prevent="handleSubmit" class="space-y-4">
@@ -48,10 +49,10 @@
               :disabled="transcribingField === 'rootCause'"
               :title="transcribingField === 'rootCause' ? 'Transcribing audio...' : (activeRecordingField === 'rootCause' ? 'Stop recording' : 'Record audio')"
               :class="activeRecordingField === 'rootCause' ? 'bg-red-600 text-white animate-pulse border-red-500' : 'bg-bgCard text-gray-400 hover:text-white border-gray-600 hover:border-gray-500'"
-              class="absolute right-3 bottom-3 p-1.5 rounded-lg border text-xs font-semibold flex items-center justify-center transition duration-150 shadow cursor-pointer"
+              class="absolute right-3 bottom-3 w-8 h-8 rounded-lg border text-sm font-semibold flex items-center justify-center transition duration-150 shadow cursor-pointer"
             >
-              <font-awesome-icon v-if="transcribingField === 'rootCause'" icon="spinner" class="animate-spin text-xs" />
-              <font-awesome-icon v-else icon="microphone" class="text-xs" />
+              <font-awesome-icon v-if="transcribingField === 'rootCause'" icon="spinner" class="animate-spin text-sm" />
+              <font-awesome-icon v-else icon="microphone" class="text-sm" />
             </button>
           </div>
         </div>
@@ -73,10 +74,10 @@
               :disabled="transcribingField === 'appliedSolution'"
               :title="transcribingField === 'appliedSolution' ? 'Transcribing audio...' : (activeRecordingField === 'appliedSolution' ? 'Stop recording' : 'Record audio')"
               :class="activeRecordingField === 'appliedSolution' ? 'bg-red-600 text-white animate-pulse border-red-500' : 'bg-bgCard text-gray-400 hover:text-white border-gray-600 hover:border-gray-500'"
-              class="absolute right-3 bottom-3 p-1.5 rounded-lg border text-xs font-semibold flex items-center justify-center transition duration-150 shadow"
+              class="absolute right-3 bottom-3 w-8 h-8 rounded-lg border text-sm font-semibold flex items-center justify-center transition duration-150 shadow cursor-pointer"
             >
-              <font-awesome-icon v-if="transcribingField === 'appliedSolution'" icon="spinner" class="animate-spin text-xs" />
-              <font-awesome-icon v-else icon="microphone" class="text-xs" />
+              <font-awesome-icon v-if="transcribingField === 'appliedSolution'" icon="spinner" class="animate-spin text-sm" />
+              <font-awesome-icon v-else icon="microphone" class="text-sm" />
             </button>
           </div>
         </div>
@@ -84,21 +85,24 @@
         <p v-if="audioError" class="text-xs text-accentCoral font-medium">{{ audioError }}</p>
 
         <div class="flex justify-end space-x-3 pt-4 border-t border-gray-700">
-          <button
+          <BaseButton
             type="button"
+            variant="secondary"
+            size="sm"
             @click="$emit('close')"
-            class="px-4 py-2 rounded-xl text-xs font-semibold bg-bgMain text-gray-300 hover:text-white border border-gray-700 transition"
           >
             Cancel
-          </button>
-          <button
+          </BaseButton>
+          <BaseButton
             type="submit"
+            variant="success"
+            size="sm"
             :disabled="submitting"
-            class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2 rounded-xl text-xs shadow-md transition duration-150 disabled:opacity-50 flex items-center space-x-1 cursor-pointer"
+            :loading="submitting"
+            loading-text="Saving..."
           >
-            <font-awesome-icon v-if="submitting" icon="spinner" class="animate-spin mr-1" />
-            <span>{{ submitting ? 'Saving...' : 'Resolve' }}</span>
-          </button>
+            Resolve
+          </BaseButton>
         </div>
       </form>
     </div>
@@ -108,6 +112,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { BaseButton } from './index';
 import { getApiUrl } from '../config/api';
 
 const props = defineProps({

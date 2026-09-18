@@ -1,7 +1,7 @@
 <template>
   <span
     v-if="category"
-    class="inline-flex items-center justify-center text-center px-2.5 py-0.5 rounded text-xs font-bold text-teal-300/90 bg-teal-500/15 border border-teal-500/30 font-mono uppercase tracking-wider leading-normal flex-shrink-0"
+    class="inline-flex items-center justify-center text-center px-2.5 pt-[0.5em] pb-[0.25em] rounded text-xs font-semibold text-gray-300 bg-gray-800/80 border border-gray-700/70 font-mono uppercase tracking-wider flex-shrink-0"
   >
     <slot>{{ formattedCategory }}</slot>
   </span>

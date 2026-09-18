@@ -14,26 +14,32 @@
         </div>
       </div>
       <div class="flex items-center space-x-2 w-full sm:w-auto">
-        <button
+        <BaseButton
           @click="acceptTriage"
+          variant="success"
+          size="sm"
+          icon="check"
+          :loading="triageLoading === 'accept'"
+          loading-text="Accepting..."
           :disabled="triageLoading !== null"
-          class="flex-1 sm:flex-initial px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow transition flex items-center justify-center space-x-1.5 cursor-pointer disabled:opacity-50"
           title="Accept ticket into Open queue"
+          class="flex-1 sm:flex-initial"
         >
-          <font-awesome-icon v-if="triageLoading === 'accept'" icon="spinner" spin class="text-xs" />
-          <font-awesome-icon v-else icon="check" class="text-xs" />
-          <span>{{ triageLoading === 'accept' ? 'Accepting...' : 'Accept Ticket' }}</span>
-        </button>
-        <button
+          Accept Ticket
+        </BaseButton>
+        <BaseButton
           @click="rejectTriage"
+          variant="danger"
+          size="sm"
+          icon="xmark"
+          :loading="triageLoading === 'reject'"
+          loading-text="Rejecting..."
           :disabled="triageLoading !== null"
-          class="flex-1 sm:flex-initial px-4 py-2 bg-accentCoral/20 hover:bg-accentCoral text-accentCoral hover:text-white border border-accentCoral/40 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-1.5 cursor-pointer disabled:opacity-50"
           title="Reject ticket"
+          class="flex-1 sm:flex-initial"
         >
-          <font-awesome-icon v-if="triageLoading === 'reject'" icon="spinner" spin class="text-xs" />
-          <font-awesome-icon v-else icon="xmark" class="text-xs" />
-          <span>{{ triageLoading === 'reject' ? 'Rejecting...' : 'Reject Ticket' }}</span>
-        </button>
+          Reject Ticket
+        </BaseButton>
       </div>
     </div>
 
@@ -78,23 +84,25 @@
 
         <!-- 3 & 4. Action icon buttons group (Expanded on mobile, compact on desktop) -->
         <div v-if="canDelete || (incident.status === 'ASSIGNED' || incident.status === 'IN_PROGRESS' || incident.status === 'WAITING')" class="flex items-center space-x-2 w-full sm:w-auto flex-shrink-0">
-          <button
+          <BaseButton
             v-if="canDelete"
             @click="showDeleteModal = true"
-            class="flex-1 sm:flex-initial h-9 sm:w-8 sm:h-8 flex items-center justify-center bg-accentCoral/20 hover:bg-accentCoral text-accentCoral hover:text-white border border-accentCoral/40 rounded-lg transition duration-150 cursor-pointer"
+            variant="danger"
+            size="icon-sm"
+            icon="trash-can"
             title="Delete Incident"
-          >
-            <font-awesome-icon icon="trash-can" class="text-xs" />
-          </button>
+            class="flex-1 sm:flex-initial h-9 sm:h-8"
+          />
 
-          <button
+          <BaseButton
             v-if="incident.status === 'ASSIGNED' || incident.status === 'IN_PROGRESS' || incident.status === 'WAITING'"
             @click="showResolveModal = true"
-            class="flex-1 sm:flex-initial h-9 sm:w-8 sm:h-8 flex items-center justify-center bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition duration-150 shadow hover:shadow-md cursor-pointer"
+            variant="success"
+            size="icon-sm"
+            icon="check"
             title="Resolve Incident"
-          >
-            <font-awesome-icon icon="check" class="text-xs" />
-          </button>
+            class="flex-1 sm:flex-initial h-9 sm:h-8"
+          />
         </div>
       </div>
     </div>
@@ -264,6 +272,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import {
+  BaseButton,
   CommentSection,
   AISuggestionPanel,
   ResolveIncidentModal,

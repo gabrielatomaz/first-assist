@@ -25,10 +25,10 @@
 
         <!-- Knowledge Base Status Badge (Below Title) -->
         <div class="pt-0.5">
-          <span v-if="suggestion?.isRagGrounded" class="inline-flex items-center justify-center text-center px-2.5 py-1 rounded-md text-xs font-bold font-mono uppercase tracking-wider bg-primaryTeal/15 text-primaryTeal border border-primaryTeal/30 shadow-sm">
+          <span v-if="suggestion?.isRagGrounded" class="inline-flex items-center justify-center text-center px-2.5 pt-[0.5em] pb-[0.25em] rounded-md text-xs font-bold font-mono uppercase tracking-wider bg-primaryTeal/15 text-primaryTeal border border-primaryTeal/30 shadow-sm">
             <font-awesome-icon icon="database" class="mr-1.5 text-[10px]" /> Knowledge Base Solution
           </span>
-          <span v-else-if="suggestion" class="inline-flex items-center justify-center text-center px-2.5 py-1 rounded-md text-xs font-bold font-mono uppercase tracking-wider bg-accentPurple/15 text-accentPurple border border-accentPurple/30 shadow-sm">
+          <span v-else-if="suggestion" class="inline-flex items-center justify-center text-center px-2.5 pt-[0.5em] pb-[0.25em] rounded-md text-xs font-bold font-mono uppercase tracking-wider bg-accentPurple/15 text-accentPurple border border-accentPurple/30 shadow-sm">
             <font-awesome-icon icon="wand-magic-sparkles" class="mr-1.5 text-[10px]" /> AI Generated Suggestion
           </span>
         </div>
@@ -54,7 +54,7 @@
       <div v-else-if="suggestion" class="space-y-4">
         <div class="space-y-4 text-sm text-textMain">
           <!-- Not Found in Knowledge Base Notice -->
-          <div v-if="!suggestion.isRagGrounded && (!suggestion.suggestedCause || !suggestion.suggestedCause.toLowerCase().includes('response not found'))" class="p-3 bg-accentPurple/10 border border-accentPurple/25 rounded-xl text-xs text-purple-200 flex items-center space-x-2 animate-fadeIn">
+          <div v-if="!suggestion.isRagGrounded && (!suggestion.suggestedCause || !suggestion.suggestedCause.toLowerCase().includes('response not found'))" class="p-3 bg-accentPurple/10 border border-accentPurple/25 rounded-xl text-xs text-textMain flex items-center space-x-2 animate-fadeIn">
             <font-awesome-icon icon="circle-info" class="text-sm text-accentPurple flex-shrink-0" />
             <span class="font-medium">It was not found in our knowledge base, but here is an AI suggestion:</span>
           </div>

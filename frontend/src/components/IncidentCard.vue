@@ -62,7 +62,7 @@
         <span>Unassigned</span>
       </div>
 
-      <span v-if="incident.eventCode" class="inline-flex items-center justify-center text-center h-6 px-2.5 rounded text-xs font-bold text-accentYellow/90 bg-accentYellow/10 border border-accentYellow/20 font-mono uppercase tracking-wider flex-shrink-0 leading-none" title="Event Code">
+      <span v-if="incident.eventCode" class="inline-flex items-center justify-center text-center px-2.5 pt-[0.5em] pb-[0.25em] rounded text-xs font-bold text-accentYellow/90 bg-accentYellow/10 border border-accentYellow/20 font-mono uppercase tracking-wider flex-shrink-0" title="Event Code">
         <font-awesome-icon icon="trophy" class="mr-1 text-[10px]" />{{ incident.eventCode }}
       </span>
     </div>
