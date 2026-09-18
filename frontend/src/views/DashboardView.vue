@@ -17,14 +17,11 @@
       @cancel="incidentToReject = null"
     />
 
-    <div class="flex flex-col md:flex-row justify-between md:items-center gap-4">
-      <div>
-        <h2 class="text-3xl font-extrabold text-primaryTeal tracking-tight">Technical Incidents</h2>
-        <p class="text-sm text-gray-400 mt-1">Real-time status tracking and CSA assignments for FRC teams</p>
-      </div>
-
-      <!-- Filters (Status & Event) -->
-      <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 w-full md:w-auto">
+    <PageHeader
+      title="Technical Incidents"
+      subtitle="Real-time status tracking and CSA assignments for FRC teams"
+    >
+      <template #actions>
         <!-- Event Code Filter (Visible ONLY for Admin and FTA) -->
         <CustomSelect
           v-if="authStore.isAdmin || authStore.isFTA"
@@ -35,7 +32,7 @@
         />
 
         <!-- CSA Active Event Context Badge (CSAs have 1 event, no dropdown) -->
-        <div v-else-if="authStore.user?.assignedEventCode" class="px-3.5 py-2 rounded-lg border border-primaryTeal/40 bg-primaryTeal/10 text-primaryTeal text-xs font-bold font-mono">
+        <div v-else-if="authStore.user?.assignedEventCode" class="px-3.5 py-2 rounded-lg border border-primaryTeal/40 bg-primaryTeal/10 text-teal-400 text-xs font-bold font-mono">
           <font-awesome-icon icon="trophy" class="mr-1 text-accentYellow" /> Active Event: {{ authStore.user.assignedEventCode }}
         </div>
 
@@ -43,6 +40,14 @@
         <CustomSelect
           v-model="statusFilter"
           :options="statusOptions"
+          @change="fetchIncidents"
+          class="w-full sm:w-36"
+        />
+
+        <!-- Priority Filter -->
+        <CustomSelect
+          v-model="priorityFilter"
+          :options="priorityOptions"
           @change="fetchIncidents"
           class="w-full sm:w-36"
         />
@@ -64,28 +69,28 @@
             class="w-full sm:w-32 flex-1"
           />
         </div>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Main View Tabs: Active Board vs In Triage -->
     <div class="flex items-center space-x-2 border-b border-gray-800 pb-3">
       <button
         type="button"
         @click="statusFilter = 'ALL'; fetchIncidents();"
-        :class="statusFilter !== 'PENDING_SCREENING' ? 'bg-primaryTeal/20 text-primaryTeal border-primaryTeal/40 shadow-sm' : 'bg-bgCard text-gray-400 border-gray-800 hover:text-white'"
-        class="px-4 py-2 rounded-lg text-xs font-bold border transition flex items-center space-x-2 cursor-pointer"
+        :class="statusFilter !== 'PENDING_SCREENING' ? 'bg-teal-500/25 text-teal-300 border-teal-500/60 shadow-sm font-bold' : 'bg-bgCard text-gray-300 border-gray-700 hover:text-white hover:border-gray-600'"
+        class="px-4 py-2 rounded-lg text-xs border transition flex items-center space-x-2 cursor-pointer"
       >
-        <font-awesome-icon icon="list-check" class="text-xs" />
+        <font-awesome-icon icon="list-check" class="text-xs" :class="statusFilter !== 'PENDING_SCREENING' ? 'text-teal-300' : 'text-gray-400'" />
         <span>Active Board</span>
       </button>
 
       <button
         type="button"
         @click="statusFilter = 'PENDING_SCREENING'; fetchIncidents();"
-        :class="statusFilter === 'PENDING_SCREENING' ? 'bg-amber-500/20 text-amber-400 border-amber-500/40 shadow-sm' : 'bg-bgCard text-gray-400 border-gray-800 hover:text-white'"
-        class="px-4 py-2 rounded-lg text-xs font-bold border transition flex items-center space-x-2 cursor-pointer relative"
+        :class="statusFilter === 'PENDING_SCREENING' ? 'bg-amber-500/25 text-amber-300 border-amber-500/60 shadow-sm font-bold' : 'bg-bgCard text-gray-300 border-gray-700 hover:text-white hover:border-gray-600'"
+        class="px-4 py-2 rounded-lg text-xs border transition flex items-center space-x-2 cursor-pointer relative"
       >
-        <font-awesome-icon icon="shield-halved" class="text-xs" />
+        <font-awesome-icon icon="shield-halved" class="text-xs" :class="statusFilter === 'PENDING_SCREENING' ? 'text-amber-300' : 'text-gray-400'" />
         <span>In Triage</span>
         <span 
           v-if="pendingScreeningCount > 0" 
@@ -97,14 +102,9 @@
     </div>
 
     <!-- Main Content -->
-    <div v-if="loading && firstLoad" class="text-center py-16">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primaryTeal border-t-transparent"></div>
-      <p class="text-gray-500 mt-3 text-sm">Loading incident board...</p>
-    </div>
+    <LoadingSpinner v-if="loading && firstLoad" text="Loading incident board..." />
 
-    <div v-else-if="error" class="bg-red-950/40 text-accentCoral p-4 rounded-xl border border-red-900/30 text-xs text-center font-medium">
-      {{ error }}
-    </div>
+    <AlertBanner v-else-if="error" type="error" :message="error" />
 
     <div v-else-if="incidents.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
       <router-link
@@ -123,22 +123,27 @@
       </router-link>
     </div>
 
-    <div v-else class="text-center py-20 bg-bgCard rounded-2xl border border-gray-800 shadow">
-      <div class="max-w-md mx-auto space-y-3">
-        <font-awesome-icon icon="check-circle" class="text-4xl text-primaryTeal/40" />
-        <h3 class="text-base font-extrabold text-white">No Technical Incidents Reported</h3>
-        <p class="text-xs text-gray-400 font-medium max-w-md mx-auto">
-          There are currently no active or reported technical incidents matching this event context. The competition field is clear!
-        </p>
-      </div>
-    </div>
+    <EmptyState
+      v-else
+      icon="circle-check"
+      title="No Technical Incidents Reported"
+      description="There are currently no active or reported technical incidents matching this event context. The competition field is clear!"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
-import { IncidentCard, CustomSelect, ConfirmationModal } from '../components';
+import {
+  IncidentCard,
+  CustomSelect,
+  ConfirmationModal,
+  PageHeader,
+  LoadingSpinner,
+  AlertBanner,
+  EmptyState
+} from '../components';
 import { getApiUrl } from '../config/api';
 
 const authStore = useAuthStore();
@@ -149,12 +154,13 @@ const firstLoad = ref(true);
 const error = ref(null);
 
 const statusFilter = ref('ALL');
+const priorityFilter = ref('ALL');
 const eventFilter = ref('ALL');
 const refreshInterval = ref(parseInt(localStorage.getItem('first_assist_refresh_rate')) || 15000);
 const pendingScreeningCount = ref(0);
 
 const statusOptions = [
-  { value: 'ALL', label: 'All Active' },
+  { value: 'ALL', label: 'Active' },
   { value: 'PENDING_SCREENING', label: 'In Triage' },
   { value: 'OPEN', label: 'Open' },
   { value: 'ASSIGNED', label: 'Assigned' },
@@ -163,6 +169,14 @@ const statusOptions = [
   { value: 'RESOLVED', label: 'Resolved' },
   { value: 'CLOSED', label: 'Closed' },
   { value: 'REJECTED', label: 'Rejected' }
+];
+
+const priorityOptions = [
+  { value: 'ALL', label: 'All' },
+  { value: 'LOW', label: 'Low' },
+  { value: 'MEDIUM', label: 'Medium' },
+  { value: 'HIGH', label: 'High' },
+  { value: 'CRITICAL', label: 'Critical' }
 ];
 
 const toggleAwaitingTriage = () => {
@@ -196,7 +210,7 @@ const availableEvents = computed(() => {
 });
 
 const eventOptions = computed(() => [
-  { value: 'ALL', label: 'All Events' },
+  { value: 'ALL', label: 'All' },
   ...availableEvents.value.map(e => ({ value: e.code, label: `${e.name} (${e.code})` }))
 ]);
 
@@ -258,6 +272,9 @@ const fetchIncidents = async () => {
     if (statusFilter.value !== 'ALL') {
       params.push(`status=${statusFilter.value}`);
     }
+    if (priorityFilter.value !== 'ALL') {
+      params.push(`priority=${priorityFilter.value}`);
+    }
     if (eventFilter.value !== 'ALL') {
       params.push(`eventCode=${eventFilter.value}`);
     } else {
@@ -280,7 +297,7 @@ const fetchIncidents = async () => {
   }
 };
 
-watch([statusFilter, eventFilter], () => {
+watch([statusFilter, priorityFilter, eventFilter], () => {
   fetchIncidents();
 });
 

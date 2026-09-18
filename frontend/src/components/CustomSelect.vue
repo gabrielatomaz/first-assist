@@ -35,11 +35,11 @@
             :class="[
               'block w-full px-4 py-2.5 text-left text-xs font-semibold transition cursor-pointer flex items-center justify-between',
               opt.disabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-white/15 text-white',
-              isSelected(opt.value) ? 'bg-primaryTeal/25 text-primaryTeal font-bold' : 'text-gray-200'
+              isSelected(opt.value) ? 'bg-primaryTeal/25 text-teal-300 font-bold' : 'text-gray-200'
             ]"
           >
             <span class="truncate">{{ opt.label }}</span>
-            <font-awesome-icon v-if="isSelected(opt.value)" icon="check" class="text-xs text-primaryTeal ml-2 flex-shrink-0" />
+            <font-awesome-icon v-if="isSelected(opt.value)" icon="check" class="text-xs text-teal-300 ml-2 flex-shrink-0" />
           </button>
         </div>
       </transition>

@@ -1,24 +1,26 @@
 <template>
-  <div class="max-w-2xl mx-auto bg-bgCard p-8 rounded-2xl shadow border border-gray-800 mt-8 animate-fadeIn">
-    <h2 class="text-3xl font-extrabold text-primaryTeal tracking-tight mb-2">Report Technical Incident</h2>
-    <p class="text-sm text-gray-400 mb-6">Document issues immediately to request field support</p>
+  <div class="max-w-2xl mx-auto bg-bgCard p-8 rounded-2xl shadow border border-gray-800 mt-8 animate-fadeIn space-y-6">
+    <PageHeader
+      title="Report Technical Incident"
+      subtitle="Document issues immediately to request field support"
+    />
 
     <!-- Active Event Banner -->
-    <div v-if="activeEvent" class="bg-bgMain border border-gray-800 p-3 rounded-lg text-xs font-semibold text-gray-400 mb-4 flex items-center space-x-1.5 shadow-sm">
+    <div v-if="activeEvent" class="bg-bgMain border border-gray-800 p-3 rounded-xl text-xs font-semibold text-gray-400 flex items-center space-x-1.5 shadow-sm">
       <font-awesome-icon icon="trophy" class="text-accentYellow font-black mr-1" />
-      <span class="text-primaryTeal font-extrabold">{{ activeEvent.name }} ({{ activeEvent.code }})</span>
+      <span class="text-teal-400 font-extrabold">{{ activeEvent.name }} ({{ activeEvent.code }})</span>
     </div>
     
     <form @submit.prevent="submitIncident" class="space-y-6">
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Team Number</label>
+          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Team Number</label>
           <input 
             v-model.number="form.teamNumber" 
             type="number" 
             list="eventTeamsList" 
             required 
-            class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500 font-mono" 
+            class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500 font-mono" 
             placeholder="e.g. 254 (or select below)"
           >
           <datalist id="eventTeamsList">
@@ -28,115 +30,123 @@
           </datalist>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2" title="Select match number">Match Number</label>
+          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2" title="Select match number">Match Number</label>
           <input 
             v-model="form.matchNumber" 
             type="text" 
             list="matchSuggestionsList" 
             :disabled="!form.teamNumber"
             title="Select match number"
-            class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500 font-mono disabled:opacity-50 disabled:cursor-not-allowed" 
+            class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500 font-mono disabled:opacity-50 disabled:cursor-not-allowed" 
             :placeholder="form.teamNumber ? 'e.g. Q12 (select match)' : 'Select Team Number first...'"
           >
           <datalist id="matchSuggestionsList">
             <option v-for="m in availableMatchSuggestions" :key="m" :value="m">{{ m }}</option>
           </datalist>
           <p v-if="!form.teamNumber" class="text-[10px] text-gray-400 mt-1">Select a team number first to filter matches for that team.</p>
-          <p v-else-if="availableMatchSuggestions.length" class="text-[10px] text-primaryTeal font-medium mt-1">Showing {{ availableMatchSuggestions.length }} matches assigned to Team {{ form.teamNumber }}</p>
+          <p v-else-if="availableMatchSuggestions.length" class="text-[10px] text-teal-400 font-medium mt-1">Showing {{ availableMatchSuggestions.length }} matches assigned to Team {{ form.teamNumber }}</p>
         </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Category</label>
+          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Category</label>
           <CustomSelect
             v-model="form.category"
             :options="categoryOptions"
-            button-class="py-2.5 px-4 text-sm"
           />
         </div>
+
         <div>
-          <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Priority</label>
+          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Priority</label>
           <CustomSelect
             v-model="form.priority"
             :options="priorityOptions"
-            button-class="py-2.5 px-4 text-sm"
           />
         </div>
       </div>
-      
+
       <div>
-        <div class="flex justify-between items-center mb-2">
-          <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider">Issue Description</label>
-          <span v-if="transcriptionSource" class="text-[10px] text-primaryTeal bg-primaryTeal/10 px-2 py-0.5 rounded font-bold uppercase font-mono tracking-wider">
-            Transcribed (Review Details below)
-          </span>
-        </div>
-        <textarea v-model="form.description" required rows="4" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500" placeholder="Describe the problem..."></textarea>
+        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Description</label>
+        <textarea 
+          v-model="form.description" 
+          required 
+          rows="4" 
+          class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500 leading-relaxed" 
+          placeholder="Detailed explanation of the issue (e.g., Radio lost power on hit, CAN error on drive motor, etc.)"
+        ></textarea>
       </div>
 
-      <!-- Recording status banner -->
-      <div v-if="recording" class="bg-red-50 border border-accentCoral/30 p-4 rounded-xl flex items-center justify-between animate-pulse">
-        <div class="flex items-center space-x-2 text-xs text-accentCoral font-bold">
-          <span class="w-2.5 h-2.5 bg-accentCoral rounded-full animate-ping"></span>
-          <span>Recording microphone audio... Speak clearly.</span>
-        </div>
-        <button type="button" @click="stopRecording" class="bg-accentCoral text-white text-base p-2 px-3 rounded-lg shadow hover:bg-opacity-90" title="Stop Recording">
-          <font-awesome-icon icon="stop" />
+      <!-- Recording status and wave animation indicator -->
+      <div v-if="recording" class="flex items-center space-x-3 bg-red-950/40 border border-red-900/40 p-3 rounded-xl text-accentCoral text-xs animate-pulse">
+        <font-awesome-icon icon="circle-dot" class="text-accentCoral text-base" />
+        <span class="font-bold flex-1">Recording voice audio... Speak clearly into your microphone.</span>
+        <button 
+          type="button" 
+          @click="stopRecording" 
+          class="px-3 py-1 bg-accentCoral text-white font-bold rounded-lg text-xs shadow hover:bg-opacity-90 cursor-pointer"
+        >
+          Stop Recording
         </button>
       </div>
 
-      <!-- Transcribing loading indicator -->
-      <div v-if="transcribing" class="text-xs text-primaryTeal font-bold flex items-center space-x-2 p-3 bg-primaryTeal/5 border border-primaryTeal/15 rounded-xl">
-        <div class="inline-block animate-spin rounded-full h-3.5 w-3.5 border-2 border-primaryTeal border-t-transparent"></div>
-        <span>Converting audio to text transcription... Please wait.</span>
+      <div v-if="transcribing" class="flex items-center space-x-2 text-xs text-primaryTeal font-medium bg-primaryTeal/10 p-3 rounded-xl border border-primaryTeal/20">
+        <font-awesome-icon icon="spinner" spin />
+        <span>Transcribing audio with Gemini Flash...</span>
       </div>
 
-      <!-- Transcription Error and Retry -->
-      <div v-if="transcriptionError" class="bg-red-50 border border-accentCoral/20 p-4 rounded-xl flex flex-col sm:flex-row justify-between sm:items-center gap-3">
-        <span class="text-xs text-accentCoral font-semibold">{{ transcriptionError }}</span>
-        <div class="flex space-x-2">
+      <div v-if="transcriptionSource" class="text-xs text-emerald-400 font-medium bg-emerald-950/40 p-3 rounded-xl border border-emerald-900/30 flex items-center justify-between">
+        <span><font-awesome-icon icon="circle-check" class="mr-1.5" /> Incident details transcribed successfully via voice</span>
+        <button type="button" @click="transcriptionSource = false" class="text-gray-400 hover:text-white text-xs">✕</button>
+      </div>
+
+      <!-- Transcription Error with Graceful Retry / Circuit-Breaker options -->
+      <div v-if="transcriptionError" class="bg-red-950/40 border border-red-900/30 text-accentCoral p-3.5 rounded-xl space-y-2 text-xs">
+        <div class="flex items-center space-x-1.5 font-bold">
+          <font-awesome-icon icon="triangle-exclamation" class="text-accentCoral" />
+          <span>{{ transcriptionError }}</span>
+        </div>
+        <div class="flex items-center space-x-2 pt-1">
           <button
             type="button"
             @click="retryTranscription(true)"
-            class="bg-accentPurple text-white text-xs font-bold py-1.5 px-3 rounded shadow hover:bg-opacity-90 transition"
+            class="bg-purple-700 hover:bg-purple-600 text-white text-xs font-bold py-1.5 px-3 rounded shadow border border-purple-500/30 transition cursor-pointer"
           >
             Force Fail Retry
           </button>
           <button
             type="button"
             @click="retryTranscription(false)"
-            class="bg-primaryTeal text-white text-xs font-bold py-1.5 px-3 rounded shadow hover:bg-opacity-90 transition"
+            class="bg-primaryTeal hover:brightness-110 text-gray-200 text-xs font-bold py-1.5 px-3 rounded shadow transition cursor-pointer border border-primaryTeal/30"
           >
             Retry Transcription
           </button>
         </div>
       </div>
 
-      <div v-if="error" class="text-accentCoral text-xs font-medium p-3 bg-red-50 rounded">
-        {{ error }}
-      </div>
+      <AlertBanner v-if="error" type="error" :message="error" />
 
       <div class="flex items-center justify-between pt-4 border-t border-gray-800">
         <button
           type="button"
           @click="startRecording"
           :disabled="recording || transcribing"
-          class="w-10 h-10 flex items-center justify-center rounded-xl text-primaryTeal hover:bg-primaryTeal/10 disabled:opacity-50 transition border border-primaryTeal/30 shadow-sm flex-shrink-0 cursor-pointer"
+          class="w-10 h-10 flex items-center justify-center rounded-xl text-teal-400 hover:bg-teal-500/10 disabled:opacity-50 transition border border-teal-500/30 shadow-sm flex-shrink-0 cursor-pointer"
           title="Voice Record"
         >
           <font-awesome-icon icon="microphone" class="text-sm" />
         </button>
 
-        <button
+        <BaseButton
           type="submit"
           :disabled="submitting || transcribing"
-          class="h-10 px-5 bg-primaryTeal hover:brightness-95 text-white font-bold rounded-xl shadow transition duration-150 disabled:opacity-50 text-xs sm:text-sm flex items-center justify-center space-x-2 flex-shrink-0 cursor-pointer"
-          title="Submit Ticket"
+          :loading="submitting"
+          loading-text="Submitting..."
+          variant="primary"
+          size="md"
         >
-          <font-awesome-icon v-if="submitting" icon="spinner" spin class="text-xs" />
-          <span>{{ submitting ? 'Submitting...' : 'Submit' }}</span>
-        </button>
+          Submit
+        </BaseButton>
       </div>
     </form>
   </div>
@@ -146,7 +156,12 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
-import { CustomSelect } from '../components';
+import {
+  CustomSelect,
+  PageHeader,
+  AlertBanner,
+  BaseButton
+} from '../components';
 import { getApiUrl } from '../config/api';
 
 const router = useRouter();

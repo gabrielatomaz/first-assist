@@ -1,21 +1,19 @@
 <template>
   <div class="max-w-5xl mx-auto space-y-8 mt-8 animate-fadeIn text-textMain">
     <!-- Top Header & Sub-Navigation Selector -->
-    <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-      <div>
-        <h2 class="text-3xl font-extrabold text-primaryTeal tracking-tight">FTA Control Panel</h2>
-        <p class="text-sm text-gray-400 font-medium mt-1">Operational tools for FRC events, team rosters, and CSA context assignments</p>
-      </div>
-
-      <!-- Navigation Dropdown / Tab Selector -->
-      <div class="flex items-center space-x-2 w-full md:w-auto">
+    <PageHeader
+      title="FTA Control Panel"
+      subtitle="Operational tools for FRC events, team rosters, and CSA context assignments"
+      :card="true"
+    >
+      <template #actions>
         <CustomSelect
           v-model="activeTab"
           :options="tabOptions"
           class="w-full md:w-60 font-bold"
         />
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
 
     <!-- Confirm Remove Team Modal Overlay -->
@@ -308,7 +306,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
-import { CustomSelect, ConfirmationModal } from '../components';
+import {
+  CustomSelect,
+  ConfirmationModal,
+  PageHeader,
+  AlertBanner
+} from '../components';
 import { getApiUrl } from '../config/api';
 
 const authStore = useAuthStore();

@@ -1,34 +1,34 @@
 <template>
   <div class="max-w-2xl mx-auto space-y-8 animate-fadeIn text-textMain">
-    <div>
-      <h2 class="text-3xl font-extrabold text-primaryTeal tracking-tight">My Profile</h2>
-      <p class="text-sm text-gray-400 mt-1">Manage your account information, credentials, and avatar preferences</p>
-    </div>
+    <PageHeader
+      title="My Profile"
+      subtitle="Manage your account information, credentials, and avatar preferences"
+    />
 
     <!-- Basic Profile Info & Avatar Selector -->
     <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-6">
-      <h3 class="text-lg font-bold text-primaryTeal border-b border-gray-800 pb-3">Account Details</h3>
+      <h3 class="text-lg font-bold text-teal-400 border-b border-gray-800 pb-3">Account Details</h3>
       
       <form @submit.prevent="handleUpdateProfile" class="space-y-6">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Full Name</label>
-            <input v-model="profile.name" type="text" required class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500">
+            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Full Name</label>
+            <input v-model="profile.name" type="text" required class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Email Address</label>
-            <input v-model="profile.email" type="email" required class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500">
+            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Email Address</label>
+            <input v-model="profile.email" type="email" required class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500">
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Designated Role</label>
+          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Designated Role</label>
           <input :value="profile.role" type="text" disabled :class="roleTextColor" class="w-full px-4 py-2.5 rounded-lg border border-gray-800 bg-bgMain/60 text-sm font-mono font-bold uppercase tracking-wider">
         </div>
 
         <!-- Avatar Customization -->
         <div class="border-t border-gray-800 pt-5 space-y-4">
-          <label class="block text-xs font-bold text-primaryTeal uppercase tracking-wider">Profile Avatar Customization</label>
+          <label class="block text-xs font-bold text-teal-400 uppercase tracking-wider">Profile Avatar Customization</label>
 
           <div class="flex flex-col sm:flex-row items-center gap-6 bg-bgMain/60 p-4 rounded-xl border border-gray-800">
             <!-- Live Preview -->
@@ -47,7 +47,7 @@
                     :key="iconItem"
                     type="button"
                     @click="profile.avatarIcon = iconItem"
-                    :class="profile.avatarIcon === iconItem ? 'bg-primaryTeal text-white border-primaryTeal ring-2 ring-primaryTeal/50' : 'bg-bgMain text-gray-400 hover:text-white border-gray-700 hover:border-gray-600'"
+                    :class="profile.avatarIcon === iconItem ? 'bg-teal-600 text-gray-200 border-teal-500 ring-2 ring-teal-500/50 font-bold' : 'bg-bgMain text-gray-400 hover:text-white border-gray-700 hover:border-gray-600'"
                     class="w-9 h-9 rounded-lg border flex items-center justify-center text-sm transition duration-150 cursor-pointer"
                   >
                     <font-awesome-icon :icon="iconItem" />
@@ -58,16 +58,16 @@
               <!-- Select Color Swatch -->
               <div>
                 <span class="block text-xs text-gray-300 font-semibold mb-2">Icon Color</span>
-                <div class="flex flex-wrap gap-2.5">
+                <div class="flex flex-wrap gap-2">
                   <button
                     v-for="colorItem in colorOptions"
-                    :key="colorItem.hex"
+                    :key="colorItem.value"
                     type="button"
-                    @click="profile.avatarColor = colorItem.hex"
-                    :style="{ backgroundColor: colorItem.hex }"
-                    :title="colorItem.name"
-                    :class="profile.avatarColor === colorItem.hex ? 'ring-2 ring-white scale-110 shadow-md' : 'hover:scale-105 opacity-85 hover:opacity-100'"
-                    class="w-7 h-7 rounded-full transition-all duration-150 shadow-sm cursor-pointer"
+                    @click="profile.avatarColor = colorItem.value"
+                    :style="{ backgroundColor: colorItem.value }"
+                    :class="profile.avatarColor === colorItem.value ? 'ring-2 ring-white scale-110' : 'opacity-80 hover:opacity-100'"
+                    class="w-7 h-7 rounded-full transition duration-150 cursor-pointer shadow-sm"
+                    :title="colorItem.label"
                   ></button>
                 </div>
               </div>
@@ -75,58 +75,54 @@
           </div>
         </div>
 
-        <div v-if="profileError" class="text-accentCoral text-xs font-medium p-3 bg-red-950/40 rounded">
-          {{ profileError }}
-        </div>
-        <div v-if="profileSuccess" class="text-accentGreen border border-accentGreen/30 text-xs font-medium p-3 bg-accentGreen/10 rounded">
-          Profile updated successfully!
-        </div>
+        <AlertBanner v-if="profileError" type="error" :message="profileError" />
+        <AlertBanner v-if="profileSuccess" type="success" message="Profile updated successfully!" />
 
-        <button
+        <BaseButton
           type="submit"
-          :disabled="updatingProfile"
-          class="bg-primaryTeal hover:brightness-95 text-white font-semibold py-2.5 px-6 rounded-lg text-sm shadow hover:shadow-md transition duration-150 disabled:opacity-50 cursor-pointer"
+          :loading="updatingProfile"
+          loading-text="Saving..."
+          variant="primary"
+          size="md"
         >
-          {{ updatingProfile ? 'Saving...' : 'Save Profile' }}
-        </button>
+          Save Profile
+        </BaseButton>
       </form>
     </div>
 
     <!-- Password Management -->
     <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-6">
-      <h3 class="text-lg font-bold text-primaryTeal border-b border-gray-800 pb-3">Update Password</h3>
+      <h3 class="text-lg font-bold text-teal-400 border-b border-gray-800 pb-3">Update Password</h3>
       
       <form @submit.prevent="handlePasswordChange" class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Current Password</label>
-          <input v-model="passwordForm.currentPassword" type="password" required placeholder="******" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500 font-mono">
+          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Current Password</label>
+          <input v-model="passwordForm.currentPassword" type="password" required placeholder="******" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500 font-mono">
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">New Password</label>
-            <input v-model="passwordForm.newPassword" type="password" required placeholder="******" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500 font-mono">
+            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">New Password</label>
+            <input v-model="passwordForm.newPassword" type="password" required placeholder="******" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500 font-mono">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Confirm New Password</label>
-            <input v-model="passwordForm.confirmPassword" type="password" required placeholder="******" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500 font-mono">
+            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Confirm New Password</label>
+            <input v-model="passwordForm.confirmPassword" type="password" required placeholder="******" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500 font-mono">
           </div>
         </div>
 
-        <div v-if="passwordError" class="text-accentCoral text-xs font-medium p-3 bg-red-950/40 rounded">
-          {{ passwordError }}
-        </div>
-        <div v-if="passwordSuccess" class="text-accentGreen border border-accentGreen/30 text-xs font-medium p-3 bg-accentGreen/10 rounded">
-          Password updated successfully!
-        </div>
+        <AlertBanner v-if="passwordError" type="error" :message="passwordError" />
+        <AlertBanner v-if="passwordSuccess" type="success" message="Password updated successfully!" />
 
-        <button
+        <BaseButton
           type="submit"
-          :disabled="changingPassword"
-          class="bg-primaryTeal hover:brightness-95 text-white font-semibold py-2.5 px-6 rounded-lg text-sm shadow hover:shadow-md transition duration-150 disabled:opacity-50 cursor-pointer"
+          :loading="changingPassword"
+          loading-text="Updating..."
+          variant="primary"
+          size="md"
         >
-          {{ changingPassword ? 'Updating...' : 'Update Password' }}
-        </button>
+          Update Password
+        </BaseButton>
       </form>
     </div>
   </div>
@@ -136,7 +132,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { getApiUrl } from '../config/api';
-import UserAvatar from '../components/UserAvatar.vue';
+import { PageHeader, AlertBanner, BaseButton, UserAvatar } from '../components';
 
 const authStore = useAuthStore();
 

@@ -139,9 +139,9 @@
         <button
           @click="generateDiagnosis"
           :disabled="generating"
-          class="px-4 py-2 bg-accentPurple hover:bg-accentPurple/90 text-white text-xs font-bold rounded-xl transition duration-150 flex items-center justify-center space-x-2 mx-auto shadow-md cursor-pointer"
+          class="px-5 py-2.5 bg-purple-700 hover:bg-purple-600 text-white text-xs font-bold rounded-xl transition duration-150 flex items-center justify-center space-x-2 mx-auto shadow-md border border-purple-500/30 cursor-pointer"
         >
-          <font-awesome-icon icon="wand-magic-sparkles" class="mr-1" />
+          <font-awesome-icon icon="wand-magic-sparkles" class="mr-1 text-purple-200" />
           <span>Generate AI Diagnosis</span>
         </button>
       </div>

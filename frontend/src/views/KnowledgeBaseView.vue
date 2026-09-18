@@ -1,25 +1,19 @@
 <template>
   <div class="space-y-8 animate-fadeIn max-w-5xl mx-auto text-textMain">
-    <div>
-      <h2 class="text-3xl font-extrabold text-primaryTeal tracking-tight">Knowledge Base</h2>
-      <p class="text-sm text-gray-400 mt-1">Search through resolved tickets to find proven root causes and applied fixes.</p>
-    </div>
+    <PageHeader
+      title="Knowledge Base"
+      subtitle="Search through resolved tickets to find proven root causes and applied fixes."
+    />
 
     <!-- Search & Filters Container -->
     <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-4">
-      <div class="flex items-center space-x-3 bg-bgMain px-4 py-3 rounded-xl border border-gray-700 focus-within:ring-2 focus-within:ring-primaryTeal/30 focus-within:border-primaryTeal transition-all shadow-inner">
-        <font-awesome-icon icon="magnifying-glass" class="text-primaryTeal text-base" />
-        <input
-          v-model="searchQuery"
-          type="text"
-          placeholder="Type keywords (e.g. radio, fuse, breaker, CAN)..."
-          @input="debouncedSearch"
-          class="w-full bg-transparent border-none focus:outline-none text-sm text-textMain placeholder-gray-500 font-medium"
-        >
-        <button v-if="searchQuery" @click="clearSearch" class="text-xs text-accentYellow hover:underline font-bold transition whitespace-nowrap">
-          <font-awesome-icon icon="xmark" class="mr-1" /> Clear
-        </button>
-      </div>
+      <SearchBar
+        v-model="searchQuery"
+        placeholder="Type keywords (e.g. radio, fuse, breaker, CAN)..."
+        :debounce-ms="300"
+        @search="debouncedSearch"
+        @clear="clearSearch"
+      />
 
       <!-- Advanced filters (Category, Priority, Team Number, Event Code) -->
       <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
@@ -57,48 +51,33 @@
             type="number"
             placeholder="e.g. 254"
             @input="debouncedSearch"
-            class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgCard focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 text-xs text-textMain placeholder-gray-500 font-medium"
+            class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgCard focus:outline-none focus:ring-2 focus:ring-teal-500/20 text-xs text-textMain placeholder-gray-500 font-medium"
           >
         </div>
       </div>
     </div>
 
     <!-- Results -->
-    <div v-if="searching" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primaryTeal border-t-transparent"></div>
-      <p class="text-sm text-gray-400 mt-2">Searching knowledge base...</p>
-    </div>
+    <LoadingSpinner v-if="searching" text="Searching knowledge base..." />
 
     <div v-else class="space-y-4">
       <router-link 
-        v-for="(incident, index) in results" 
+        v-for="(incident) in results" 
         :key="incident._id" 
         :to="`/incidents/${incident._id}`"
-        class="block p-6 rounded-2xl border border-gray-700/60 hover:border-primaryTeal/50 space-y-4 transition-all duration-150 cursor-pointer hover:shadow-xl hover:scale-[1.005]"
-        :class="index % 2 === 0 ? 'bg-bgCard' : 'bg-[#243344]'"
+        class="block p-6 rounded-2xl bg-bgCard border border-gray-700/60 hover:border-teal-500/50 space-y-4 transition-all duration-150 cursor-pointer hover:shadow-xl hover:scale-[1.005]"
       >
         <!-- Header Row -->
         <div class="flex flex-row items-start justify-between gap-3">
           <div class="space-y-1.5 flex-1 min-w-0">
-            <h3 class="font-extrabold text-white text-xl tracking-tight group-hover:text-primaryTeal transition">Team {{ incident.teamNumber }}</h3>
+            <h3 class="font-extrabold text-white text-xl tracking-tight group-hover:text-teal-300 transition">Team {{ incident.teamNumber }}</h3>
 
             <div class="flex flex-wrap items-center gap-2 pt-0.5">
-              <!-- Category Badge -->
-              <span class="inline-flex items-center justify-center text-center px-2.5 py-1 rounded text-xs font-bold text-primaryTeal/85 bg-primaryTeal/5 border border-primaryTeal/10 font-mono uppercase tracking-wider">
-                {{ formatCategory(incident.category) }}
-              </span>
-
-              <!-- Priority Badge -->
-              <span 
-                v-if="incident.priority"
-                class="inline-flex items-center justify-center text-center min-w-[85px] px-2.5 py-1 rounded text-xs font-bold tracking-wider font-mono uppercase"
-                :class="priorityBadgeClass(incident.priority)"
-              >
-                {{ incident.priority }}
-              </span>
+              <CategoryBadge :category="incident.category" />
+              <PriorityBadge v-if="incident.priority" :priority="incident.priority" />
 
               <!-- Event Code Badge -->
-              <span v-if="incident.eventCode" class="inline-flex items-center justify-center text-center px-2.5 py-1 rounded text-xs font-bold text-accentYellow/90 bg-accentYellow/10 border border-accentYellow/20 font-mono uppercase tracking-wider flex-shrink-0">
+              <span v-if="incident.eventCode" class="inline-flex items-center justify-center text-center px-2.5 py-0.5 rounded text-xs font-bold text-accentYellow/90 bg-accentYellow/10 border border-accentYellow/20 font-mono uppercase tracking-wider flex-shrink-0">
                 <font-awesome-icon icon="trophy" class="mr-1 text-[10px]" /> {{ incident.eventCode }}
               </span>
             </div>
@@ -136,9 +115,9 @@
           </div>
 
           <!-- Root Cause Block -->
-          <div class="p-3.5 bg-primaryTeal/10 rounded-xl border border-primaryTeal/25 space-y-1.5">
-            <div class="flex items-center space-x-1.5 text-primaryTeal font-bold uppercase tracking-wider text-[10px]">
-              <font-awesome-icon icon="lightbulb" class="text-primaryTeal text-xs" />
+          <div class="p-3.5 bg-teal-500/10 rounded-xl border border-teal-500/25 space-y-1.5">
+            <div class="flex items-center space-x-1.5 text-teal-300 font-bold uppercase tracking-wider text-[10px]">
+              <font-awesome-icon icon="lightbulb" class="text-teal-300 text-xs" />
               <span>Root Cause</span>
             </div>
             <p class="text-teal-100 leading-relaxed font-medium">{{ incident.rootCause }}</p>
@@ -146,8 +125,8 @@
 
           <!-- Applied Fix Block -->
           <div class="p-3.5 bg-accentGreen/10 rounded-xl border border-accentGreen/30 space-y-1.5">
-            <div class="flex items-center space-x-1.5 text-accentGreen font-bold uppercase tracking-wider text-[10px]">
-              <font-awesome-icon icon="circle-check" class="text-accentGreen text-xs" />
+            <div class="flex items-center space-x-1.5 text-emerald-400 font-bold uppercase tracking-wider text-[10px]">
+              <font-awesome-icon icon="circle-check" class="text-emerald-400 text-xs" />
               <span>Applied Fix</span>
             </div>
             <p class="text-emerald-200 leading-relaxed font-semibold">{{ incident.appliedSolution }}</p>
@@ -155,9 +134,12 @@
         </div>
       </router-link>
 
-      <div v-if="results.length === 0" class="text-center py-12 bg-bgCard rounded-2xl border border-dashed border-gray-800">
-        <p class="text-gray-400 text-sm font-medium">No matching resolved incident records found.</p>
-      </div>
+      <EmptyState
+        v-if="results.length === 0"
+        icon="book-open"
+        title="No Matching Records"
+        description="No matching resolved incident records found. Try adjusting your search keywords or filter criteria."
+      />
     </div>
 
       <!-- Pagination Controls (FEAT-016) -->
@@ -188,7 +170,15 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
-import { CustomSelect } from '../components';
+import {
+  CustomSelect,
+  PageHeader,
+  SearchBar,
+  CategoryBadge,
+  PriorityBadge,
+  LoadingSpinner,
+  EmptyState
+} from '../components';
 import { getApiUrl } from '../config/api';
 
 const authStore = useAuthStore();
@@ -198,7 +188,7 @@ const filters = ref({ category: '', priority: '', teamNumber: null, eventCode: '
 const events = ref([]);
 
 const categoryOptions = [
-  { value: '', label: 'All Categories' },
+  { value: '', label: 'All' },
   { value: 'RADIO_COMMS', label: 'Radio & Comms' },
   { value: 'ROBOTIC_POWER', label: 'Robot Power Path' },
   { value: 'CAN_BUS', label: 'CAN Bus Connection' },
@@ -208,7 +198,7 @@ const categoryOptions = [
 ];
 
 const priorityOptions = [
-  { value: '', label: 'All Priorities' },
+  { value: '', label: 'All' },
   { value: 'LOW', label: 'Low' },
   { value: 'MEDIUM', label: 'Medium' },
   { value: 'HIGH', label: 'High' },
@@ -216,7 +206,7 @@ const priorityOptions = [
 ];
 
 const eventOptions = computed(() => [
-  { value: '', label: 'All Events' },
+  { value: '', label: 'All' },
   ...events.value.map(ev => ({ value: ev.code, label: `${ev.name} (${ev.code})` }))
 ]);
 
@@ -314,21 +304,6 @@ const formatDate = (dateStr) => {
   if (!dateStr) return 'N/A';
   const date = new Date(dateStr);
   return date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
-};
-
-const formatCategory = (cat) => {
-  if (!cat) return 'OTHER';
-  return cat.replace('_', ' ');
-};
-
-const priorityBadgeClass = (priority) => {
-  switch (priority) {
-    case 'LOW': return 'bg-gray-800 text-gray-400 border border-gray-700';
-    case 'MEDIUM': return 'bg-blue-950/40 text-blue-400 border border-blue-900/30';
-    case 'HIGH': return 'bg-accentCoral/10 text-accentCoral border border-accentCoral/20';
-    case 'CRITICAL': return 'bg-red-950/40 text-red-400 border border-red-900/30';
-    default: return 'bg-gray-800 text-gray-400 border border-gray-700';
-  }
 };
 
 onMounted(() => {

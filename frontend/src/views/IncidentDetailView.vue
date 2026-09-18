@@ -1,12 +1,7 @@
 <template>
-  <div v-if="loading" class="text-center py-12">
-    <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primaryTeal border-t-transparent"></div>
-    <p class="text-sm text-gray-500 mt-2">Loading incident details...</p>
-  </div>
+  <LoadingSpinner v-if="loading" text="Loading incident details..." />
 
-  <div v-else-if="error" class="bg-red-50 text-accentCoral p-4 rounded-xl text-center text-sm font-medium">
-    {{ error }}
-  </div>
+  <AlertBanner v-else-if="error" type="error" :message="error" />
 
   <div v-else-if="incident" class="space-y-8 animate-fadeIn max-w-5xl mx-auto">
     <!-- Quick Triage Action Banner on Top of the Incident Detail -->
@@ -22,7 +17,7 @@
         <button
           @click="acceptTriage"
           :disabled="triageLoading !== null"
-          class="flex-1 sm:flex-initial px-4 py-2 bg-accentGreen hover:bg-accentGreen/90 text-white font-bold rounded-xl text-xs shadow transition flex items-center justify-center space-x-1.5 cursor-pointer disabled:opacity-50"
+          class="flex-1 sm:flex-initial px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow transition flex items-center justify-center space-x-1.5 cursor-pointer disabled:opacity-50"
           title="Accept ticket into Open queue"
         >
           <font-awesome-icon v-if="triageLoading === 'accept'" icon="spinner" spin class="text-xs" />
@@ -45,22 +40,16 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between md:items-start gap-4">
       <div class="space-y-2">
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-primaryTeal tracking-tight whitespace-nowrap">Team {{ incident.teamNumber }}</h2>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-teal-400 tracking-tight whitespace-nowrap">Team {{ incident.teamNumber }}</h2>
 
         <div class="flex flex-wrap items-center gap-2 pt-0.5">
-          <span :class="statusBadgeClass" class="inline-flex items-center justify-center text-center min-w-[85px] px-2.5 py-1 rounded text-xs font-bold font-mono tracking-wider uppercase flex-shrink-0">
-            {{ incident.status === 'PENDING_SCREENING' ? 'IN_TRIAGE' : incident.status }}
-          </span>
-          <span :class="priorityBadgeClass" class="inline-flex items-center justify-center text-center min-w-[85px] px-2.5 py-1 rounded text-xs font-bold font-mono tracking-wider uppercase flex-shrink-0">
-            {{ incident.priority }}
-          </span>
-          <span v-if="incident.category" class="inline-flex items-center justify-center text-center px-2.5 py-1 rounded text-xs font-bold text-primaryTeal/85 bg-primaryTeal/5 border border-primaryTeal/10 font-mono uppercase tracking-wider flex-shrink-0">
-            {{ formatCategory(incident.category) }}
-          </span>
+          <StatusBadge :status="incident.status" />
+          <PriorityBadge :priority="incident.priority" />
+          <CategoryBadge :category="incident.category" />
         </div>
 
         <p class="text-sm text-gray-400 font-medium sm:whitespace-nowrap pt-0.5">
-          Event: <span class="font-extrabold text-primaryTeal uppercase">{{ incident.eventCode || 'N/A' }}</span> | Match: <span class="font-bold text-gray-300">{{ incident.matchNumber || 'N/A' }}</span> | Reported: {{ formatTime(incident.createdAt) }}
+          Event: <span class="font-bold text-gray-200 uppercase">{{ incident.eventCode || 'N/A' }}</span> | Match: <span class="font-bold text-gray-200">{{ incident.matchNumber || 'N/A' }}</span> | Reported: <span class="text-gray-400">{{ formatTime(incident.createdAt) }}</span>
         </p>
       </div>
 
@@ -101,7 +90,7 @@
           <button
             v-if="incident.status === 'ASSIGNED' || incident.status === 'IN_PROGRESS' || incident.status === 'WAITING'"
             @click="showResolveModal = true"
-            class="flex-1 sm:flex-initial h-9 sm:w-8 sm:h-8 flex items-center justify-center bg-accentGreen hover:bg-accentGreen/90 text-white rounded-lg transition duration-150 shadow hover:shadow-md cursor-pointer"
+            class="flex-1 sm:flex-initial h-9 sm:w-8 sm:h-8 flex items-center justify-center bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition duration-150 shadow hover:shadow-md cursor-pointer"
             title="Resolve Incident"
           >
             <font-awesome-icon icon="check" class="text-xs" />
@@ -115,14 +104,8 @@
       <!-- Mobile Technical Assignee Header Card (Visible on mobile only, above Issue Description) -->
       <div class="block md:hidden bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-4">
         <div class="flex items-center space-x-2 border-b border-gray-800 pb-2">
-          <h3 class="text-xs font-bold text-primaryTeal uppercase tracking-wider">Technical Assignee</h3>
-          <span
-            v-if="incident.assignedTo"
-            class="inline-flex items-center justify-center text-center min-w-[65px] px-2.5 py-1 rounded text-xs font-bold font-mono uppercase tracking-wider flex-shrink-0"
-            :class="roleBadgeClass(incident.assignedTo?.role)"
-          >
-            {{ incident.assignedTo?.role }}
-          </span>
+          <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">Technical Assignee</h3>
+          <RoleBadge v-if="incident.assignedTo" :role="incident.assignedTo?.role" />
         </div>
         <div v-if="incident.assignedTo" class="flex items-center space-x-3 pt-2">
           <UserAvatar :icon="incident.assignedTo?.avatarIcon" :color="incident.assignedTo?.avatarColor" size="md" :has-bg="true" />
@@ -134,8 +117,8 @@
       <div class="md:col-span-2 space-y-6">
         <!-- Description -->
         <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-3">
-          <h3 class="text-xs font-bold text-primaryTeal uppercase tracking-wider">Issue Description</h3>
-          <p class="text-sm text-gray-200 mt-2 whitespace-pre-wrap">{{ incident.description }}</p>
+          <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">Issue Description</h3>
+          <p class="text-sm text-gray-200 mt-2 whitespace-pre-wrap leading-relaxed">{{ incident.description }}</p>
         </div>
 
         <!-- AI Assistant Suggestions -->
@@ -152,14 +135,8 @@
         <!-- Desktop Assignee Card info -->
         <div class="hidden md:block bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-4">
           <div class="flex items-center space-x-2 border-b border-gray-800 pb-2">
-            <h3 class="text-xs font-bold text-primaryTeal uppercase tracking-wider">Technical Assignee</h3>
-            <span
-              v-if="incident.assignedTo"
-              class="inline-flex items-center justify-center text-center min-w-[65px] px-2.5 py-1 rounded text-xs font-bold font-mono uppercase tracking-wider flex-shrink-0"
-              :class="roleBadgeClass(incident.assignedTo?.role)"
-            >
-              {{ incident.assignedTo?.role }}
-            </span>
+            <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">Technical Assignee</h3>
+            <RoleBadge v-if="incident.assignedTo" :role="incident.assignedTo?.role" />
           </div>
           <div v-if="incident.assignedTo" class="flex items-center space-x-3 pt-2">
             <UserAvatar :icon="incident.assignedTo?.avatarIcon" :color="incident.assignedTo?.avatarColor" size="md" :has-bg="true" />
@@ -170,14 +147,14 @@
 
         <!-- Resolution Details Card -->
         <div v-if="incident.status === 'RESOLVED' || incident.status === 'CLOSED'" class="bg-accentGreen/10 border border-accentGreen/30 p-6 rounded-2xl space-y-4">
-          <h3 class="text-xs font-bold text-accentGreen uppercase tracking-wider border-b border-accentGreen/30 pb-2">Resolution details</h3>
+          <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider border-b border-accentGreen/30 pb-2">Resolution details</h3>
           <div>
-            <h4 class="text-xs font-bold text-accentGreen uppercase tracking-wider mb-1">Root Cause</h4>
-            <p class="text-xs text-textMain leading-relaxed font-medium bg-bgMain p-2.5 rounded border border-accentGreen/30">{{ incident.rootCause }}</p>
+            <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-1">Root Cause</h4>
+            <p class="text-xs text-gray-200 leading-relaxed font-medium bg-bgMain p-2.5 rounded border border-accentGreen/30">{{ incident.rootCause }}</p>
           </div>
           <div>
-            <h4 class="text-xs font-bold text-accentGreen uppercase tracking-wider mb-1">Applied Fix</h4>
-            <p class="text-xs text-textMain leading-relaxed font-medium bg-bgMain p-2.5 rounded border border-accentGreen/30">{{ incident.appliedSolution }}</p>
+            <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-1">Applied Fix</h4>
+            <p class="text-xs text-gray-200 leading-relaxed font-medium bg-bgMain p-2.5 rounded border border-accentGreen/30">{{ incident.appliedSolution }}</p>
           </div>
         </div>
 
@@ -188,14 +165,14 @@
             class="w-full px-6 py-4 flex justify-between items-center text-left hover:bg-gray-800/30 transition cursor-pointer group select-none"
           >
             <div class="flex items-center space-x-2">
-              <h3 class="text-xs font-bold text-primaryTeal uppercase tracking-wider">Audit Timeline</h3>
-              <span v-if="auditLogs.length" class="text-[10px] bg-bgMain text-primaryTeal px-1.5 py-0.5 rounded font-mono font-bold border border-gray-800">
+              <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">Audit Timeline</h3>
+              <span v-if="auditLogs.length" class="text-[10px] bg-bgMain text-gray-300 px-1.5 py-0.5 rounded font-mono font-bold border border-gray-700">
                 {{ auditLogs.length }}
               </span>
             </div>
             <font-awesome-icon 
               icon="chevron-down" 
-              class="w-3.5 h-3.5 text-gray-400 group-hover:text-primaryTeal transition-transform duration-200"
+              class="w-3.5 h-3.5 text-gray-400 group-hover:text-white transition-transform duration-200"
               :class="{ 'rotate-180': isAuditTimelineOpen }"
             />
           </button>
@@ -286,7 +263,20 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
-import { CommentSection, AISuggestionPanel, ResolveIncidentModal, CustomSelect, UserAvatar, ConfirmationModal } from '../components';
+import {
+  CommentSection,
+  AISuggestionPanel,
+  ResolveIncidentModal,
+  CustomSelect,
+  UserAvatar,
+  ConfirmationModal,
+  StatusBadge,
+  PriorityBadge,
+  CategoryBadge,
+  RoleBadge,
+  LoadingSpinner,
+  AlertBanner
+} from '../components';
 import { getApiUrl } from '../config/api';
 
 const router = useRouter();
@@ -383,42 +373,6 @@ const isAuditTimelineOpen = ref(false);
 const isAssignee = computed(() => {
   return incident.value?.assignedTo?._id === authStore.user?._id;
 });
-
-const statusBadgeClass = computed(() => {
-  if (!incident.value) return '';
-  switch (incident.value.status) {
-    case 'PENDING_SCREENING': return 'bg-amber-500/15 text-amber-400 border border-amber-500/30';
-    case 'REJECTED': return 'bg-accentCoral/15 text-accentCoral border border-accentCoral/30';
-    case 'OPEN': return 'bg-primaryTeal/10 text-primaryTeal border border-primaryTeal/25';
-    case 'ASSIGNED': return 'bg-accentYellow/10 text-accentYellow border border-accentYellow/25';
-    case 'IN_PROGRESS': return 'bg-accentPurple/10 text-accentPurple border border-accentPurple/25';
-    case 'WAITING': return 'bg-gray-800 text-gray-400 border border-gray-700';
-    case 'RESOLVED': return 'bg-accentGreen/10 text-accentGreen border border-accentGreen/30';
-    case 'CLOSED': return 'bg-gray-800/80 text-gray-500 border border-gray-700/50';
-    default: return 'bg-gray-800 text-gray-400 border border-gray-700';
-  }
-});
-
-const priorityBadgeClass = computed(() => {
-  if (!incident.value) return '';
-  switch (incident.value.priority) {
-    case 'LOW': return 'bg-gray-800 text-gray-400 border border-gray-700';
-    case 'MEDIUM': return 'bg-blue-950/40 text-blue-400 border border-blue-900/30';
-    case 'HIGH': return 'bg-accentCoral/10 text-accentCoral border border-accentCoral/20';
-    case 'CRITICAL': return 'bg-red-950/40 text-red-400 border border-red-900/30 animate-pulse';
-    default: return 'bg-gray-800 text-gray-400 border border-gray-700';
-  }
-});
-
-const roleBadgeClass = (role) => {
-  const r = (role || '').toUpperCase();
-  switch (r) {
-    case 'ADMIN': return 'bg-accentYellow/15 text-accentYellow border border-accentYellow/25';
-    case 'FTA': return 'bg-accentPurple/15 text-purple-300 border border-accentPurple/25';
-    case 'CSA': return 'bg-primaryTeal/15 text-primaryTeal border border-primaryTeal/25';
-    default: return 'bg-gray-800 text-gray-400 border border-gray-700';
-  }
-};
 
 const fetchDetails = async (isBackground = false) => {
   if (!isBackground) {

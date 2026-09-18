@@ -18,45 +18,45 @@
             <rect x="326" y="334" width="52" height="52" rx="8" fill="#0066B3" stroke="#FFFFFF" stroke-width="5" />
           </svg>
         </div>
-        <h2 class="text-3xl font-extrabold text-primaryTeal tracking-tight">FIRST Assist</h2>
+        <h2 class="text-3xl font-extrabold text-teal-400 tracking-tight">FIRST Assist</h2>
         <p class="text-sm text-gray-400 mt-2">Sign in to coordinate technical support</p>
       </div>
 
       <form @submit.prevent="handleLogin" class="space-y-6">
         <div>
-          <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Email Address</label>
+          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Email Address</label>
           <input
             v-model="email"
             type="email"
             required
             placeholder="csa@first.org"
-            class="w-full px-4 py-3 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal transition duration-200"
+            class="w-full px-4 py-3 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 transition duration-200"
           >
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Password</label>
+          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Password</label>
           <input
             v-model="password"
             type="password"
             required
             placeholder="******"
-            class="w-full px-4 py-3 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal transition duration-200 font-mono"
+            class="w-full px-4 py-3 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 transition duration-200 font-mono"
           >
         </div>
 
-        <div v-if="error" class="bg-red-950/40 border-l-4 border-accentCoral p-4 rounded text-sm text-accentCoral font-medium">
-          {{ error }}
-        </div>
+        <AlertBanner v-if="error" type="error" :message="error" />
 
-        <button
+        <BaseButton
           type="submit"
-          :disabled="loading"
-          class="w-full bg-primaryTeal hover:brightness-95 text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl transition duration-200 disabled:opacity-50 flex items-center justify-center space-x-2 cursor-pointer"
+          :loading="loading"
+          loading-text="Signing in..."
+          variant="primary"
+          size="lg"
+          class="w-full"
         >
-          <span v-if="loading" class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></span>
-          <span>{{ loading ? 'Signing in...' : 'Sign In' }}</span>
-        </button>
+          Sign In
+        </BaseButton>
       </form>
 
       <!-- Divider -->
@@ -76,7 +76,7 @@
           <button 
             type="button" 
             @click="showPublicModal = true"
-            class="text-xs font-bold text-primaryTeal hover:underline inline-flex items-center space-x-1.5 cursor-pointer transition duration-150"
+            class="text-xs font-bold text-teal-400 hover:text-teal-300 hover:underline inline-flex items-center space-x-1.5 cursor-pointer transition duration-150"
           >
             <font-awesome-icon icon="plus-circle" class="text-xs" />
             <span>Request CSA Support</span>
@@ -90,7 +90,7 @@
           <button 
             type="button" 
             @click="showRequestModal = true"
-            class="text-xs font-bold text-primaryTeal hover:underline inline-flex items-center space-x-1.5 cursor-pointer transition duration-150"
+            class="text-xs font-bold text-teal-400 hover:text-teal-300 hover:underline inline-flex items-center space-x-1.5 cursor-pointer transition duration-150"
           >
             <font-awesome-icon icon="id-card" class="text-xs" />
             <span>Request FTA Event Access</span>
@@ -118,7 +118,12 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
-import { AccessRequestModal, PublicReportModal } from '../components';
+import {
+  AccessRequestModal,
+  PublicReportModal,
+  AlertBanner,
+  BaseButton
+} from '../components';
 
 const router = useRouter();
 const authStore = useAuthStore();

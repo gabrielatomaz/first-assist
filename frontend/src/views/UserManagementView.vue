@@ -1,42 +1,43 @@
 <template>
   <div class="space-y-8 text-textMain">
-    <div class="flex justify-between items-center">
-      <div>
-        <h2 class="text-3xl font-extrabold text-primaryTeal tracking-tight">User Management</h2>
-        <p class="text-sm text-gray-400 mt-1">Manage system accounts, access levels, and active volunteers</p>
-      </div>
-      <button
-        @click="showCreateForm = !showCreateForm"
-        :class="showCreateForm ? 'w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 rounded-lg transition cursor-pointer flex-shrink-0' : 'bg-primaryTeal hover:brightness-95 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center space-x-1.5 shadow-sm'"
-        :title="showCreateForm ? 'Cancel' : 'Register'"
-      >
-        <font-awesome-icon :icon="showCreateForm ? 'xmark' : 'user-plus'" class="text-xs" />
-        <span v-if="!showCreateForm">Register</span>
-      </button>
-    </div>
+    <PageHeader
+      title="User Management"
+      subtitle="Manage system accounts, access levels, and active volunteers"
+    >
+      <template #actions>
+        <button
+          @click="showCreateForm = !showCreateForm"
+          :class="showCreateForm ? 'w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 rounded-lg transition cursor-pointer flex-shrink-0' : 'bg-teal-600 hover:bg-teal-500 text-gray-200 font-bold px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center space-x-1.5 shadow-sm'"
+          :title="showCreateForm ? 'Cancel' : 'Register'"
+        >
+          <font-awesome-icon :icon="showCreateForm ? 'xmark' : 'user-plus'" class="text-xs" />
+          <span v-if="!showCreateForm">Register</span>
+        </button>
+      </template>
+    </PageHeader>
 
     <!-- Create User Card -->
     <div v-if="showCreateForm" class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 animate-fadeIn">
-      <h3 class="text-lg font-bold text-primaryTeal mb-4">Register Authorized Volunteer</h3>
+      <h3 class="text-lg font-bold text-teal-400 mb-4">Register Authorized Volunteer</h3>
       <form @submit.prevent="handleCreateUser" class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Name</label>
-            <input v-model="form.name" type="text" required placeholder="e.g. John Doe" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500">
+            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Name</label>
+            <input v-model="form.name" type="text" required placeholder="e.g. John Doe" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Email Address</label>
-            <input v-model="form.email" type="email" required placeholder="csa@first.org" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500">
+            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Email Address</label>
+            <input v-model="form.email" type="email" required placeholder="csa@first.org" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500">
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Temporary Password</label>
-            <input v-model="form.password" type="password" required placeholder="******" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-primaryTeal/20 focus:border-primaryTeal text-sm placeholder-gray-500 font-mono">
+            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Temporary Password</label>
+            <input v-model="form.password" type="password" required placeholder="******" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 text-sm placeholder-gray-500 font-mono">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">System Role</label>
+            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">System Role</label>
             <CustomSelect
               v-model="form.role"
               :options="roleOptions"
@@ -45,14 +46,12 @@
           </div>
         </div>
 
-        <div v-if="createError" class="text-accentCoral text-xs font-medium bg-red-950/40 rounded p-3">
-          {{ createError }}
-        </div>
+        <AlertBanner v-if="createError" type="error" :message="createError" />
 
         <button
           type="submit"
           :disabled="creating"
-          class="bg-primaryTeal hover:brightness-95 text-white font-semibold py-2.5 px-6 rounded-lg text-sm shadow hover:shadow-md transition duration-150 disabled:opacity-50 cursor-pointer"
+          class="bg-teal-600 hover:bg-teal-500 text-gray-200 font-bold py-2.5 px-6 rounded-lg text-sm shadow hover:shadow-md transition duration-150 disabled:opacity-50 cursor-pointer"
         >
           {{ creating ? 'Registering...' : 'Register' }}
         </button>
@@ -61,19 +60,14 @@
 
     <!-- Users Table -->
     <div class="bg-bgCard rounded-2xl shadow overflow-hidden border border-gray-800">
-      <div v-if="loading" class="text-center py-12">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primaryTeal border-t-transparent"></div>
-        <p class="text-gray-400 mt-3 text-sm">Loading users list...</p>
-      </div>
+      <LoadingSpinner v-if="loading" text="Loading users list..." />
 
-      <div v-else-if="error" class="bg-red-950/40 text-accentCoral p-4 text-center text-sm font-medium border border-red-900/30">
-        {{ error }}
-      </div>
+      <AlertBanner v-else-if="error" type="error" :message="error" />
 
       <div v-else class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-bgMain border-b border-gray-800 text-xs font-bold uppercase tracking-wider text-primaryTeal">
+            <tr class="bg-bgMain border-b border-gray-800 text-xs font-bold uppercase tracking-wider text-teal-400">
               <th class="px-6 py-4">Name</th>
               <th class="px-6 py-4">Email</th>
               <th class="px-6 py-4">Role</th>
@@ -87,13 +81,7 @@
               <td class="px-6 py-4 font-semibold text-white">{{ user.name }}</td>
               <td class="px-6 py-4 font-mono text-xs">{{ user.email }}</td>
               <td class="px-6 py-4">
-                <span :class="{
-                  'bg-primaryTeal/15 text-primaryTeal border border-primaryTeal/25': user.role === 'CSA',
-                  'bg-accentYellow/15 text-accentYellow border border-accentYellow/25': user.role === 'FTA',
-                  'bg-accentPurple/15 text-purple-300 border border-accentPurple/25': user.role === 'ADMIN'
-                }" class="px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase font-mono">
-                  {{ user.role }}
-                </span>
+                <RoleBadge :role="user.role" />
               </td>
 
               <!-- Assigned Regionals Column -->
@@ -118,10 +106,23 @@
                       class="w-56 font-bold"
                     />
                   </div>
-                  <div class="flex flex-wrap gap-1.5">
-                    <span v-for="code in user.assignedEventCodes" :key="code" class="inline-flex items-center space-x-1 px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-accentYellow/15 text-accentYellow border border-accentYellow/25">
+
+                  <!-- Selected Badges with Remove (x) Button -->
+                  <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span
+                      v-for="code in (user.assignedEventCodes || [])"
+                      :key="code"
+                      class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded-md text-[11px] font-bold font-mono bg-teal-500/15 text-teal-400 border border-teal-500/25"
+                    >
                       <span>{{ code }}</span>
-                      <button v-if="authStore.isAdmin" @click="removeFTARegional(user, code)" class="text-xs hover:text-red-400 font-bold ml-1 cursor-pointer">✕</button>
+                      <button
+                        v-if="authStore.isAdmin"
+                        @click="removeFTARegionalValue(user, code)"
+                        class="text-teal-300 hover:text-white transition ml-1 text-xs cursor-pointer"
+                        title="Remove regional"
+                      >
+                        ✕
+                      </button>
                     </span>
                     <span v-if="!user.assignedEventCodes || user.assignedEventCodes.length === 0" class="text-[10px] text-gray-400 italic">No regionals assigned</span>
                   </div>
@@ -131,12 +132,7 @@
               </td>
 
               <td class="px-6 py-4">
-                <span :class="{
-                  'bg-accentGreen/10 text-accentGreen border border-accentGreen/30': user.status === 'ACTIVE',
-                  'bg-red-950/40 text-accentCoral border border-red-900/30': user.status === 'INACTIVE'
-                }" class="px-2.5 py-1 rounded-md text-xs font-bold uppercase font-mono tracking-wider">
-                  {{ user.status }}
-                </span>
+                <StatusBadge :status="user.status || 'ACTIVE'" size="sm" />
               </td>
               <td class="px-6 py-4 text-right">
                 <button
@@ -148,7 +144,7 @@
                 >
                   {{ user.status === 'ACTIVE' ? 'Deactivate' : 'Reactivate' }}
                 </button>
-                <span v-else class="text-xs text-gray-500 italic">Protected</span>
+                <span v-else class="text-xs text-gray-400 italic">Protected</span>
               </td>
             </tr>
           </tbody>
@@ -161,7 +157,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
-import { CustomSelect } from '../components';
+import {
+  CustomSelect,
+  PageHeader,
+  RoleBadge,
+  StatusBadge,
+  LoadingSpinner,
+  AlertBanner
+} from '../components';
 import { getApiUrl } from '../config/api';
 
 const authStore = useAuthStore();

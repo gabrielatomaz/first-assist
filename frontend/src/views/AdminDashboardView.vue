@@ -1,30 +1,18 @@
 <template>
   <div class="max-w-5xl mx-auto space-y-8 mt-8 animate-fadeIn text-textMain">
     <!-- Header -->
-    <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 flex justify-between items-center">
-      <div>
-        <h2 class="text-3xl font-extrabold text-primaryTeal tracking-tight">Admin Panel</h2>
-        <p class="text-sm text-gray-400 font-medium mt-1">System accounts, access requests, TBA registrations, and audit logs</p>
-      </div>
-      <div class="w-10 h-10 flex items-center justify-center bg-primaryTeal/15 text-primaryTeal border border-primaryTeal/25 rounded-xl shadow-sm flex-shrink-0">
-        <font-awesome-icon icon="user-shield" class="text-base" />
-      </div>
-    </div>
+    <PageHeader
+      title="Admin Panel"
+      subtitle="System accounts, access requests, TBA registrations, and audit logs"
+      icon="user-shield"
+      :card="true"
+    />
 
     <!-- Health Metrics Grid -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="bg-bgCard p-5 rounded-2xl border border-gray-800 shadow-sm flex flex-col items-center justify-center">
-        <span class="text-3xl font-extrabold text-accentGreen">ONLINE</span>
-        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1">Backend Node API Status</span>
-      </div>
-      <div class="bg-bgCard p-5 rounded-2xl border border-gray-800 shadow-sm flex flex-col items-center justify-center">
-        <span class="text-3xl font-extrabold text-primaryTeal">{{ auditLogs.length }}</span>
-        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1">Total Logged System Actions</span>
-      </div>
-      <div class="bg-bgCard p-5 rounded-2xl border border-gray-800 shadow-sm flex flex-col items-center justify-center">
-        <span class="text-3xl font-extrabold text-accentPurple">CONNECTED</span>
-        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1">MongoDB Atlas Cluster</span>
-      </div>
+      <StatCard title="Backend Node API Status" value="ONLINE" variant="green" />
+      <StatCard title="Total Logged System Actions" :value="auditLogs.length" variant="teal" />
+      <StatCard title="MongoDB Atlas Cluster" value="CONNECTED" variant="purple" />
     </div>
 
     <!-- Styled Reject Access Request Modal -->
@@ -63,7 +51,7 @@
         </div>
         <button 
           @click="approvalModal.open = false" 
-          class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold py-2.5 rounded-xl shadow transition cursor-pointer text-sm"
+          class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl shadow transition cursor-pointer text-sm"
         >
           Done
         </button>
@@ -90,13 +78,13 @@
     <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-4">
       <div class="flex justify-between items-center border-b border-gray-800 pb-3">
         <div class="flex items-center space-x-2">
-          <font-awesome-icon icon="id-card" class="text-primaryTeal" />
-          <h3 class="text-base font-bold text-primaryTeal tracking-tight">Pending FTA Event Access Requests</h3>
-          <span v-if="pendingRequests.length > 0" class="px-2 py-0.5 text-[10px] font-extrabold bg-accentCoral text-slate-950 rounded-full font-mono">
+          <font-awesome-icon icon="id-card" class="text-teal-400" />
+          <h3 class="text-base font-bold text-teal-400 tracking-tight">Pending FTA Event Access Requests</h3>
+          <span v-if="pendingRequests.length > 0" class="px-2 py-0.5 text-[10px] font-extrabold bg-accentCoral text-white rounded-full font-mono">
             {{ pendingRequests.length }}
           </span>
         </div>
-        <button @click="fetchAccessRequests" class="text-xs text-primaryTeal hover:underline font-bold">
+        <button @click="fetchAccessRequests" class="text-xs text-teal-400 hover:text-teal-300 hover:underline font-bold cursor-pointer">
           Refresh List
         </button>
       </div>
@@ -104,13 +92,13 @@
       <div v-if="loadingRequests" class="text-center py-6 text-xs text-gray-400">
         Loading access requests...
       </div>
-      <div v-else-if="pendingRequests.length === 0" class="text-center py-8 text-xs text-gray-500 font-medium italic">
+      <div v-else-if="pendingRequests.length === 0" class="text-center py-8 text-xs text-gray-400 font-medium italic">
         No pending FTA event access requests.
       </div>
       <div v-else class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-bgMain border-b border-gray-800 text-[11px] font-bold uppercase tracking-wider text-primaryTeal">
+            <tr class="bg-bgMain border-b border-gray-800 text-[11px] font-bold uppercase tracking-wider text-teal-400">
               <th class="px-4 py-3">Requester Name</th>
               <th class="px-4 py-3">Email</th>
               <th class="px-4 py-3">Requested Events</th>
@@ -125,7 +113,7 @@
               <td class="px-4 py-3 text-xs text-gray-300 font-mono">{{ req.email }}</td>
               <td class="px-4 py-3">
                 <div class="flex flex-wrap items-center gap-1.5">
-                  <span v-for="code in req.requestedEventCodes" :key="code" class="px-2.5 py-1 rounded-md text-xs font-bold font-mono bg-primaryTeal/15 text-primaryTeal border border-primaryTeal/25">
+                  <span v-for="code in req.requestedEventCodes" :key="code" class="px-2.5 py-1 rounded-md text-xs font-bold font-mono bg-teal-500/15 text-teal-400 border border-teal-500/25">
                     {{ code }}
                   </span>
                   <span v-if="req.tbaEventKey" class="px-2.5 py-1 rounded-md text-xs font-bold font-mono bg-accentPurple/15 text-purple-300 border border-accentPurple/25 flex items-center gap-1.5">
@@ -163,12 +151,12 @@
     <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-4">
       <div class="flex justify-between items-center border-b border-gray-800 pb-3">
         <div>
-          <h3 class="text-base font-bold text-primaryTeal tracking-tight">System User Accounts</h3>
+          <h3 class="text-base font-bold text-teal-400 tracking-tight">System User Accounts</h3>
           <p class="text-xs text-gray-400 mt-0.5">Manage system accounts, access roles (Admin, FTA, CSA), and regional assignments</p>
         </div>
         <button
           @click="showCreateUserForm = !showCreateUserForm"
-          :class="showCreateUserForm ? 'w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 rounded-lg transition cursor-pointer flex-shrink-0' : 'bg-primaryTeal hover:brightness-95 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center space-x-1.5 shadow-sm'"
+          :class="showCreateUserForm ? 'w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 rounded-lg transition cursor-pointer flex-shrink-0' : 'bg-primaryTeal hover:brightness-110 text-gray-200 font-bold px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center space-x-1.5 shadow-sm border border-primaryTeal/30'"
           :title="showCreateUserForm ? 'Cancel' : 'Register'"
         >
           <font-awesome-icon :icon="showCreateUserForm ? 'xmark' : 'user-plus'" class="text-xs" />
@@ -178,26 +166,26 @@
 
       <!-- Create User Form Card -->
       <div v-if="showCreateUserForm" class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 animate-fadeIn">
-        <h4 class="text-xs font-bold text-primaryTeal uppercase tracking-wider mb-4">Register Authorized System User</h4>
+        <h4 class="text-xs font-bold text-teal-400 uppercase tracking-wider mb-4">Register Authorized System User</h4>
         <form @submit.prevent="handleCreateUser" class="space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Name</label>
-              <input v-model="userForm.name" type="text" required placeholder="e.g. John Doe" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-sm">
+              <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Name</label>
+              <input v-model="userForm.name" type="text" required placeholder="e.g. John Doe" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400">
             </div>
             <div>
-              <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Email Address</label>
-              <input v-model="userForm.email" type="email" required placeholder="user@first.org" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-sm">
+              <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Email Address</label>
+              <input v-model="userForm.email" type="email" required placeholder="user@first.org" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400">
             </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">Temporary Password</label>
-              <input v-model="userForm.password" type="password" required placeholder="******" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-sm font-mono">
+              <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Temporary Password</label>
+              <input v-model="userForm.password" type="password" required placeholder="******" class="w-full px-4 py-2.5 rounded-lg border border-gray-700 bg-bgMain text-textMain text-sm font-mono focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400">
             </div>
             <div>
-              <label class="block text-xs font-semibold text-primaryTeal uppercase tracking-wider mb-2">System Role</label>
+              <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">System Role</label>
               <CustomSelect
                 v-model="userForm.role"
                 :options="userRoleOptions"
@@ -214,7 +202,7 @@
             <button
               type="submit"
               :disabled="creatingUser || !userForm.name || !userForm.email || !userForm.password"
-              class="bg-primaryTeal hover:bg-primaryTeal/90 text-white font-semibold py-2.5 px-6 rounded-lg text-sm shadow transition disabled:opacity-40"
+              class="bg-primaryTeal hover:brightness-110 text-gray-200 font-bold py-2.5 px-6 rounded-lg text-sm shadow transition disabled:opacity-40 cursor-pointer border border-primaryTeal/30"
             >
               {{ creatingUser ? 'Registering...' : 'Register' }}
             </button>
@@ -234,7 +222,7 @@
       <div v-else class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-bgMain border-b border-gray-800 text-[11px] font-bold uppercase tracking-wider text-primaryTeal">
+            <tr class="bg-bgMain border-b border-gray-800 text-[11px] font-bold uppercase tracking-wider text-teal-400">
               <th class="px-4 py-3">Name</th>
               <th class="px-4 py-3">Email</th>
               <th class="px-4 py-3">Role</th>
@@ -248,13 +236,7 @@
               <td class="px-4 py-3 font-bold text-white text-xs">{{ u.name }}</td>
               <td class="px-4 py-3 text-xs text-gray-300 font-mono">{{ u.email }}</td>
               <td class="px-4 py-3">
-                <span :class="{
-                  'bg-primaryTeal/15 text-primaryTeal border border-primaryTeal/25': u.role === 'CSA',
-                  'bg-accentYellow/15 text-accentYellow border border-accentYellow/25': u.role === 'FTA',
-                  'bg-accentPurple/15 text-purple-300 border border-accentPurple/25': u.role === 'ADMIN'
-                }" class="px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase font-mono">
-                  {{ u.role }}
-                </span>
+                <RoleBadge :role="u.role" />
               </td>
 
               <!-- Assigned Regionals Column -->
@@ -318,47 +300,47 @@
       <!-- Register FRC Event Card -->
       <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-5">
         <div class="border-b border-gray-800 pb-3 flex justify-between items-center">
-          <h3 class="text-base font-bold text-primaryTeal">Register FRC Event</h3>
+          <h3 class="text-base font-bold text-teal-400">Register FRC Event</h3>
           <span class="px-2.5 py-1 rounded-md text-xs font-bold font-mono bg-accentPurple/15 text-purple-300 border border-accentPurple/25">TBA 1-Click Import</span>
         </div>
 
         <!-- TBA Event Import Section -->
         <div class="p-4 bg-bgMain rounded-xl border border-gray-800 space-y-3">
-          <label class="block text-xs font-bold text-primaryTeal uppercase">Import Event & Roster from TBA</label>
+          <label class="block text-xs font-bold text-teal-400 uppercase">Import Event & Roster from TBA</label>
           <div class="flex space-x-2">
-            <input v-model="tbaEventKey" type="text" placeholder="Enter TBA Event Key (e.g. 2026brsp)" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgCard text-textMain text-xs font-mono">
+            <input v-model="tbaEventKey" type="text" placeholder="Enter TBA Event Key (e.g. 2026brsp)" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgCard text-textMain text-xs font-mono focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400">
             <button 
               @click="handleImportTBAEvent" 
               :disabled="importingTBAEvent || !tbaEventKey" 
               title="Import Event and Attending Teams from TBA"
-              class="bg-primaryTeal hover:bg-primaryTeal/90 text-white font-extrabold px-3.5 py-2 rounded-lg text-xs transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center shadow-sm whitespace-nowrap flex-shrink-0"
+              class="bg-primaryTeal hover:brightness-110 text-gray-200 font-bold px-3.5 py-2 rounded-lg text-xs transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center shadow-sm whitespace-nowrap flex-shrink-0 border border-primaryTeal/30"
             >
               <font-awesome-icon :icon="importingTBAEvent ? 'spinner' : 'download'" :spin="importingTBAEvent" class="text-xs" />
             </button>
           </div>
         </div>
 
-        <div class="text-center text-[10px] text-gray-500 font-bold uppercase">— OR Manual Creation —</div>
+        <div class="text-center text-[10px] text-gray-400 font-bold uppercase">— OR Manual Creation —</div>
 
         <form @submit.prevent="handleCreateEvent" class="space-y-3">
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Event Key/Code</label>
-            <input v-model="eventForm.code" type="text" required placeholder="e.g. 2026brsp" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs">
+            <input v-model="eventForm.code" type="text" required placeholder="e.g. 2026brsp" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400">
           </div>
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Event Name</label>
-            <input v-model="eventForm.name" type="text" required placeholder="e.g. Brazil Regional" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs">
+            <input v-model="eventForm.name" type="text" required placeholder="e.g. Brazil Regional" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400">
           </div>
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Location</label>
-            <input v-model="eventForm.location" type="text" placeholder="e.g. Sao Paulo, Brazil" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs">
+            <input v-model="eventForm.location" type="text" placeholder="e.g. Sao Paulo, Brazil" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400">
           </div>
           <div class="flex items-center space-x-2">
-            <input v-model="eventForm.isActive" type="checkbox" id="isActiveEvent" class="rounded text-primaryTeal focus:ring-primaryTeal">
+            <input v-model="eventForm.isActive" type="checkbox" id="isActiveEvent" class="rounded text-teal-400 focus:ring-teal-500/20">
             <label for="isActiveEvent" class="text-xs text-gray-300 font-medium">Set as Active Competition Event</label>
           </div>
 
-          <button type="submit" :disabled="creatingEvent || !eventForm.code || !eventForm.name" class="w-full bg-primaryTeal hover:bg-primaryTeal/90 text-white font-bold py-2.5 rounded-lg shadow text-xs transition disabled:opacity-40 disabled:cursor-not-allowed">
+          <button type="submit" :disabled="creatingEvent || !eventForm.code || !eventForm.name" class="w-full bg-primaryTeal hover:brightness-110 text-gray-200 font-bold py-2.5 rounded-lg shadow text-xs transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer border border-primaryTeal/30">
             {{ creatingEvent ? 'Creating...' : 'Create' }}
           </button>
         </form>
@@ -367,15 +349,15 @@
       <!-- Register FRC Team Card -->
       <div class="bg-bgCard p-6 rounded-2xl shadow border border-gray-800 space-y-5">
         <div class="border-b border-gray-800 pb-3 flex justify-between items-center">
-          <h3 class="text-base font-bold text-primaryTeal">Register FRC Team</h3>
-          <span class="px-2.5 py-1 rounded-md text-xs font-bold font-mono bg-primaryTeal/15 text-primaryTeal border border-primaryTeal/25">TBA API Enabled</span>
+          <h3 class="text-base font-bold text-teal-400">Register FRC Team</h3>
+          <span class="px-2.5 py-1 rounded-md text-xs font-bold font-mono bg-teal-500/15 text-teal-400 border border-teal-500/25">TBA API Enabled</span>
         </div>
 
         <form @submit.prevent="handleRegisterTeam" class="space-y-3">
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Team Number</label>
             <div class="flex space-x-2">
-              <input v-model.number="teamForm.number" type="number" required placeholder="e.g. 254" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs">
+              <input v-model.number="teamForm.number" type="number" required placeholder="e.g. 254" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400">
               <button type="button" @click="fetchFromTBA" :disabled="fetchingTBA || !teamForm.number" class="bg-accentPurple/15 hover:bg-accentPurple/25 text-purple-300 border border-accentPurple/25 disabled:opacity-40 disabled:cursor-not-allowed font-bold px-3.5 py-2 rounded-lg text-xs whitespace-nowrap transition cursor-pointer flex items-center">
                 <font-awesome-icon icon="bolt" class="mr-1 text-accentYellow text-xs" /> {{ fetchingTBA ? 'Syncing...' : 'Lookup TBA' }}
               </button>
@@ -384,16 +366,16 @@
 
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Team Name / Nickname</label>
-            <input v-model="teamForm.name" type="text" required placeholder="e.g. The Cheesy Poofs" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs">
+            <input v-model="teamForm.name" type="text" required placeholder="e.g. The Cheesy Poofs" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400">
           </div>
 
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Rookie Year</label>
-            <input v-model.number="teamForm.rookieYear" type="number" placeholder="e.g. 1999" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs">
+            <input v-model.number="teamForm.rookieYear" type="number" placeholder="e.g. 1999" class="w-full px-3 py-2 rounded-lg border border-gray-700 bg-bgMain text-textMain text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400">
           </div>
 
           <div class="pt-6">
-            <button type="submit" :disabled="registeringTeam || !teamForm.number || !teamForm.name" class="w-full bg-primaryTeal hover:bg-primaryTeal/90 text-white font-bold py-2.5 rounded-lg shadow text-xs transition disabled:opacity-40 disabled:cursor-not-allowed">
+            <button type="submit" :disabled="registeringTeam || !teamForm.number || !teamForm.name" class="w-full bg-primaryTeal hover:brightness-110 text-gray-200 font-bold py-2.5 rounded-lg shadow text-xs transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer border border-primaryTeal/30">
               {{ registeringTeam ? 'Saving...' : 'Save' }}
             </button>
           </div>
@@ -465,7 +447,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
-import { CustomSelect, ConfirmationModal } from '../components';
+import {
+  CustomSelect,
+  ConfirmationModal,
+  PageHeader,
+  StatCard,
+  RoleBadge
+} from '../components';
 import { getApiUrl } from '../config/api';
 
 const authStore = useAuthStore();
@@ -485,7 +473,7 @@ const loadingRequests = ref(true);
 const processingReq = ref(null);
 
 const actionOptions = [
-  { value: 'ALL', label: 'All Actions' },
+  { value: 'ALL', label: 'All' },
   { value: 'TBA_EVENT_IMPORT', label: 'TBA Event Import' },
   { value: 'EVENT_CREATION', label: 'Event Creation' },
   { value: 'EVENT_ACTIVATION', label: 'Event Activation' },

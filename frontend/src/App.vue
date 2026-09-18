@@ -15,7 +15,7 @@
               FIRST Assist
             </router-link>
             <!-- Active Event Context Indicator (Epic 11) -->
-            <span v-if="activeEvent" class="block text-[10px] text-primaryTeal font-bold uppercase font-mono tracking-wider mt-0.5">
+            <span v-if="activeEvent" class="block text-[10px] text-teal-400 font-bold uppercase font-mono tracking-wider mt-0.5">
               <span class="md:hidden"><font-awesome-icon icon="trophy" class="mr-1.5 text-accentYellow" />{{ activeEvent.code }}</span>
               <span class="hidden md:inline"><font-awesome-icon icon="trophy" class="mr-1.5 text-accentYellow" />{{ activeEvent.name }} ({{ activeEvent.code }})</span>
             </span>
@@ -140,7 +140,7 @@ const roleTextColor = computed(() => {
   const r = (authStore.user?.role || '').toUpperCase();
   if (r === 'ADMIN') return 'text-accentYellow';
   if (r === 'FTA') return 'text-purple-300';
-  return 'text-primaryTeal'; // CSA
+  return 'text-teal-400'; // CSA
 });
 
 const handleLogout = () => {

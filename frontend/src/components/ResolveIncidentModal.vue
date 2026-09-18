@@ -4,7 +4,7 @@
       <div class="flex justify-between items-start border-b border-gray-700 pb-4">
         <div>
           <h3 class="text-xl font-extrabold text-white tracking-tight flex items-center space-x-2">
-            <font-awesome-icon icon="circle-check" class="text-primaryTeal" />
+            <font-awesome-icon icon="circle-check" class="text-teal-400" />
             <span>Resolve Incident</span>
           </h3>
           <p class="text-xs text-gray-300 mt-1">Document the technical root cause and applied fix to close this ticket.</p>
@@ -23,9 +23,9 @@
         <button
           type="button"
           @click="applyAISuggestion"
-          class="px-3 py-1 bg-accentPurple hover:bg-accentPurple/90 text-white text-xs font-bold rounded-lg transition duration-150 shadow flex items-center space-x-1"
+          class="px-3 py-1 bg-purple-700 hover:bg-purple-600 text-white text-xs font-bold rounded-lg transition duration-150 shadow border border-purple-500/30 flex items-center space-x-1 cursor-pointer"
         >
-          <font-awesome-icon icon="wand-magic-sparkles" class="mr-1" />
+          <font-awesome-icon icon="wand-magic-sparkles" class="mr-1 text-purple-200" />
           <span>Use AI Suggestion</span>
         </button>
       </div>
@@ -33,14 +33,14 @@
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <!-- Root Cause Field -->
         <div>
-          <label class="block text-xs font-bold text-primaryTeal uppercase tracking-wider mb-2">Root Cause</label>
+          <label class="block text-xs font-bold text-teal-400 uppercase tracking-wider mb-2">Root Cause</label>
           <div class="relative">
             <textarea
               v-model="form.rootCause"
               required
               rows="3"
               placeholder="e.g. POE power cable loose terminal"
-              class="w-full px-4 py-2.5 pb-10 rounded-xl bg-bgMain border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primaryTeal/40 focus:border-primaryTeal text-sm font-medium resize-none"
+              class="w-full px-4 py-2.5 pb-10 rounded-xl bg-bgMain border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-400 text-sm font-medium resize-none"
             ></textarea>
             <button
               type="button"
@@ -48,7 +48,7 @@
               :disabled="transcribingField === 'rootCause'"
               :title="transcribingField === 'rootCause' ? 'Transcribing audio...' : (activeRecordingField === 'rootCause' ? 'Stop recording' : 'Record audio')"
               :class="activeRecordingField === 'rootCause' ? 'bg-red-600 text-white animate-pulse border-red-500' : 'bg-bgCard text-gray-400 hover:text-white border-gray-600 hover:border-gray-500'"
-              class="absolute right-3 bottom-3 p-1.5 rounded-lg border text-xs font-semibold flex items-center justify-center transition duration-150 shadow"
+              class="absolute right-3 bottom-3 p-1.5 rounded-lg border text-xs font-semibold flex items-center justify-center transition duration-150 shadow cursor-pointer"
             >
               <font-awesome-icon v-if="transcribingField === 'rootCause'" icon="spinner" class="animate-spin text-xs" />
               <font-awesome-icon v-else icon="microphone" class="text-xs" />
@@ -58,14 +58,14 @@
 
         <!-- Applied Solution Field -->
         <div>
-          <label class="block text-xs font-bold text-primaryTeal uppercase tracking-wider mb-2">Applied Solution</label>
+          <label class="block text-xs font-bold text-teal-400 uppercase tracking-wider mb-2">Applied Solution</label>
           <div class="relative">
             <textarea
               v-model="form.appliedSolution"
               required
               rows="3"
               placeholder="e.g. Secured ethernet cable connector, added zip-tie support"
-              class="w-full px-4 py-2.5 pb-10 rounded-xl bg-bgMain border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primaryTeal/40 focus:border-primaryTeal text-sm font-medium resize-none"
+              class="w-full px-4 py-2.5 pb-10 rounded-xl bg-bgMain border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-400 text-sm font-medium resize-none"
             ></textarea>
             <button
               type="button"
@@ -94,7 +94,7 @@
           <button
             type="submit"
             :disabled="submitting"
-            class="bg-accentGreen hover:bg-accentGreen/90 text-white font-bold px-5 py-2 rounded-xl text-xs shadow-md transition duration-150 disabled:opacity-50 flex items-center space-x-1 cursor-pointer"
+            class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2 rounded-xl text-xs shadow-md transition duration-150 disabled:opacity-50 flex items-center space-x-1 cursor-pointer"
           >
             <font-awesome-icon v-if="submitting" icon="spinner" class="animate-spin mr-1" />
             <span>{{ submitting ? 'Saving...' : 'Resolve' }}</span>
