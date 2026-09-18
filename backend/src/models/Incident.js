@@ -7,7 +7,19 @@ const incidentSchema = new mongoose.Schema({
   description: { type: String, required: true },
   category: {
     type: String,
-    enum: ['RADIO_COMMS', 'ROBOTIC_POWER', 'CAN_BUS', 'MECHANICAL', 'CODE_EXCEPTION', 'OTHER'],
+    enum: [
+      'RADIO_COMMS',
+      'ROBOTIC_POWER',
+      'CAN_BUS',
+      'MOTOR_CONTROLLER',
+      'PNEUMATICS',
+      'VISION_COPROCESSOR',
+      'DRIVER_STATION',
+      'CODE_EXCEPTION',
+      'MECHANICAL',
+      'FIELD_NETWORK',
+      'OTHER'
+    ],
     default: 'OTHER'
   },
   priority: {

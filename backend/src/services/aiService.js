@@ -157,7 +157,7 @@ Transcribe the spoken audio into clear, technical English prose.
 In addition, extract any competition entities mentioned in the voice report:
 1. teamNumber: The numeric team number (e.g., 254, 1156, 1678), or null if not spoken.
 2. matchNumber: The match identifier (e.g., "Q14", "Qualification 14", "Practice 2", "Playoff 4"), or null if not spoken.
-3. category: The best-matching FRC incident category strictly from this list: ["RADIO_COMMS", "ROBOTIC_POWER", "CAN_BUS", "MECHANICAL", "CODE_EXCEPTION", "OTHER"], or null if undetermined.
+3. category: The best-matching FRC incident category strictly from this list: ["RADIO_COMMS", "ROBOTIC_POWER", "CAN_BUS", "MOTOR_CONTROLLER", "PNEUMATICS", "VISION_COPROCESSOR", "DRIVER_STATION", "CODE_EXCEPTION", "MECHANICAL", "FIELD_NETWORK", "OTHER"], or null if undetermined.
 4. priority: The urgency level strictly from this list: ["LOW", "MEDIUM", "HIGH", "CRITICAL"], or null if not mentioned.
 
 Return strictly a valid JSON object matching this schema:

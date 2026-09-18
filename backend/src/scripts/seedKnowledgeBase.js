@@ -36,7 +36,7 @@ const sampleFRCIncidents = [
     teamNumber: 7033,
     matchNumber: 'Q05',
     eventCode: 'brba',
-    category: 'RADIO_COMMS',
+    category: 'VISION_COPROCESSOR',
     priority: 'MEDIUM',
     status: 'RESOLVED',
     description: 'Video feed latency exceeded 400ms during Autonomous mode. Field Network Monitor indicated team exceeded 7Mbps bandwidth cap.',
@@ -140,7 +140,7 @@ const sampleFRCIncidents = [
     teamNumber: 9046,
     matchNumber: 'Q11',
     eventCode: 'brba',
-    category: 'MECHANICAL',
+    category: 'PNEUMATICS',
     priority: 'MEDIUM',
     status: 'RESOLVED',
     description: 'Pneumatic intake arm failed to actuate during autonomous mode. Working pressure gauge dropping from 60 PSI to 20 PSI in 30 seconds.',
@@ -179,7 +179,7 @@ const sampleFRCIncidents = [
     teamNumber: 9110,
     matchNumber: 'Q03',
     eventCode: 'brba',
-    category: 'OTHER',
+    category: 'DRIVER_STATION',
     priority: 'MEDIUM',
     status: 'RESOLVED',
     description: 'Joysticks completely unresponsive when match started, though DS showed green link.',
@@ -187,6 +187,32 @@ const sampleFRCIncidents = [
     rootCause: 'Plugging in USB web camera before Xbox controller shifted controller index assignments in Windows Device Manager.',
     appliedSolution: 'Reordered USB controllers in FRC Driver Station setup tab (Index 0 set to Xbox Controller), locked slot order, and re-tested bindings.',
     resolvedAt: new Date(Date.now() - 3600000 * 24 * 4)
+  },
+  {
+    teamNumber: 1156,
+    matchNumber: 'Q40',
+    eventCode: 'brba',
+    category: 'MOTOR_CONTROLLER',
+    priority: 'HIGH',
+    status: 'RESOLVED',
+    description: 'Left shooter flywheel oscillating violently and cutting out under high RPM target velocity setpoint.',
+    diagnosis: 'Connected Phoenix Tuner X to Talon FX motor controller. Found motor firmware running legacy v23.0 while code was built against Phoenix v24.2 Pro API.',
+    rootCause: 'Firmware version incompatibility caused velocity closed-loop PID controller calculation overflow in Talon FX onboard firmware.',
+    appliedSolution: 'Flashed latest Talon FX v24.2 firmware via Phoenix Tuner X, re-tuned kP and kF feedforward gains, and validated stable 5500 RPM velocity hold.',
+    resolvedAt: new Date(Date.now() - 3600000 * 24 * 1)
+  },
+  {
+    teamNumber: 1860,
+    matchNumber: 'Q52',
+    eventCode: 'brba',
+    category: 'FIELD_NETWORK',
+    priority: 'CRITICAL',
+    status: 'RESOLVED',
+    description: 'Driver Station dropped FMS connection upon match enable on Red 2 driver station shelf.',
+    diagnosis: 'Checked Ethernet cable connecting DS laptop to field team shelf switch. RJ45 clip was sheared off and cable connection was intermittent.',
+    rootCause: 'Damaged RJ45 Ethernet patch cable dislodged from Driver Station shelf switch port when drive team bumped shelf during enable.',
+    appliedSolution: 'Replaced shelf patch cable with heavy-duty snagless Cat6 cable, tested link integrity with field network diagnostic tool, and confirmed stable FMS connection.',
+    resolvedAt: new Date(Date.now() - 3600000 * 24 * 2)
   }
 ];
 
