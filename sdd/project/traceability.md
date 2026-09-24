@@ -21,3 +21,9 @@ This matrix maps functional requirements to features, architectural files, API e
 | **FR-013** | FEAT-006 | AI Troubleshooting | `AISuggestionPanel.vue` | `incidentController.js`| `GET /api/incidents/:id/ai-suggestions` | `AISuggestion.js` | `ai.test.js` | PARTIALLY IMPLEMENTED |
 | **FR-014** | FEAT-007 | Knowledge Base | `KnowledgeBaseView.vue` | `incidentController.js`| `GET /api/incidents/search`| `Incident.js` | `kb.test.js` | NOT IMPLEMENTED |
 | **FR-023** | FEAT-023 | RAG AI Troubleshooting | `AISuggestionPanel.vue` | `aiService.js`, `incidentController.js` | `POST /api/incidents/:id/ai-suggestions` | `AISuggestion.js`, `Incident.js` | `rag.test.js` | SPECIFIED |
+| **FR-024** | FEAT-024 | FTA Auto-Login Cache | `LoginView.vue` | `accessRequestController.js` | `POST /api/access-requests/claim-session` | `AccessRequest.js`, `User.js` | `auto-login.test.js` | SPECIFIED |
+| **FR-025** | FEAT-025 | Dashboard Team Search | `DashboardView.vue`, `SearchBar.vue` | `incidentController.js` | `GET /api/incidents?teamNumber=N` | `Incident.js` | `dashboard-search.test.js` | SPECIFIED |
+| **FR-026** | FEAT-026 | FTA/CSA First-Use Tutorial | `OnboardingTutorialModal.vue` | `userController.js` | `PATCH /api/users/profile` | `User.js` | `tutorial.test.js` | SPECIFIED |
+| **FR-027** | FEAT-027 | Portuguese Localization & Audio | `App.vue`, `useSpeechRecognition.js` | `aiService.js` | `POST /api/incidents/voice` | `Incident.js` | `i18n.test.js` | SPECIFIED |
+| **FR-028** | FEAT-028 | App Security Hardening | `main.js`, `authStore.js` | `server.js`, `authMiddleware.js` | All Endpoints (`helmet`, `rate-limit`) | All Models | `security.test.js` | SPECIFIED |
+| **FR-029** | FEAT-029 | Dashboard Infinite Scroll | `DashboardView.vue` | `incidentController.js` | `GET /api/incidents?page=N&limit=10` | `Incident.js` | `infinite-scroll.test.js` | SPECIFIED |

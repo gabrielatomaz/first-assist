@@ -20,7 +20,7 @@
           icon="user-plus"
           @click="showCreateForm = true"
           title="Register"
-          class="w-8 h-8 sm:w-auto px-0 sm:px-3 flex-shrink-0"
+          class="w-10 h-10 sm:w-auto px-0 sm:px-3 flex-shrink-0"
         >
           <span class="hidden sm:inline">Register</span>
         </BaseButton>

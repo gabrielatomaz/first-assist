@@ -93,8 +93,8 @@
           <div class="flex items-center space-x-2 flex-shrink-0">
             <BaseButton
               v-if="authStore.user"
-              @click.stop.prevent="rollbackIncidentStatus(incident)"
-              :disabled="rollingBackId === incident._id"
+              @click.stop.prevent="reopenTarget = incident; showReopenModal = true"
+              :disabled="rollingBackId === incident._id || showReopenModal"
               :loading="rollingBackId === incident._id"
               variant="secondary"
               size="icon-sm"
@@ -104,33 +104,63 @@
           </div>
         </div>
 
-        <!-- 3 Distinct Content Blocks -->
+        <!-- 3 Distinct Content Blocks with Fixed Equal Heights & Read More Modal -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs pt-1">
           <!-- Issue Description Block -->
-          <div class="p-3.5 bg-bgMain rounded-xl border border-gray-800/80 space-y-1.5">
-            <div class="flex items-center space-x-1.5 text-gray-400 font-bold uppercase tracking-wider text-[10px]">
-              <font-awesome-icon icon="circle-info" class="text-gray-400 text-xs" />
-              <span>Issue Description</span>
+          <div class="p-3.5 bg-bgMain rounded-xl border border-gray-800/80 flex flex-col justify-between h-36">
+            <div class="space-y-1.5 overflow-hidden">
+              <div class="flex items-center space-x-1.5 text-gray-400 font-bold uppercase tracking-wider text-[10px]">
+                <font-awesome-icon icon="circle-info" class="text-gray-400 text-xs" />
+                <span>Issue Description</span>
+              </div>
+              <p class="text-gray-200 leading-relaxed font-medium line-clamp-3 text-xs">{{ incident.description }}</p>
             </div>
-            <p class="text-gray-200 leading-relaxed font-medium whitespace-pre-wrap">{{ incident.description }}</p>
+            <div v-if="incident.description && incident.description.length > 140" class="pt-1">
+              <button 
+                @click.stop.prevent="openTextModal(`Team ${incident.teamNumber} — Issue Description`, incident.description)"
+                class="text-xs sm:text-[11px] font-bold text-teal-400 hover:text-teal-300 hover:underline inline-flex items-center gap-1.5 px-2.5 py-1 sm:p-0 bg-teal-500/15 sm:bg-transparent border border-teal-500/30 sm:border-0 rounded-lg sm:rounded-none cursor-pointer flex-shrink-0 transition shadow-sm sm:shadow-none"
+              >
+                Read more <font-awesome-icon icon="arrow-right" class="text-[10px] sm:text-[9px]" />
+              </button>
+            </div>
           </div>
 
           <!-- Root Cause Block -->
-          <div class="p-3.5 bg-teal-500/10 rounded-xl border border-teal-500/25 space-y-1.5">
-            <div class="flex items-center space-x-1.5 text-teal-300 font-bold uppercase tracking-wider text-[10px]">
-              <font-awesome-icon icon="lightbulb" class="text-teal-300 text-xs" />
-              <span>Root Cause</span>
+          <div class="p-3.5 bg-teal-500/10 rounded-xl border border-teal-500/25 flex flex-col justify-between h-36">
+            <div class="space-y-1.5 overflow-hidden">
+              <div class="flex items-center space-x-1.5 text-teal-300 font-bold uppercase tracking-wider text-[10px]">
+                <font-awesome-icon icon="lightbulb" class="text-teal-300 text-xs" />
+                <span>Root Cause</span>
+              </div>
+              <p class="text-teal-100 leading-relaxed font-medium line-clamp-3 text-xs">{{ incident.rootCause || 'N/A' }}</p>
             </div>
-            <p class="text-teal-100 leading-relaxed font-medium">{{ incident.rootCause }}</p>
+            <div v-if="incident.rootCause && incident.rootCause.length > 140" class="pt-1">
+              <button 
+                @click.stop.prevent="openTextModal(`Team ${incident.teamNumber} — Root Cause`, incident.rootCause)"
+                class="text-xs sm:text-[11px] font-bold text-teal-300 hover:text-teal-200 hover:underline inline-flex items-center gap-1.5 px-2.5 py-1 sm:p-0 bg-teal-500/20 sm:bg-transparent border border-teal-500/40 sm:border-0 rounded-lg sm:rounded-none cursor-pointer flex-shrink-0 transition shadow-sm sm:shadow-none"
+              >
+                Read more <font-awesome-icon icon="arrow-right" class="text-[10px] sm:text-[9px]" />
+              </button>
+            </div>
           </div>
 
           <!-- Applied Fix Block -->
-          <div class="p-3.5 bg-accentGreen/10 rounded-xl border border-accentGreen/30 space-y-1.5">
-            <div class="flex items-center space-x-1.5 text-emerald-400 font-bold uppercase tracking-wider text-[10px]">
-              <font-awesome-icon icon="circle-check" class="text-emerald-400 text-xs" />
-              <span>Applied Fix</span>
+          <div class="p-3.5 bg-accentGreen/10 rounded-xl border border-accentGreen/30 flex flex-col justify-between h-36">
+            <div class="space-y-1.5 overflow-hidden">
+              <div class="flex items-center space-x-1.5 text-emerald-400 font-bold uppercase tracking-wider text-[10px]">
+                <font-awesome-icon icon="circle-check" class="text-emerald-400 text-xs" />
+                <span>Applied Fix</span>
+              </div>
+              <p class="text-emerald-200 leading-relaxed font-semibold line-clamp-3 text-xs">{{ incident.appliedSolution || 'N/A' }}</p>
             </div>
-            <p class="text-emerald-200 leading-relaxed font-semibold">{{ incident.appliedSolution }}</p>
+            <div v-if="incident.appliedSolution && incident.appliedSolution.length > 140" class="pt-1">
+              <button 
+                @click.stop.prevent="openTextModal(`Team ${incident.teamNumber} — Applied Fix`, incident.appliedSolution)"
+                class="text-xs sm:text-[11px] font-bold text-emerald-400 hover:text-emerald-300 hover:underline inline-flex items-center gap-1.5 px-2.5 py-1 sm:p-0 bg-emerald-500/20 sm:bg-transparent border border-emerald-500/40 sm:border-0 rounded-lg sm:rounded-none cursor-pointer flex-shrink-0 transition shadow-sm sm:shadow-none"
+              >
+                Read more <font-awesome-icon icon="arrow-right" class="text-[10px] sm:text-[9px]" />
+              </button>
+            </div>
           </div>
         </div>
       </router-link>
@@ -166,6 +196,34 @@
         </div>
       </div>
     </div>
+
+    <ConfirmationModal
+      v-model="showReopenModal"
+      title="Re-open Incident?"
+      message="This will change the incident status back to In Progress and return it to the active dashboard."
+      icon="rotate-left"
+      variant="warning"
+      confirm-text="Re-open"
+      confirm-icon="rotate-left"
+      :loading="rollingBackId !== null"
+      loading-text="Re-opening..."
+      @confirm="rollbackIncidentStatus"
+      @cancel="showReopenModal = false; reopenTarget = null"
+    />
+    <!-- KB Text Detail Modal -->
+    <div 
+      v-if="showTextModal" 
+      class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn"
+      @click.self="showTextModal = false"
+    >
+      <div class="bg-bgCard border border-gray-800 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl animate-fadeIn">
+        <div class="flex items-center justify-between">
+          <h4 class="text-base font-extrabold text-white tracking-tight">{{ textModalTitle }}</h4>
+          <BaseButton variant="ghost" size="icon-xs" icon="xmark" @click="showTextModal = false" />
+        </div>
+        <p class="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap font-medium">{{ textModalContent }}</p>
+      </div>
+    </div>
 </template>
 
 <script setup>
@@ -175,6 +233,7 @@ import {
   BaseButton,
   BaseCard,
   BaseInput,
+  ConfirmationModal,
   CustomSelect,
   PageHeader,
   SearchBar,
@@ -273,8 +332,22 @@ const executeSearch = async (page = 1) => {
 };
 
 const rollingBackId = ref(null);
+const showReopenModal = ref(false);
+const reopenTarget = ref(null);
 
-const rollbackIncidentStatus = async (incident) => {
+const showTextModal = ref(false);
+const textModalTitle = ref('');
+const textModalContent = ref('');
+
+const openTextModal = (title, content) => {
+  textModalTitle.value = title;
+  textModalContent.value = content;
+  showTextModal.value = true;
+};
+
+const rollbackIncidentStatus = async () => {
+  if (!reopenTarget.value) return;
+  const incident = reopenTarget.value;
   try {
     rollingBackId.value = incident._id;
     const response = await fetch(getApiUrl(`/incidents/${incident._id}/status`), {
@@ -289,6 +362,8 @@ const rollbackIncidentStatus = async (incident) => {
     if (!response.ok) throw new Error(data.error || 'Failed to re-open ticket status');
     results.value = results.value.filter(i => i._id !== incident._id);
     totalCount.value = Math.max(0, totalCount.value - 1);
+    showReopenModal.value = false;
+    reopenTarget.value = null;
   } catch (err) {
     console.error('Failed to re-open ticket:', err);
     alert(err.message);

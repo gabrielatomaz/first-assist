@@ -16,8 +16,8 @@ export const incidentService = {
         query.status = filters.status;
       }
     } else {
-      // Active board view: exclude PENDING_SCREENING tickets (which belong to In Triage queue)
-      query.status = { $ne: 'PENDING_SCREENING' };
+      // Active board view: exclude PENDING_SCREENING (In Triage), RESOLVED, CLOSED, and REJECTED tickets
+      query.status = { $nin: ['PENDING_SCREENING', 'RESOLVED', 'CLOSED', 'REJECTED'] };
     }
     if (filters.category) query.category = filters.category;
     if (filters.priority) query.priority = filters.priority;

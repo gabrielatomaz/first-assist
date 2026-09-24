@@ -81,9 +81,9 @@
               type="number" 
               placeholder="Team #" 
               required
-              size="sm"
+              size="md"
               input-class="font-mono"
-              class="flex-1 min-w-0 sm:w-28"
+              class="flex-1 min-w-0 sm:w-32"
             />
             <BaseButton 
               type="submit" 
@@ -199,7 +199,7 @@
             icon="user-plus"
             @click="showCreateCsaForm = true"
             title="Register"
-            class="w-8 h-8 sm:w-auto px-0 sm:px-3 flex-shrink-0"
+            class="w-10 h-10 sm:w-auto px-0 sm:px-3 flex-shrink-0"
           >
             <span class="hidden sm:inline">Register</span>
           </BaseButton>

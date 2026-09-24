@@ -82,25 +82,26 @@
           />
         </div>
 
-        <!-- 3 & 4. Action buttons group -->
-        <div v-if="canDelete || (incident.status === 'ASSIGNED' || incident.status === 'IN_PROGRESS' || incident.status === 'WAITING')" class="flex items-center space-x-2 flex-shrink-0">
+        <!-- 3 & 4. Action buttons group (Side by Side full width, Icon-only) -->
+        <div v-if="canDelete || (incident.status === 'ASSIGNED' || incident.status === 'IN_PROGRESS' || incident.status === 'WAITING')" class="flex items-center gap-2 w-full sm:w-auto flex-1">
           <BaseButton
             v-if="incident.status === 'ASSIGNED' || incident.status === 'IN_PROGRESS' || incident.status === 'WAITING'"
             @click="showResolveModal = true"
             variant="success"
-            size="icon-sm"
+            size="md"
             icon="check"
-            title="Resolve"
+            title="Resolve Incident"
+            class="flex-1 justify-center"
           />
 
           <BaseButton
             v-if="canDelete"
             @click="showDeleteModal = true"
             variant="danger"
-            size="icon-sm"
+            size="md"
             icon="trash-can"
             title="Delete Incident"
-            class="flex-shrink-0"
+            class="flex-1 justify-center"
           />
         </div>
       </div>

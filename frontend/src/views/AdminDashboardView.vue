@@ -121,7 +121,13 @@
                   </span>
                 </div>
               </td>
-              <td class="px-4 py-3 text-xs text-gray-300 max-w-xs truncate" :title="req.notes">{{ req.notes || 'N/A' }}</td>
+              <td class="px-4 py-3 text-xs text-gray-300 max-w-xs">
+                <span v-if="!req.notes || req.notes.length <= 60">{{ req.notes || 'N/A' }}</span>
+                <span v-else class="flex items-center gap-1">
+                  <span class="truncate">{{ req.notes.substring(0, 60) }}...</span>
+                  <button @click="noteModalText = req.notes; showNoteModal = true" class="text-xs sm:text-[11px] font-bold text-teal-400 hover:text-teal-300 hover:underline px-2 py-0.5 sm:p-0 bg-teal-500/15 sm:bg-transparent border border-teal-500/30 sm:border-0 rounded-md sm:rounded-none whitespace-nowrap cursor-pointer flex-shrink-0 transition">Read more</button>
+                </span>
+              </td>
               <td class="px-4 py-3 text-xs text-gray-300 font-mono">{{ formatDate(req.createdAt) }}</td>
               <td class="px-4 py-3 text-right whitespace-nowrap">
                 <div class="flex items-center justify-end space-x-2">
@@ -172,7 +178,7 @@
           icon="user-plus"
           @click="showCreateUserForm = true"
           title="Register"
-          class="w-8 h-8 sm:w-auto px-0 sm:px-3 flex-shrink-0"
+          class="w-10 h-10 sm:w-auto px-0 sm:px-3 flex-shrink-0"
         >
           <span class="hidden sm:inline">Register</span>
         </BaseButton>
@@ -465,6 +471,21 @@
         </div>
       </div>
     </div>
+
+    <!-- Note Detail Modal -->
+    <div 
+      v-if="showNoteModal" 
+      class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn"
+      @click.self="showNoteModal = false"
+    >
+      <div class="bg-bgCard border border-gray-800 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl animate-fadeIn">
+        <div class="flex items-center justify-between">
+          <h4 class="text-base font-extrabold text-white tracking-tight">Request Notes</h4>
+          <BaseButton variant="ghost" size="icon-xs" icon="xmark" @click="showNoteModal = false" />
+        </div>
+        <p class="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">{{ noteModalText }}</p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -497,6 +518,8 @@ const toggleAuditTimeline = () => {
 const accessRequests = ref([]);
 const loadingRequests = ref(true);
 const processingReq = ref(null);
+const showNoteModal = ref(false);
+const noteModalText = ref('');
 
 const actionOptions = [
   { value: 'ALL', label: 'All' },

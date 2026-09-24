@@ -28,11 +28,25 @@
     </div>
 
     <!-- Graceful Fallback Notice (Network / System Issue / Response Not Found) -->
-    <div v-if="error" class="bg-amber-950/40 border border-amber-900/50 p-3 rounded-xl text-amber-300 text-xs flex flex-col space-y-1">
-      <span class="font-bold flex items-center gap-1.5 text-amber-400">
-        <font-awesome-icon icon="triangle-exclamation" /> Response Not Found
-      </span>
-      <span class="text-gray-200 font-medium">Diagnostic response could not be determined due to a network or service issue ({{ error }}). Please inspect hardware connections manually.</span>
+    <div v-if="error" class="bg-amber-950/40 border border-amber-900/50 p-3 rounded-xl text-amber-300 text-xs space-y-3">
+      <div class="flex flex-col space-y-1">
+        <span class="font-bold flex items-center gap-1.5 text-amber-400">
+          <font-awesome-icon icon="triangle-exclamation" /> Response Not Found
+        </span>
+        <span class="text-gray-200 font-medium">Diagnostic response could not be determined due to a network or service issue. Please verify network connectivity or inspect hardware manually.</span>
+      </div>
+      <div class="flex justify-center">
+        <BaseButton
+          @click="generateDiagnosis"
+          :loading="generating"
+          loading-text="Retrying..."
+          variant="ai"
+          size="sm"
+          icon="arrows-rotate"
+        >
+          Try Again
+        </BaseButton>
+      </div>
     </div>
 
     <!-- Initial Loading / Generating State -->
@@ -53,12 +67,26 @@
         </div>
 
         <!-- Response Not Found Warning Banner if AI/RAG could not determine diagnosis -->
-        <div v-if="suggestion.suggestedCause && suggestion.suggestedCause.toLowerCase().includes('response not found')" class="bg-amber-950/30 border border-amber-800/40 p-3.5 rounded-xl space-y-1.5 text-xs">
-          <div class="flex items-center gap-1.5 font-bold text-amber-400">
-            <font-awesome-icon icon="triangle-exclamation" />
-            <span>Response Not Found</span>
+        <div v-if="suggestion.suggestedCause && suggestion.suggestedCause.toLowerCase().includes('response not found')" class="bg-amber-950/30 border border-amber-800/40 p-3.5 rounded-xl space-y-3 text-xs">
+          <div class="space-y-1.5">
+            <div class="flex items-center gap-1.5 font-bold text-amber-400">
+              <font-awesome-icon icon="triangle-exclamation" />
+              <span>Response Not Found</span>
+            </div>
+            <p class="text-amber-200/90 font-medium leading-relaxed">Unable to retrieve AI diagnostic recommendation at this moment. Please verify network connectivity or inspect hardware manually.</p>
           </div>
-          <p class="text-amber-200/90 font-medium leading-relaxed">{{ suggestion.suggestedCause }}</p>
+          <div class="flex justify-center">
+            <BaseButton
+              @click="generateDiagnosis"
+              :loading="generating"
+              loading-text="Retrying..."
+              variant="ai"
+              size="sm"
+              icon="arrows-rotate"
+            >
+              Try Again
+            </BaseButton>
+          </div>
         </div>
         <div v-else>
           <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5">Likely Root Cause</label>
@@ -67,7 +95,7 @@
           </div>
         </div>
 
-        <div>
+        <div v-if="!(suggestion.suggestedCause && suggestion.suggestedCause.toLowerCase().includes('response not found'))">
           <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5">Recommended Solution</label>
           <div class="bg-bgMain p-3 rounded-xl border border-gray-800/80 text-xs text-gray-200 leading-relaxed font-medium">
             {{ suggestion.suggestedSolution }}

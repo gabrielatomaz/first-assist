@@ -60,18 +60,18 @@ const props = defineProps({
 const sizeClasses = computed(() => {
   switch (props.size) {
     case 'sm':
-      return 'h-8 px-3 text-xs rounded-xl';
+      return 'h-10 sm:h-8 px-3.5 sm:px-3 text-xs rounded-xl';
     case 'lg':
-      return 'h-11 px-6 text-sm sm:text-base rounded-xl shadow-md';
+      return 'h-12 sm:h-11 px-6 text-sm sm:text-base rounded-xl shadow-md';
     case 'icon-xs':
-      return 'w-7 h-7 text-xs rounded-lg flex items-center justify-center p-0 flex-shrink-0';
+      return 'w-8 h-8 sm:w-7 sm:h-7 text-xs rounded-lg flex items-center justify-center p-0 flex-shrink-0';
     case 'icon-sm':
-      return 'w-9 h-9 text-sm rounded-xl flex items-center justify-center p-0 flex-shrink-0';
+      return 'w-10 h-10 sm:w-9 sm:h-9 text-sm rounded-xl flex items-center justify-center p-0 flex-shrink-0';
     case 'icon-md':
-      return 'w-10 sm:w-9 h-10 sm:h-9 text-sm rounded-xl flex items-center justify-center p-0 flex-shrink-0';
+      return 'w-11 h-11 sm:w-10 sm:h-10 text-sm rounded-xl flex items-center justify-center p-0 flex-shrink-0';
     case 'md':
     default:
-      return 'h-10 sm:h-9 px-4 text-sm rounded-xl shadow-sm';
+      return 'h-11 sm:h-9 px-4 text-sm rounded-xl shadow-sm';
   }
 });
 

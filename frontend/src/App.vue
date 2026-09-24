@@ -58,7 +58,7 @@
             <span class="text-xs font-bold text-gray-200 group-hover:text-white transition">
               {{ authStore.user?.name }}
             </span>
-            <RoleBadge v-if="authStore.user?.role" :role="authStore.user?.role" size="xs" />
+            <RoleBadge v-if="authStore.user?.role" :role="authStore.user?.role" />
           </router-link>
 
           <!-- Mobile Hamburger Toggle Button -->
