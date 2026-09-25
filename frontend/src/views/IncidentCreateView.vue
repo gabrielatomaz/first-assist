@@ -6,62 +6,70 @@
     />
 
     <!-- Active Event Banner -->
-    <div v-if="activeEvent" class="bg-bgMain border border-gray-800 p-3 rounded-xl text-xs font-semibold text-gray-400 flex items-center space-x-1.5 shadow-sm">
+    <div v-if="activeEvent" class="bg-bgMain border border-gray-800 p-3.5 rounded-xl text-sm font-semibold text-gray-300 flex items-center space-x-2 shadow-sm">
       <font-awesome-icon icon="trophy" class="text-accentYellow font-black mr-1" />
       <span class="text-teal-400 font-extrabold">{{ activeEvent.name }} ({{ activeEvent.code }})</span>
     </div>
     
     <form @submit.prevent="submitIncident" class="space-y-6">
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
+        <!-- Team Number with Styled Dropdown Suggestions -->
+        <div class="relative" ref="teamInputRef">
           <BaseInput 
             v-model="form.teamNumber" 
             type="number" 
             label="Team Number"
-            list="eventTeamsList" 
             required 
             placeholder="e.g. 254 (or select below)"
             input-class="font-mono"
+            @focus="showTeamSuggestions = true"
+            @input="showTeamSuggestions = true"
           />
-          <datalist id="eventTeamsList">
-            <option v-for="team in activeEventTeams" :key="team._id" :value="team.number">
-              Team {{ team.number }} — {{ team.name }}
-            </option>
-          </datalist>
+
+          <!-- Styled Floating Suggestions Dropdown -->
+          <div 
+            v-if="showTeamSuggestions && filteredTeamSuggestions.length > 0"
+            class="absolute left-0 right-0 top-full mt-1.5 z-30 bg-bgCard border border-gray-800 rounded-xl shadow-2xl py-1 max-h-52 overflow-y-auto custom-scrollbar animate-fadeIn"
+          >
+            <button
+              v-for="team in filteredTeamSuggestions"
+              :key="team._id"
+              type="button"
+              @click="form.teamNumber = team.number; showTeamSuggestions = false"
+              class="w-full px-3.5 py-2 text-left text-xs text-gray-200 hover:bg-white/15 hover:text-white transition flex items-center justify-between cursor-pointer border-b border-gray-800/40 last:border-b-0"
+            >
+              <span class="font-mono font-bold text-teal-400">Team {{ team.number }}</span>
+              <span class="text-gray-400 text-[11px] truncate max-w-[200px]">{{ team.name }}</span>
+            </button>
+          </div>
         </div>
+
+        <!-- Match Number with CustomSelect (Required) -->
         <div>
-          <BaseInput 
+          <CustomSelect 
             v-model="form.matchNumber" 
             label="Match Number"
-            list="matchSuggestionsList" 
+            required
+            :options="matchOptions"
             :disabled="!form.teamNumber"
-            :placeholder="form.teamNumber ? 'e.g. Q12 (select match)' : 'Select Team Number first...'"
-            input-class="font-mono"
+            :placeholder="form.teamNumber ? 'Select Match...' : 'Select Team Number first...'"
+            button-class="font-mono"
           />
-          <datalist id="matchSuggestionsList">
-            <option v-for="m in availableMatchSuggestions" :key="m" :value="m">{{ m }}</option>
-          </datalist>
-          <p v-if="!form.teamNumber" class="text-[10px] text-gray-400 mt-1">Select a team number first to filter matches for that team.</p>
-          <p v-else-if="availableMatchSuggestions.length" class="text-[10px] text-teal-400 font-medium mt-1">Showing {{ availableMatchSuggestions.length }} matches assigned to Team {{ form.teamNumber }}</p>
         </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div class="space-y-1.5">
-          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider">Category</label>
-          <CustomSelect
-            v-model="form.category"
-            :options="categoryOptions"
-          />
-        </div>
+        <CustomSelect
+          v-model="form.category"
+          label="Category"
+          :options="categoryOptions"
+        />
 
-        <div class="space-y-1.5">
-          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider">Priority</label>
-          <CustomSelect
-            v-model="form.priority"
-            :options="priorityOptions"
-          />
-        </div>
+        <CustomSelect
+          v-model="form.priority"
+          label="Priority"
+          :options="priorityOptions"
+        />
       </div>
 
       <div>
@@ -142,7 +150,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { useSpeechRecognition } from '../composables/useSpeechRecognition';
@@ -171,6 +179,26 @@ const {
 const transcriptionSource = ref(false);
 const activeEvent = ref(null);
 const activeEventTeams = ref([]);
+
+const showTeamSuggestions = ref(false);
+const teamInputRef = ref(null);
+
+const filteredTeamSuggestions = computed(() => {
+  if (!activeEventTeams.value || activeEventTeams.value.length === 0) return [];
+  const searchStr = form.value.teamNumber ? String(form.value.teamNumber).trim() : '';
+  if (!searchStr) {
+    return activeEventTeams.value.slice(0, 30);
+  }
+  return activeEventTeams.value.filter(team => {
+    return String(team.number).includes(searchStr) || (team.name && team.name.toLowerCase().includes(searchStr.toLowerCase()));
+  }).slice(0, 30);
+});
+
+const handleClickOutsideTeam = (event) => {
+  if (teamInputRef.value && !teamInputRef.value.contains(event.target)) {
+    showTeamSuggestions.value = false;
+  }
+};
 
 const categoryOptions = [
   { value: 'RADIO_COMMS', label: 'Radio & Wireless Comms' },
@@ -201,6 +229,8 @@ const isFormValid = computed(() => {
   return Boolean(
     form.value.teamNumber &&
     Number(form.value.teamNumber) > 0 &&
+    form.value.matchNumber &&
+    form.value.matchNumber.trim().length > 0 &&
     form.value.description &&
     form.value.description.trim().length > 0
   );
@@ -235,6 +265,11 @@ const availableMatchSuggestions = computed(() => {
     const numB = parseInt(b.replace(/\D/g, '')) || 0;
     return numA - numB;
   });
+});
+
+const matchOptions = computed(() => {
+  if (!availableMatchSuggestions.value || availableMatchSuggestions.value.length === 0) return [];
+  return availableMatchSuggestions.value.map(m => ({ value: m, label: m }));
 });
 
 watch(() => form.value.teamNumber, (newTeam) => {
@@ -382,5 +417,10 @@ const submitIncident = async () => {
 
 onMounted(() => {
   fetchActiveEvent();
+  document.addEventListener('click', handleClickOutsideTeam);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutsideTeam);
 });
 </script>

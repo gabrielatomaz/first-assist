@@ -1,54 +1,66 @@
 <template>
-  <div class="relative inline-block text-left w-full" ref="dropdownRef">
-    <button
-      type="button"
-      @click="toggleDropdown"
-      :disabled="disabled"
-      :class="[
-        'w-full text-left text-textMain border transition flex items-center justify-between shadow-sm cursor-pointer select-none',
-        'focus:outline-none focus:ring-2 focus:ring-primaryTeal/30 focus:border-primaryTeal',
-        'disabled:opacity-50 disabled:cursor-not-allowed',
-        sizeClasses,
-        error ? 'border-accentCoral' : 'border-gray-800 hover:border-gray-700 bg-bgCard',
-        buttonClass
-      ]"
-    >
-      <span class="truncate pr-2" :class="selectedOption?.class">{{ selectedLabel }}</span>
-      <font-awesome-icon icon="chevron-down" class="text-xs text-gray-400 flex-shrink-0 transition-transform duration-200" :class="{ 'rotate-180': isOpen }" />
-    </button>
-
-    <Teleport to="body">
-      <transition
-        enter-active-class="transition ease-out duration-100"
-        enter-from-class="transform opacity-0 scale-95"
-        enter-to-class="transform opacity-100 scale-100"
-        leave-active-class="transition ease-in duration-75"
-        leave-from-class="transform opacity-100 scale-100"
-        leave-to-class="transform opacity-0 scale-95"
+  <div class="w-full space-y-1.5">
+    <div v-if="label" class="flex justify-between items-center">
+      <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider">
+        {{ label }}
+        <span v-if="required" class="text-accentCoral ml-0.5">*</span>
+      </label>
+    </div>
+    <div class="relative inline-block text-left w-full" ref="dropdownRef">
+      <button
+        type="button"
+        @click="toggleDropdown"
+        :disabled="disabled"
+        :class="[
+          'w-full text-left text-textMain border transition flex items-center justify-between shadow-sm cursor-pointer select-none',
+          'focus:outline-none focus:ring-2 focus:ring-primaryTeal/30 focus:border-primaryTeal',
+          'disabled:opacity-50 disabled:cursor-not-allowed',
+          sizeClasses,
+          error ? 'border-accentCoral' : 'border-gray-800 hover:border-gray-700 bg-bgCard',
+          buttonClass
+        ]"
       >
-        <div
-          v-if="isOpen"
-          :style="menuStyle"
-          class="fixed z-[99999] rounded-xl bg-bgCard shadow-2xl border border-gray-800 py-1 max-h-60 overflow-y-auto custom-scrollbar"
+        <span class="truncate pr-2" :class="selectedOption?.class">{{ selectedLabel }}</span>
+        <font-awesome-icon icon="chevron-down" class="text-xs text-gray-400 flex-shrink-0 transition-transform duration-200" :class="{ 'rotate-180': isOpen }" />
+      </button>
+
+      <Teleport to="body">
+        <transition
+          enter-active-class="transition ease-out duration-100"
+          enter-from-class="transform opacity-0 scale-95"
+          enter-to-class="transform opacity-100 scale-100"
+          leave-active-class="transition ease-in duration-75"
+          leave-from-class="transform opacity-100 scale-100"
+          leave-to-class="transform opacity-0 scale-95"
         >
-          <button
-            v-for="opt in options"
-            :key="opt.value"
-            type="button"
-            :disabled="opt.disabled"
-            @click="selectOption(opt)"
-            :class="[
-              'block w-full px-4 py-2.5 text-left text-xs font-semibold transition cursor-pointer flex items-center justify-between',
-              opt.disabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-white/15 text-white',
-              isSelected(opt.value) ? 'bg-primaryTeal/25 text-teal-300 font-bold' : 'text-gray-200'
-            ]"
+          <div
+            v-if="isOpen"
+            :style="menuStyle"
+            class="fixed z-[99999] rounded-xl bg-bgCard shadow-2xl border border-gray-800 py-1 max-h-60 overflow-y-auto custom-scrollbar"
           >
-            <span class="truncate">{{ opt.label }}</span>
-            <font-awesome-icon v-if="isSelected(opt.value)" icon="check" class="text-xs text-teal-300 ml-2 flex-shrink-0" />
-          </button>
-        </div>
-      </transition>
-    </Teleport>
+            <button
+              v-for="opt in options"
+              :key="opt.value"
+              type="button"
+              :disabled="opt.disabled"
+              @click="selectOption(opt)"
+              :class="[
+                'block w-full px-3.5 py-2 text-left text-sm font-medium transition cursor-pointer flex items-center justify-between border-b border-gray-800/40 last:border-b-0',
+                opt.disabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-white/15 text-white',
+                isSelected(opt.value) ? 'bg-primaryTeal/25 text-teal-300 font-bold' : 'text-gray-200'
+              ]"
+            >
+              <div v-if="opt.teamNumber" class="flex items-center justify-between w-full min-w-0 pr-2">
+                <span class="font-mono font-bold text-teal-400 text-xs flex-shrink-0">Team {{ opt.teamNumber }}</span>
+                <span v-if="opt.teamName" class="text-gray-400 text-[11px] truncate ml-2 max-w-[140px] font-sans font-normal">{{ opt.teamName }}</span>
+              </div>
+              <span v-else class="truncate pr-2">{{ opt.label }}</span>
+              <font-awesome-icon v-if="isSelected(opt.value)" icon="check" class="text-xs text-teal-300 ml-1.5 flex-shrink-0" />
+            </button>
+          </div>
+        </transition>
+      </Teleport>
+    </div>
   </div>
 </template>
 
@@ -57,6 +69,14 @@ import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 
 const props = defineProps({
   modelValue: [String, Number, Object],
+  label: {
+    type: String,
+    default: ''
+  },
+  required: {
+    type: Boolean,
+    default: false
+  },
   options: {
     type: Array,
     required: true
@@ -94,7 +114,7 @@ const sizeClasses = computed(() => {
   if (props.size === 'sm') {
     return 'h-8 px-3 py-1 rounded-xl text-xs font-semibold';
   }
-  return 'h-10 sm:h-9 px-3.5 py-1 sm:py-1.5 rounded-xl text-xs font-semibold';
+  return 'h-10 sm:h-9 px-3.5 py-1 sm:py-1.5 rounded-xl text-sm font-medium';
 });
 
 const isSelected = (optValue) => {

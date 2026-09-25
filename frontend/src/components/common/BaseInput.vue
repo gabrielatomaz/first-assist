@@ -79,7 +79,7 @@ const props = defineProps({
   },
   showAsterisk: {
     type: Boolean,
-    default: false
+    default: true
   },
   size: {
     type: String,

@@ -237,7 +237,12 @@ const teamOptions = computed(() => {
   activeTeamsList.value.forEach(num => {
     const name = allTeamsMap.value.get(num);
     const label = name ? `Team ${num} - ${name}` : `Team ${num}`;
-    options.push({ value: String(num), label });
+    options.push({
+      value: String(num),
+      label,
+      teamNumber: num,
+      teamName: name || ''
+    });
   });
   return options;
 });
