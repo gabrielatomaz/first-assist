@@ -30,7 +30,7 @@ const calculateSimilarity = (incident, historicalTicket) => {
  * @param {Array} relatedIncidents - Historical resolved tickets for RAG context
  * @returns {Promise<{suggestedCause: string, suggestedSolution: string, isRagGrounded: boolean, citedIncidents: Array}>}
  */
-export const generateDiagnosticSuggestion = async (incident, relatedIncidents = []) => {
+export const generateDiagnosticSuggestion = async (incident, relatedIncidents = [], locale = 'en') => {
   const citedIncidents = relatedIncidents.map(inc => ({
     incidentId: inc._id,
     teamNumber: inc.teamNumber,
@@ -57,6 +57,11 @@ export const generateDiagnosticSuggestion = async (incident, relatedIncidents = 
 
   const ai = new GoogleGenAI({ apiKey });
 
+  const isPt = locale === 'pt' || locale === 'pt-BR';
+  const languageInstruction = isPt
+    ? `\n5. IMPORTANT LANGUAGE REQUIREMENT: Output both 'suggestedCause' and 'suggestedSolution' strictly in fluent Portuguese (Português do Brasil). Technical FRC terminology (e.g. RoboRIO, CAN bus, PDP, PCM, Driver Station, Breaker, Radio, Limelight, Spark Max) can be kept in standard FRC context, but explanations and troubleshooting instructions must be in fluent Portuguese.`
+    : '';
+
   // Construct domain-specific FRC prompt with RAG context
   const knowledgeBaseContext = isRagGrounded
     ? `\n[VERIFIED KNOWLEDGE BASE COMPETITION RESOLUTIONS]\nThe following verified resolutions were recorded for similar incidents at past FRC events:\n` +
@@ -82,7 +87,7 @@ Instructions:
 {
   "suggestedCause": "Clear, technical explanation of probable root cause, or 'Response not found: ...' if undetermined.",
   "suggestedSolution": "Actionable bullet points or step-by-step instructions for resolving the issue."
-}`;
+}${languageInstruction}`;
 
   // Candidate models chain to prevent 503 high demand failures
   const candidateModels = ['gemini-2.5-flash-lite', 'gemini-flash-latest', 'gemini-3.6-flash'];
@@ -215,4 +220,39 @@ Return strictly a valid JSON object matching this schema:
 
   throw new Error('All Gemini AI models failed to process audio transcription.');
 };
+
+/**
+ * Translate technical FRC text dynamically using Gemini AI.
+ * @param {string} text - Input text
+ * @param {string} targetLanguage - Target language ('pt' or 'en')
+ * @returns {Promise<string>}
+ */
+export const translateText = async (text, targetLanguage = 'pt') => {
+  if (!text || !text.trim()) return text;
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return text;
+
+  try {
+    const ai = new GoogleGenAI({ apiKey });
+    const targetName = targetLanguage === 'pt' ? 'Portuguese (Português do Brasil)' : 'English';
+    const prompt = `Translate the following FIRST Robotics Competition (FRC) technical text into ${targetName}. Preserve technical FRC hardware/software terms (e.g., RoboRIO, CAN bus, Breaker, Radio, PDP, PCM, Driver Station, Motor Controller, Limelight) as standard in FRC context. Output ONLY the translated text with no additional quotes or commentary.\n\nText: "${text}"`;
+
+    const candidateModels = ['gemini-2.5-flash-lite', 'gemini-flash-latest', 'gemini-3.6-flash'];
+    for (const modelName of candidateModels) {
+      try {
+        const response = await ai.models.generateContent({
+          model: modelName,
+          contents: prompt
+        });
+        if (response.text) return response.text.trim();
+      } catch (err) {
+        console.warn(`Translation fallback ${modelName} error:`, err.message);
+      }
+    }
+  } catch (err) {
+    console.error('Translation failed:', err.message);
+  }
+  return text;
+};
+
 

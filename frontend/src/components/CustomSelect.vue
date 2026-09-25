@@ -45,7 +45,7 @@
               :disabled="opt.disabled"
               @click="selectOption(opt)"
               :class="[
-                'block w-full px-3.5 py-2 text-left text-sm font-medium transition cursor-pointer flex items-center justify-between border-b border-gray-800/40 last:border-b-0',
+                'block w-full px-3.5 py-2 text-left text-xs font-semibold transition cursor-pointer flex items-center justify-between border-b border-gray-800/40 last:border-b-0',
                 opt.disabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-white/15 text-white',
                 isSelected(opt.value) ? 'bg-primaryTeal/25 text-teal-300 font-bold' : 'text-gray-200'
               ]"
@@ -112,9 +112,9 @@ const menuStyle = ref({});
 
 const sizeClasses = computed(() => {
   if (props.size === 'sm') {
-    return 'h-8 px-3 py-1 rounded-xl text-xs font-semibold';
+    return 'h-9 px-3 py-1 rounded-xl text-xs font-semibold';
   }
-  return 'h-10 sm:h-9 px-3.5 py-1 sm:py-1.5 rounded-xl text-sm font-medium';
+  return 'h-9 px-3.5 py-1.5 rounded-xl text-xs font-semibold';
 });
 
 const isSelected = (optValue) => {

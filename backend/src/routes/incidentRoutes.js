@@ -33,6 +33,9 @@ router.delete('/:id', authMiddleware, incidentController.deleteIncident);
 // Transcription route accepting binary audio file
 router.post('/transcribe', authMiddleware, upload.single('audio'), incidentController.transcribeAudio);
 
+// AI text translation route for dynamic KB & ticket content
+router.post('/translate', authMiddleware, incidentController.translateContent);
+
 // Comments routes nested under incidents
 router.get('/:id/comments', authMiddleware, commentController.getComments);
 router.post('/:id/comments', authMiddleware, commentController.createComment);

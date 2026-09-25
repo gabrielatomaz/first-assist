@@ -370,11 +370,12 @@
         <!-- TBA Event Import Section -->
         <div class="p-4 bg-bgMain rounded-xl border border-borderDefault space-y-3">
           <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5">Import Event & Roster from TBA</label>
-          <div class="flex space-x-2">
+          <div class="flex items-center space-x-2">
             <BaseInput 
               v-model="tbaEventKey" 
               placeholder="Enter TBA Event Key (e.g. 2026brsp)" 
               input-class="font-mono"
+              size="sm"
               class="flex-1"
             />
             <BaseButton
@@ -382,10 +383,12 @@
               :disabled="importingTBAEvent || !tbaEventKey" 
               :loading="importingTBAEvent"
               variant="primary"
-              size="icon-md"
+              size="sm"
               icon="download"
               title="Import Event and Attending Teams from TBA"
-            />
+            >
+              Import
+            </BaseButton>
           </div>
         </div>
 

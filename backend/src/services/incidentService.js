@@ -316,7 +316,7 @@ export const incidentService = {
     return suggestion ? [suggestion] : [];
   },
 
-  generateAISuggestionsForIncident: async (incidentId) => {
+  generateAISuggestionsForIncident: async (incidentId, locale = 'en') => {
     const incident = await incidentRepository.findById(incidentId);
     if (!incident) throw new Error('Incident not found');
 
@@ -331,7 +331,7 @@ export const incidentService = {
       console.warn('Could not fetch related tickets for AI context:', err.message);
     }
 
-    const aiResult = await generateDiagnosticSuggestion(incident, relatedIncidents);
+    const aiResult = await generateDiagnosticSuggestion(incident, relatedIncidents, locale);
 
     const suggestion = await aiSuggestionRepository.upsertByIncidentId(incidentId, {
       incidentId,

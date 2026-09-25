@@ -6,9 +6,9 @@
     />
 
     <!-- Active Event Banner -->
-    <div v-if="activeEvent" class="bg-bgMain border border-gray-800 p-3.5 rounded-xl text-sm font-semibold text-gray-300 flex items-center space-x-2 shadow-sm">
-      <font-awesome-icon icon="trophy" class="text-accentYellow font-black mr-1" />
-      <span class="text-teal-400 font-extrabold">{{ activeEvent.name }} ({{ activeEvent.code }})</span>
+    <div v-if="activeEvent" class="bg-bgMain border border-gray-800 p-2.5 sm:p-3 rounded-xl text-xs font-semibold text-gray-300 flex items-center space-x-2 shadow-sm">
+      <font-awesome-icon icon="trophy" class="text-accentYellow text-xs font-black mr-1 flex-shrink-0" />
+      <span class="text-teal-400 font-extrabold tracking-tight truncate">{{ activeEvent.name }} ({{ activeEvent.code }})</span>
     </div>
     
     <form @submit.prevent="submitIncident" class="space-y-6">
@@ -215,10 +215,10 @@ const categoryOptions = [
 ];
 
 const priorityOptions = [
-  { value: 'LOW', label: 'Low Priority' },
-  { value: 'MEDIUM', label: 'Medium Priority' },
-  { value: 'HIGH', label: 'High Priority' },
-  { value: 'CRITICAL', label: 'Critical Alert', class: 'text-accentCoral font-bold' }
+  { value: 'LOW', label: 'Low' },
+  { value: 'MEDIUM', label: 'Medium' },
+  { value: 'HIGH', label: 'High' },
+  { value: 'CRITICAL', label: 'Critical', class: 'text-accentCoral font-bold' }
 ];
 
 const form = ref({ teamNumber: null, matchNumber: '', eventCode: '', description: '', category: 'OTHER', priority: 'MEDIUM' });

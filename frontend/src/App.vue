@@ -35,16 +35,16 @@
           
           <div class="hidden md:flex items-center space-x-6 text-sm font-semibold">
             <router-link to="/" class="text-gray-300 hover:text-teal-300 transition duration-150" active-class="!text-teal-400 font-bold">
-              {{ i18nStore.t('nav_dashboard') }}
+              Dashboard
             </router-link>
             <router-link to="/knowledge-base" class="text-gray-300 hover:text-teal-300 transition duration-150" active-class="!text-teal-400 font-bold">
-              {{ i18nStore.t('nav_kb') }}
+              Knowledge Base
             </router-link>
             <router-link v-if="authStore.isAdmin || authStore.isFTA" to="/fta" class="text-gray-300 hover:text-teal-300 transition duration-150" active-class="!text-teal-400 font-bold">
-              {{ i18nStore.t('nav_fta') }}
+              FTA Dashboard
             </router-link>
             <router-link v-if="authStore.isAdmin" @click="mobileMenuOpen = false" to="/admin" class="text-gray-300 hover:text-teal-300 transition duration-150" active-class="!text-teal-400 font-bold">
-              {{ i18nStore.t('nav_admin') }}
+              Admin
             </router-link>
           </div>
         </div>
@@ -75,7 +75,7 @@
 
           <!-- Desktop Logout Button -->
           <button @click="handleLogout" class="hidden md:inline-block text-gray-400 hover:text-accentCoral text-sm font-semibold transition duration-150 cursor-pointer ml-2">
-            {{ i18nStore.t('nav_logout') }}
+            Logout
           </button>
 
           <!-- Mobile Hamburger Toggle Button -->
@@ -105,21 +105,21 @@
 
         <div class="flex flex-col space-y-2 text-sm font-bold">
           <router-link @click="mobileMenuOpen = false" to="/" class="py-2.5 px-3 rounded-xl hover:bg-white/10 transition flex items-center text-gray-200" active-class="!text-teal-400 font-bold bg-white/10">
-            <font-awesome-icon icon="chart-simple" class="w-4 mr-2.5 text-primaryTeal" /> {{ i18nStore.t('nav_dashboard') }}
+            <font-awesome-icon icon="chart-simple" class="w-4 mr-2.5 text-primaryTeal" /> Dashboard
           </router-link>
           <router-link @click="mobileMenuOpen = false" to="/knowledge-base" class="py-2.5 px-3 rounded-xl hover:bg-white/10 transition flex items-center text-gray-200" active-class="!text-teal-400 font-bold bg-white/10">
-            <font-awesome-icon icon="book" class="w-4 mr-2.5 text-primaryTeal" /> {{ i18nStore.t('nav_kb') }}
+            <font-awesome-icon icon="book" class="w-4 mr-2.5 text-primaryTeal" /> Knowledge Base
           </router-link>
           <router-link v-if="authStore.isAdmin || authStore.isFTA" @click="mobileMenuOpen = false" to="/fta" class="py-2.5 px-3 rounded-xl hover:bg-white/10 transition flex items-center text-gray-200" active-class="!text-teal-400 font-bold bg-white/10">
-            <font-awesome-icon icon="wrench" class="w-4 mr-2.5 text-primaryTeal" /> {{ i18nStore.t('nav_fta') }}
+            <font-awesome-icon icon="wrench" class="w-4 mr-2.5 text-primaryTeal" /> FTA Dashboard
           </router-link>
           <router-link v-if="authStore.isAdmin" @click="mobileMenuOpen = false" to="/admin" class="py-2.5 px-3 rounded-xl hover:bg-white/10 transition flex items-center text-gray-200" active-class="!text-teal-400 font-bold bg-white/10">
-            <font-awesome-icon icon="user-shield" class="w-4 mr-2.5 text-primaryTeal" /> {{ i18nStore.t('nav_admin') }}
+            <font-awesome-icon icon="user-shield" class="w-4 mr-2.5 text-primaryTeal" /> Admin
           </router-link>
 
           <!-- Mobile Language Selector Section (2-Button Grid) -->
           <div class="pt-3 border-t border-gray-800/80">
-            <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-2">Language / Idioma</p>
+            <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-2">Language</p>
             <div class="grid grid-cols-2 gap-2">
               <BaseButton
                 :variant="i18nStore.locale === 'en' ? 'primary' : 'secondary'"
@@ -144,7 +144,7 @@
 
           <button @click="mobileMenuOpen = false; handleLogout()" class="py-2.5 px-3 rounded-xl text-left text-accentCoral font-bold hover:bg-white/10 flex items-center cursor-pointer pt-2">
             <font-awesome-icon icon="right-from-bracket" class="w-4 mr-2.5 text-accentCoral" />
-            <span>{{ i18nStore.t('nav_logout') }}</span>
+            <span>Logout</span>
           </button>
         </div>
       </div>

@@ -26,8 +26,9 @@ export function useSpeechRecognition() {
   // ========================
   const startSpeechAPI = (fieldName) => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
     const savedLocale = localStorage.getItem('first_assist_locale') || 'en';
-    recognition.lang = savedLocale === 'pt' || savedLocale === 'pt-BR' ? 'pt-BR' : 'en-US';
+    recognition.lang = (savedLocale === 'pt' || savedLocale === 'pt-BR') ? 'pt-BR' : 'en-US';
     recognition.interimResults = false;
     recognition.continuous = true;
     finalTranscript = '';
@@ -129,10 +130,12 @@ export function useSpeechRecognition() {
         try {
           const mimeType = mediaRecorder.mimeType || 'audio/webm';
           const audioBlob = new Blob(audioChunks, { type: mimeType });
+          const savedLocale = localStorage.getItem('first_assist_locale') || 'en';
 
           const formData = new FormData();
           formData.append('audio', audioBlob, 'recording.webm');
           formData.append('mode', 'resolve'); // raw text only
+          formData.append('language', savedLocale === 'pt' ? 'pt' : 'en');
 
           const headers = {};
           if (authStore.token) headers['Authorization'] = `Bearer ${authStore.token}`;

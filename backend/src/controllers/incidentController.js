@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { incidentService } from '../services/incidentService.js';
-import { transcribeAudioWithGemini } from '../services/aiService.js';
+import { transcribeAudioWithGemini, translateText } from '../services/aiService.js';
 import { Event } from '../models/Event.js';
 
 export const incidentController = {
@@ -340,8 +340,22 @@ export const incidentController = {
 
   generateAISuggestions: async (req, res) => {
     try {
-      const suggestion = await incidentService.generateAISuggestionsForIncident(req.params.id);
+      const locale = req.body?.locale || req.query?.locale || req.headers['x-locale'] || 'en';
+      const suggestion = await incidentService.generateAISuggestionsForIncident(req.params.id, locale);
       res.json({ suggestion, suggestions: [suggestion] });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  translateContent: async (req, res) => {
+    try {
+      const { text, targetLang } = req.body;
+      if (!text) {
+        return res.status(400).json({ error: 'Text field is required for translation.' });
+      }
+      const translatedText = await translateText(text, targetLang || 'pt');
+      res.json({ translatedText });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

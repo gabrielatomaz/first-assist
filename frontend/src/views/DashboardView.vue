@@ -18,8 +18,8 @@
     />
 
     <PageHeader
-      :title="i18nStore.t('dash_title')"
-      :subtitle="i18nStore.t('dash_subtitle')"
+      title="Active Incident Queue"
+      subtitle="Real-time FRC field issues and technical support requests"
     >
       <template #actions>
         <div class="flex flex-col md:flex-row items-stretch md:items-center gap-2 w-full md:w-auto md:max-w-full md:flex-nowrap md:overflow-x-auto py-0.5">
@@ -62,13 +62,13 @@
           />
 
           <!-- Unified Refresh & Auto-Sync Control -->
-          <div class="relative flex items-stretch h-10 sm:h-9 rounded-xl border border-gray-800 bg-bgCard hover:border-gray-700 shadow-sm w-full md:w-auto md:flex-shrink-0">
+          <div class="relative flex items-center h-9 rounded-xl border border-gray-800 bg-bgCard hover:border-gray-700 shadow-sm w-full md:w-auto md:flex-shrink-0">
             <button
               type="button"
               @click="handleManualRefresh"
               :disabled="isRefreshing"
               title="Refresh Incident Board Now"
-              class="px-3 md:px-2 text-gray-300 hover:text-white hover:bg-white/5 text-xs font-semibold transition flex items-center justify-center cursor-pointer border-r border-gray-800 rounded-l-xl flex-shrink-0 active:scale-95 disabled:opacity-50"
+              class="h-9 px-2.5 text-gray-300 hover:text-white hover:bg-white/5 text-xs font-semibold transition flex items-center justify-center cursor-pointer border-r border-gray-800 rounded-l-xl flex-shrink-0 active:scale-95 disabled:opacity-50"
             >
               <font-awesome-icon icon="arrows-rotate" :spin="isRefreshing" class="text-xs transition-colors" :class="isRefreshing ? 'text-teal-400' : 'text-gray-400'" />
             </button>
@@ -76,8 +76,8 @@
               v-model="refreshInterval"
               :options="refreshOptions"
               @change="updateRefreshInterval"
-              button-class="!border-0 !bg-transparent rounded-r-xl rounded-l-none px-2 text-xs font-semibold !shadow-none"
-              class="w-full md:w-24 lg:w-28 flex-1 md:flex-none"
+              button-class="!h-9 !py-0 !border-0 !bg-transparent rounded-r-xl rounded-l-none !px-2.5 !shadow-none text-xs"
+              class="w-full md:w-28 flex-1 md:flex-none"
             />
           </div>
         </div>
@@ -126,7 +126,7 @@
 
           <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-bgCard border border-gray-800 shadow-sm text-xs font-mono font-bold text-gray-300 hover:border-gray-700 transition">
             <font-awesome-icon icon="circle-check" class="text-teal-400 text-xs" />
-            <span>{{ i18nStore.t('dash_all_loaded') }}</span>
+            <span>All incidents loaded</span>
           </div>
         </div>
       </div>
@@ -144,7 +144,6 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
-import { useI18nStore } from '../stores/i18n';
 import {
   IncidentCard,
   CustomSelect,
@@ -158,7 +157,6 @@ import {
 import { getApiUrl } from '../config/api';
 
 const authStore = useAuthStore();
-const i18nStore = useI18nStore();
 const incidents = ref([]);
 const events = ref([]);
 const loading = ref(true);
@@ -186,7 +184,7 @@ let observer = null;
 const dashboardTabs = computed(() => [
   { 
     id: 'ALL', 
-    label: i18nStore.t('dash_tab_active'), 
+    label: 'Active Incidents', 
     icon: 'list-check',
     count: activeBoardCount.value,
     activeClass: 'bg-primaryTeal/20 text-teal-300 border-primaryTeal/50 shadow-sm',
@@ -195,7 +193,7 @@ const dashboardTabs = computed(() => [
   },
   {
     id: 'PENDING_SCREENING',
-    label: i18nStore.t('dash_tab_triage'),
+    label: 'In Triage',
     icon: 'shield-halved',
     count: pendingScreeningCount.value,
     activeClass: 'bg-yellow-400/20 text-yellow-300 border-yellow-200/70 shadow-sm',
@@ -213,27 +211,27 @@ const activeBoardTab = computed({
 });
 
 const statusOptions = computed(() => [
-  { value: 'ALL', label: i18nStore.t('status_active') },
-  { value: 'PENDING_SCREENING', label: i18nStore.t('status_pending_screening') },
-  { value: 'OPEN', label: i18nStore.t('status_open') },
-  { value: 'ASSIGNED', label: i18nStore.t('status_assigned') },
-  { value: 'IN_PROGRESS', label: i18nStore.t('status_in_progress') },
-  { value: 'WAITING', label: i18nStore.t('status_waiting') },
-  { value: 'RESOLVED', label: i18nStore.t('status_resolved') },
-  { value: 'CLOSED', label: i18nStore.t('status_closed') },
-  { value: 'REJECTED', label: i18nStore.t('status_rejected') }
+  { value: 'ALL', label: 'All Statuses' },
+  { value: 'PENDING_SCREENING', label: 'In Triage' },
+  { value: 'OPEN', label: 'Open' },
+  { value: 'ASSIGNED', label: 'Assigned' },
+  { value: 'IN_PROGRESS', label: 'In Progress' },
+  { value: 'WAITING', label: 'Waiting' },
+  { value: 'RESOLVED', label: 'Resolved' },
+  { value: 'CLOSED', label: 'Closed' },
+  { value: 'REJECTED', label: 'Rejected' }
 ]);
 
 const priorityOptions = computed(() => [
-  { value: 'ALL', label: i18nStore.t('dash_all_priorities') },
-  { value: 'LOW', label: i18nStore.t('priority_low') },
-  { value: 'MEDIUM', label: i18nStore.t('priority_medium') },
-  { value: 'HIGH', label: i18nStore.t('priority_high') },
-  { value: 'CRITICAL', label: i18nStore.t('priority_critical') }
+  { value: 'ALL', label: 'All Priorities' },
+  { value: 'LOW', label: 'Low' },
+  { value: 'MEDIUM', label: 'Medium' },
+  { value: 'HIGH', label: 'High' },
+  { value: 'CRITICAL', label: 'Critical' }
 ]);
 
 const teamOptions = computed(() => {
-  const options = [{ value: 'ALL', label: i18nStore.t('dash_all_teams') }];
+  const options = [{ value: 'ALL', label: 'All Teams' }];
   activeTeamsList.value.forEach(num => {
     const name = allTeamsMap.value.get(num);
     const label = name ? `Team ${num} - ${name}` : `Team ${num}`;
@@ -278,7 +276,7 @@ const availableEvents = computed(() => {
 });
 
 const eventOptions = computed(() => [
-  { value: 'ALL', label: i18nStore.t('dash_all_events') },
+  { value: 'ALL', label: 'All Events' },
   ...availableEvents.value.map(e => ({ value: e.code, label: `${e.name} (${e.code})` }))
 ]);
 

@@ -216,12 +216,15 @@ const generateDiagnosis = async () => {
   generating.value = true;
   error.value = null;
   try {
+    const savedLocale = localStorage.getItem('first_assist_locale') || 'en';
     const response = await fetch(getApiUrl(`/incidents/${props.incidentId}/ai-suggestions`), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authStore.token}`
-      }
+        'Authorization': `Bearer ${authStore.token}`,
+        'x-locale': savedLocale
+      },
+      body: JSON.stringify({ locale: savedLocale })
     });
     if (!response.ok) {
       const errData = await response.json().catch(() => ({}));

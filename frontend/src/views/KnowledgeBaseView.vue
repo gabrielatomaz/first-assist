@@ -218,9 +218,29 @@
         <div class="bg-bgCard border border-gray-800 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl animate-fadeIn my-auto max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar">
           <div class="flex items-center justify-between">
             <h4 class="text-base font-extrabold text-white tracking-tight">{{ textModalTitle }}</h4>
-            <BaseButton variant="ghost" size="icon-xs" icon="xmark" @click="showTextModal = false" />
+            <div class="flex items-center gap-1.5">
+              <BaseButton 
+                variant="secondary" 
+                size="icon-xs" 
+                :icon="isSpeaking ? 'volume-xmark' : 'volume-high'" 
+                :title="isSpeaking ? 'Stop reading' : 'Read aloud'" 
+                @click="speakText(textModalContent)" 
+              />
+              <BaseButton variant="ghost" size="icon-xs" icon="xmark" @click="showTextModal = false; if (isSpeaking) window.speechSynthesis.cancel();" />
+            </div>
           </div>
           <p class="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap font-medium">{{ textModalContent }}</p>
+          <div class="flex justify-between items-center pt-2 border-t border-gray-800/60">
+            <button 
+              @click="translateModalText" 
+              :disabled="isTranslatingModal"
+              class="text-xs font-bold text-teal-400 hover:text-teal-300 inline-flex items-center gap-1 cursor-pointer disabled:opacity-50"
+            >
+              <font-awesome-icon icon="language" />
+              <span>{{ isTranslatingModal ? 'Translating...' : 'Translate text' }}</span>
+            </button>
+            <BaseButton size="xs" variant="secondary" @click="showTextModal = false; if (isSpeaking) window.speechSynthesis.cancel();">Close</BaseButton>
+          </div>
         </div>
       </div>
     </Teleport>
@@ -391,11 +411,60 @@ const reopenTarget = ref(null);
 const showTextModal = ref(false);
 const textModalTitle = ref('');
 const textModalContent = ref('');
+const originalModalContent = ref('');
+const isSpeaking = ref(false);
+const isTranslatingModal = ref(false);
 
 const openTextModal = (title, content) => {
   textModalTitle.value = title;
   textModalContent.value = content;
+  originalModalContent.value = content;
   showTextModal.value = true;
+};
+
+const speakText = (text) => {
+  if (!('speechSynthesis' in window)) {
+    alert('Speech synthesis is not supported in this browser.');
+    return;
+  }
+  if (isSpeaking.value) {
+    window.speechSynthesis.cancel();
+    isSpeaking.value = false;
+    return;
+  }
+  const utterance = new SpeechSynthesisUtterance(text);
+  const savedLocale = localStorage.getItem('first_assist_locale') || 'en';
+  utterance.lang = savedLocale === 'pt' ? 'pt-BR' : 'en-US';
+  utterance.onend = () => { isSpeaking.value = false; };
+  utterance.onerror = () => { isSpeaking.value = false; };
+  isSpeaking.value = true;
+  window.speechSynthesis.speak(utterance);
+};
+
+const translateModalText = async () => {
+  if (isTranslatingModal.value) return;
+  isTranslatingModal.value = true;
+  try {
+    const savedLocale = localStorage.getItem('first_assist_locale') || 'en';
+    const targetLang = savedLocale === 'pt' ? 'pt' : 'en';
+    const response = await fetch(getApiUrl('/incidents/translate'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authStore.token}`
+      },
+      body: JSON.stringify({ text: textModalContent.value, targetLang })
+    });
+    if (!response.ok) throw new Error('Failed to translate content');
+    const data = await response.json();
+    if (data.translatedText) {
+      textModalContent.value = data.translatedText;
+    }
+  } catch (err) {
+    console.error('Translation error:', err);
+  } finally {
+    isTranslatingModal.value = false;
+  }
 };
 
 const rollbackIncidentStatus = async () => {
