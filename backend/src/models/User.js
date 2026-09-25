@@ -12,7 +12,8 @@ const userSchema = new mongoose.Schema({
   assignedEventCode: { type: String, default: null },
   assignedEventCodes: { type: [String], default: [] },
   avatarIcon: { type: String, default: 'user' },
-  avatarColor: { type: String, default: '#38A3A5' }
+  avatarColor: { type: String, default: '#38A3A5' },
+  hasCompletedOnboarding: { type: Boolean, default: false }
 }, { timestamps: true });
 
 userSchema.methods.comparePassword = async function(candidatePassword) {

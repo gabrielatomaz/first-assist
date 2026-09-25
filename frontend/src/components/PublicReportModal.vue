@@ -1,6 +1,7 @@
 <template>
-  <div class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn overflow-y-auto">
-    <div class="bg-bgCard border border-gray-800 rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4 relative my-auto overflow-hidden">
+  <Teleport to="body">
+    <div class="fixed inset-0 w-screen h-screen bg-black/80 backdrop-blur-sm z-[99999] flex items-center justify-center p-4 sm:p-6 animate-fadeIn overflow-y-auto">
+      <div class="bg-bgCard border border-gray-800 rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4 relative my-auto max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar">
       <!-- Styled Cancellation Confirmation Modal Overlay -->
       <ConfirmationModal
         :model-value="!!incidentToCancel"
@@ -318,6 +319,7 @@
       </form>
     </div>
   </div>
+  </Teleport>
 </template>
 
 <script setup>

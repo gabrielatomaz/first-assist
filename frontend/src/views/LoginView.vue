@@ -116,9 +116,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { getApiUrl } from '../config/api';
 import {
   BaseCard,
   BaseInput,
@@ -137,6 +138,39 @@ const loading = ref(false);
 const error = ref(null);
 const showRequestModal = ref(false);
 const showPublicModal = ref(false);
+
+const checkPendingAccessClaim = async () => {
+  const pendingData = localStorage.getItem('first_assist_pending_access');
+  if (!pendingData) return;
+
+  try {
+    const { email: pendingEmail } = JSON.parse(pendingData);
+    if (!pendingEmail) return;
+
+    const res = await fetch(getApiUrl('/access-requests/claim-session'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: pendingEmail })
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data.status === 'APPROVED' && data.token && data.user) {
+        authStore.setSession(data.token, data.user);
+        localStorage.removeItem('first_assist_pending_access');
+        router.push('/');
+      } else if (data.status === 'REJECTED') {
+        localStorage.removeItem('first_assist_pending_access');
+      }
+    }
+  } catch (err) {
+    console.warn('Auto access request claim check failed:', err);
+  }
+};
+
+onMounted(() => {
+  checkPendingAccessClaim();
+});
 
 const handleLogin = async () => {
   loading.value = true;

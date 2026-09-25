@@ -36,14 +36,14 @@ const displayLabel = computed(() => {
 const sizeClasses = computed(() => {
   switch (props.size) {
     case 'xs':
-      return 'h-5 px-2 text-[10px] rounded';
+      return 'h-5 px-2 text-[10px] rounded min-w-[70px]';
     case 'sm':
-      return 'h-5 px-2.5 text-xs rounded';
+      return 'h-5 px-2.5 text-xs rounded min-w-[76px]';
     case 'lg':
-      return 'h-7 px-3.5 text-xs rounded-lg min-w-[90px]';
+      return 'h-7 px-3.5 text-xs rounded-lg min-w-[96px]';
     case 'md':
     default:
-      return 'h-6 px-2.5 text-xs rounded-md min-w-[76px]';
+      return 'h-6 px-2.5 text-xs rounded-md min-w-[84px]';
   }
 });
 
@@ -51,7 +51,7 @@ const badgeClasses = computed(() => {
   const s = (props.status || '').toUpperCase();
   switch (s) {
     case 'OPEN':
-      return 'bg-accentCoral/15 text-accentCoral border border-accentCoral/30';
+      return 'bg-blue-500/15 text-blue-400 border border-blue-500/30';
     case 'INVESTIGATING':
     case 'PENDING_SCREENING':
     case 'IN_TRIAGE':

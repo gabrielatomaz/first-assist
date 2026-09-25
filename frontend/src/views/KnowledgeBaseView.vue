@@ -173,26 +173,24 @@
       />
     </div>
 
-      <!-- Pagination Controls (FEAT-016) -->
-      <div v-if="totalPages > 1" class="flex justify-between items-center bg-bgCard p-4 rounded-xl border border-gray-800 text-xs text-gray-400">
-        <span>Page {{ currentPage }} of {{ totalPages }} ({{ totalCount }} Total Resolved Tickets)</span>
-        <div class="flex space-x-2">
-          <BaseButton 
-            :disabled="currentPage === 1" 
-            @click="executeSearch(currentPage - 1)"
-            variant="secondary"
-            size="icon-sm"
-            icon="chevron-left"
-            title="Previous Page"
-          />
-          <BaseButton 
-            :disabled="currentPage === totalPages" 
-            @click="executeSearch(currentPage + 1)"
-            variant="secondary"
-            size="icon-sm"
-            icon="chevron-right"
-            title="Next Page"
-          />
+      <!-- Sentinel for Infinite Scroll (FEAT-029) -->
+      <div ref="sentinelRef" class="py-8 text-center flex justify-center items-center overflow-hidden">
+        <LoadingSpinner v-if="loadingMore" text="Loading more knowledge base records..." />
+        <div 
+          v-else-if="!hasMorePages && results.length > 0" 
+          class="flex flex-col items-center gap-2 origin-bottom transition-all duration-300"
+          :class="isEndStretching ? 'animate-stretch py-3' : 'animate-fadeIn'"
+        >
+          <!-- Elastic Rubberband Pulled Bar -->
+          <div 
+            class="rounded-full bg-teal-400/80 shadow-lg shadow-teal-500/40 transition-all duration-500"
+            :class="isEndStretching ? 'w-24 h-2.5 animate-pulse' : 'w-10 h-1 opacity-40'"
+          ></div>
+
+          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-bgCard border border-gray-800 shadow-sm text-xs font-mono font-bold text-gray-300 hover:border-gray-700 transition">
+            <font-awesome-icon icon="circle-check" class="text-teal-400 text-xs" />
+            <span>All {{ totalCount }} resolved tickets loaded</span>
+          </div>
         </div>
       </div>
     </div>
@@ -211,23 +209,25 @@
       @cancel="showReopenModal = false; reopenTarget = null"
     />
     <!-- KB Text Detail Modal -->
-    <div 
-      v-if="showTextModal" 
-      class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn"
-      @click.self="showTextModal = false"
-    >
-      <div class="bg-bgCard border border-gray-800 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl animate-fadeIn">
-        <div class="flex items-center justify-between">
-          <h4 class="text-base font-extrabold text-white tracking-tight">{{ textModalTitle }}</h4>
-          <BaseButton variant="ghost" size="icon-xs" icon="xmark" @click="showTextModal = false" />
+    <Teleport to="body">
+      <div 
+        v-if="showTextModal" 
+        class="fixed inset-0 w-screen h-screen bg-black/80 backdrop-blur-sm z-[99999] flex items-center justify-center p-4 sm:p-6 animate-fadeIn overflow-y-auto"
+        @click.self="showTextModal = false"
+      >
+        <div class="bg-bgCard border border-gray-800 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl animate-fadeIn my-auto max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar">
+          <div class="flex items-center justify-between">
+            <h4 class="text-base font-extrabold text-white tracking-tight">{{ textModalTitle }}</h4>
+            <BaseButton variant="ghost" size="icon-xs" icon="xmark" @click="showTextModal = false" />
+          </div>
+          <p class="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap font-medium">{{ textModalContent }}</p>
         </div>
-        <p class="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap font-medium">{{ textModalContent }}</p>
       </div>
-    </div>
+    </Teleport>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import {
   BaseButton,
@@ -280,9 +280,13 @@ const eventOptions = computed(() => [
 
 const results = ref([]);
 const searching = ref(true);
+const loadingMore = ref(false);
+const hasMorePages = ref(true);
 const currentPage = ref(1);
 const totalPages = ref(1);
 const totalCount = ref(0);
+const sentinelRef = ref(null);
+let observer = null;
 let debounceTimeout = null;
 
 const loadEvents = async () => {
@@ -298,9 +302,15 @@ const loadEvents = async () => {
   }
 };
 
-const executeSearch = async (page = 1) => {
-  searching.value = true;
-  currentPage.value = page;
+const executeSearch = async (page = 1, isLoadMore = false) => {
+  if (isLoadMore) {
+    loadingMore.value = true;
+  } else {
+    searching.value = true;
+    currentPage.value = 1;
+    results.value = [];
+  }
+
   try {
     const params = new URLSearchParams();
     params.append('page', String(page));
@@ -317,17 +327,60 @@ const executeSearch = async (page = 1) => {
     if (!response.ok) throw new Error('Failed to query knowledge base');
     const data = await response.json();
     
-    if (data.incidents) {
-      results.value = data.incidents;
-      totalPages.value = data.totalPages;
-      totalCount.value = data.total;
+    const newIncidents = data.incidents || (Array.isArray(data) ? data : []);
+    totalPages.value = data.totalPages || 1;
+    totalCount.value = data.total || newIncidents.length;
+
+    if (isLoadMore) {
+      const existingIds = new Set(results.value.map(i => i._id));
+      const filtered = newIncidents.filter(i => !existingIds.has(i._id));
+      results.value.push(...filtered);
     } else {
-      results.value = data;
+      results.value = newIncidents;
     }
+    
+    currentPage.value = page;
+    hasMorePages.value = page < totalPages.value;
   } catch (err) {
     console.error(err);
   } finally {
     searching.value = false;
+    loadingMore.value = false;
+  }
+};
+
+const isEndStretching = ref(false);
+
+const triggerEndStretch = () => {
+  if (isEndStretching.value) return;
+  isEndStretching.value = true;
+  setTimeout(() => {
+    isEndStretching.value = false;
+  }, 750);
+};
+
+const loadMoreKB = () => {
+  if (searching.value || loadingMore.value || !hasMorePages.value) return;
+  executeSearch(currentPage.value + 1, true);
+};
+
+const setupObserver = () => {
+  if (observer) {
+    observer.disconnect();
+    observer = null;
+  }
+  if (sentinelRef.value && typeof IntersectionObserver !== 'undefined') {
+    observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        if (hasMorePages.value && !searching.value && !loadingMore.value) {
+          loadMoreKB();
+        } else if (!hasMorePages.value && results.value.length > 0) {
+          triggerEndStretch();
+        }
+      }
+    }, { rootMargin: '200px' });
+
+    observer.observe(sentinelRef.value);
   }
 };
 
@@ -393,5 +446,8 @@ const formatDate = (dateStr) => {
 onMounted(() => {
   loadEvents();
   executeSearch(1);
+  watch(sentinelRef, (el) => {
+    if (el) setupObserver();
+  }, { immediate: true });
 });
 </script>

@@ -34,20 +34,22 @@
     />
 
     <!-- Prominent Full-Screen Event Sync Loading Modal Overlay -->
-    <div v-if="importingTBAEvent || creatingEvent" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
-      <div class="bg-bgCard border border-primaryTeal/40 p-8 rounded-2xl shadow-2xl max-w-md w-full text-center space-y-5">
-        <div class="inline-block animate-spin rounded-full h-14 w-14 border-4 border-primaryTeal border-t-transparent"></div>
-        <div class="space-y-2">
-          <h3 class="text-xl font-extrabold text-white">Importing Event & Roster...</h3>
-          <p class="text-xs text-gray-300 leading-relaxed font-medium">
-            Fetching official event metadata and bulk-syncing participating team rosters from <span class="text-accentPurple font-bold">The Blue Alliance API</span>.
-          </p>
-        </div>
-        <div class="p-3 bg-bgMain rounded-xl border border-gray-800 text-[11px] text-accentYellow font-mono font-bold animate-pulse">
-          <font-awesome-icon icon="bolt" class="mr-1 text-accentYellow" /> Please wait — Do not close or refresh this browser tab
+    <Teleport to="body">
+      <div v-if="importingTBAEvent || creatingEvent" class="fixed inset-0 w-screen h-screen bg-black/80 backdrop-blur-sm z-[99999] flex items-center justify-center p-4 sm:p-6 animate-fadeIn overflow-y-auto">
+        <div class="bg-bgCard border border-primaryTeal/40 p-8 rounded-2xl shadow-2xl max-w-md w-full text-center space-y-5 my-auto max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar">
+          <div class="inline-block animate-spin rounded-full h-14 w-14 border-4 border-primaryTeal border-t-transparent"></div>
+          <div class="space-y-2">
+            <h3 class="text-xl font-extrabold text-white">Importing Event & Roster...</h3>
+            <p class="text-xs text-gray-300 leading-relaxed font-medium">
+              Fetching official event metadata and bulk-syncing participating team rosters from <span class="text-accentPurple font-bold">The Blue Alliance API</span>.
+            </p>
+          </div>
+          <div class="p-3 bg-bgMain rounded-xl border border-gray-800 text-[11px] text-accentYellow font-mono font-bold animate-pulse">
+            <font-awesome-icon icon="bolt" class="mr-1 text-accentYellow" /> Please wait — Do not close or refresh this browser tab
+          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
 
     <!-- SUB-VIEW 1: MANAGE EVENT TEAMS (PAGINATED & SEARCHABLE) -->
     <div v-if="activeTab === 'manage-teams'" class="space-y-6">
@@ -244,7 +246,7 @@
                 type="submit" 
                 variant="primary"
                 size="sm"
-                :disabled="registeringCSA || !csaForm.name || !csaForm.email || !csaForm.password || !csaForm.confirmPassword" 
+                :disabled="registeringCSA || !isCsaFormValid" 
                 :loading="registeringCSA"
                 loading-text="Registering..."
               >
@@ -258,45 +260,44 @@
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="bg-bgMain border-b border-gray-800 text-xs font-bold uppercase tracking-wider text-teal-400">
-                <th class="px-4 py-3">CSA Name</th>
-                <th class="px-4 py-3">Email</th>
-                <th class="px-4 py-3">Status</th>
-                <th class="px-4 py-3">Assigned Event Context</th>
-                <th class="px-4 py-3 text-right">Actions</th>
+                <th class="px-4 py-3.5 w-1/3">CSA Name</th>
+                <th class="px-4 py-3.5 w-1/3">Email</th>
+                <th class="px-4 py-3.5 w-28 text-center whitespace-nowrap">Status</th>
+                <th class="px-4 py-3.5 w-1/3 whitespace-nowrap">Assigned Event Context</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-800 text-xs">
               <tr v-if="loadingCsaUsers">
-                <td colspan="5" class="text-center py-8 text-gray-400">Loading CSAs list...</td>
+                <td colspan="4" class="text-center py-8 text-gray-400">Loading CSAs list...</td>
               </tr>
               <tr v-else-if="!csaUsers || csaUsers.length === 0">
-                <td colspan="5" class="text-center py-8 text-gray-400">No Control System Advisors registered yet.</td>
+                <td colspan="4" class="text-center py-8 text-gray-400">No Control System Advisors registered yet.</td>
               </tr>
               <tr v-else v-for="csa in csaUsers" :key="csa._id" class="hover:bg-bgMain/30 transition">
-                <td class="px-4 py-3 font-bold text-white">{{ csa.name }}</td>
-                <td class="px-4 py-3 text-gray-400 font-mono">{{ csa.email }}</td>
-                <td class="px-4 py-3">
-                  <StatusBadge :status="csa.status || 'ACTIVE'" />
-                </td>
-                <td class="px-4 py-3">
-                  <CustomSelect
-                    v-model="csa.assignedEventCode"
-                    :options="csaEventOptions"
-                    @change="saveCSAEventAssignment(csa)"
-                    size="sm"
-                    class="w-56 font-bold"
-                  />
-                </td>
-                <td class="px-4 py-3 text-right whitespace-nowrap">
+                <td class="px-4 py-3.5 font-bold text-white text-sm" :title="csa.name">{{ csa.name }}</td>
+                <td class="px-4 py-3.5 text-gray-400 font-mono text-xs truncate" :title="csa.email">{{ csa.email }}</td>
+                <td class="px-4 py-3.5 text-center whitespace-nowrap">
                   <button
+                    type="button"
                     @click="toggleCSAStatus(csa)"
                     :disabled="updatingCsaStatus === csa._id"
-                    :class="csa.status === 'ACTIVE' ? 'text-accentCoral hover:text-red-300' : 'text-emerald-400 hover:text-emerald-300'"
-                    class="text-xs font-semibold hover:underline disabled:opacity-50 transition cursor-pointer"
+                    :title="`Click to change status to ${csa.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'}`"
+                    class="cursor-pointer active:scale-95 transition inline-block relative"
                   >
-                    <font-awesome-icon v-if="updatingCsaStatus === csa._id" icon="spinner" spin class="mr-1" />
-                    {{ csa.status === 'ACTIVE' ? 'Deactivate' : 'Reactivate' }}
+                    <font-awesome-icon v-if="updatingCsaStatus === csa._id" icon="spinner" spin class="absolute inset-0 m-auto text-xs text-teal-400 z-10" />
+                    <StatusBadge :status="csa.status || 'ACTIVE'" :class="{'opacity-40': updatingCsaStatus === csa._id, 'hover:brightness-125': updatingCsaStatus !== csa._id}" />
                   </button>
+                </td>
+                <td class="px-4 py-3.5">
+                  <div class="w-full">
+                    <CustomSelect
+                      v-model="csa.assignedEventCode"
+                      :options="csaEventOptions"
+                      @change="saveCSAEventAssignment(csa)"
+                      size="sm"
+                      class="w-full font-bold"
+                    />
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -645,8 +646,18 @@ const registeringCSA = ref(false);
 const updatingCsaStatus = ref(null);
 const csaForm = ref({ name: '', email: '', password: '', confirmPassword: '', assignedEventCode: null });
 
+const isCsaFormValid = computed(() => {
+  return (
+    !!csaForm.value.name?.trim() &&
+    !!csaForm.value.email?.trim() &&
+    !!csaForm.value.password?.trim() &&
+    !!csaForm.value.confirmPassword?.trim() &&
+    !!csaForm.value.assignedEventCode
+  );
+});
+
 const handleRegisterCSA = async () => {
-  if (!csaForm.value.name || !csaForm.value.email || !csaForm.value.password) return;
+  if (!isCsaFormValid.value) return;
   if (csaForm.value.password !== csaForm.value.confirmPassword) {
     return showAlert('Passwords do not match', 'error');
   }

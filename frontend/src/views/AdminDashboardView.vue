@@ -28,46 +28,50 @@
     />
 
     <!-- FTA Access Approved Success CSS Modal -->
-    <div v-if="approvalModal.open" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
-      <div class="bg-bgCard border border-emerald-500/40 p-6 rounded-2xl shadow-2xl max-w-md w-full text-center space-y-5">
-        <div class="w-14 h-14 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded-full flex items-center justify-center mx-auto text-2xl">
-          <font-awesome-icon icon="circle-check" />
+    <Teleport to="body">
+      <div v-if="approvalModal.open" class="fixed inset-0 w-screen h-screen bg-black/80 backdrop-blur-sm z-[99999] flex items-center justify-center p-4 sm:p-6 animate-fadeIn overflow-y-auto">
+        <div class="bg-bgCard border border-emerald-500/40 p-6 rounded-2xl shadow-2xl max-w-md w-full text-center space-y-5 my-auto max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar">
+          <div class="w-14 h-14 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded-full flex items-center justify-center mx-auto text-2xl">
+            <font-awesome-icon icon="circle-check" />
+          </div>
+          <div class="space-y-2">
+            <h3 class="text-xl font-extrabold text-white">{{ approvalModal.title }}</h3>
+            <p class="text-xs text-gray-300 leading-relaxed font-medium">
+              {{ approvalModal.message }}
+            </p>
+          </div>
+          <div v-if="approvalModal.requesterName" class="p-3 bg-bgMain rounded-xl border border-gray-800 text-xs text-primaryTeal font-mono font-bold">
+            <font-awesome-icon icon="user-check" class="mr-1 text-emerald-400" /> {{ approvalModal.requesterName }} is now Active (Role: FTA)
+          </div>
+          <BaseButton 
+            @click="approvalModal.open = false" 
+            variant="success"
+            size="md"
+            class="w-full"
+          >
+            Done
+          </BaseButton>
         </div>
-        <div class="space-y-2">
-          <h3 class="text-xl font-extrabold text-white">{{ approvalModal.title }}</h3>
-          <p class="text-xs text-gray-300 leading-relaxed font-medium">
-            {{ approvalModal.message }}
-          </p>
-        </div>
-        <div v-if="approvalModal.requesterName" class="p-3 bg-bgMain rounded-xl border border-gray-800 text-xs text-primaryTeal font-mono font-bold">
-          <font-awesome-icon icon="user-check" class="mr-1 text-emerald-400" /> {{ approvalModal.requesterName }} is now Active (Role: FTA)
-        </div>
-        <BaseButton 
-          @click="approvalModal.open = false" 
-          variant="success"
-          size="md"
-          class="w-full"
-        >
-          Done
-        </BaseButton>
       </div>
-    </div>
+    </Teleport>
 
     <!-- Full-Screen TBA Event Sync Loading Modal Overlay for Admin Approval -->
-    <div v-if="isApprovingTBA" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
-      <div class="bg-bgCard border border-primaryTeal/40 p-8 rounded-2xl shadow-2xl max-w-md w-full text-center space-y-5">
-        <div class="inline-block animate-spin rounded-full h-14 w-14 border-4 border-primaryTeal border-t-transparent"></div>
-        <div class="space-y-2">
-          <h3 class="text-xl font-extrabold text-white">Importing Event & Roster...</h3>
-          <p class="text-xs text-gray-300 leading-relaxed font-medium">
-            Fetching official event metadata and bulk-syncing participating team rosters from <span class="text-accentPurple font-bold">The Blue Alliance API</span>.
-          </p>
-        </div>
-        <div class="p-3 bg-bgMain rounded-xl border border-gray-800 text-[11px] text-accentYellow font-mono font-bold animate-pulse">
-          <font-awesome-icon icon="bolt" class="mr-1 text-accentYellow" /> Please wait — Registering event and updating FTA access permissions
+    <Teleport to="body">
+      <div v-if="isApprovingTBA" class="fixed inset-0 w-screen h-screen bg-black/80 backdrop-blur-sm z-[99999] flex items-center justify-center p-4 sm:p-6 animate-fadeIn overflow-y-auto">
+        <div class="bg-bgCard border border-primaryTeal/40 p-8 rounded-2xl shadow-2xl max-w-md w-full text-center space-y-5 my-auto max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar">
+          <div class="inline-block animate-spin rounded-full h-14 w-14 border-4 border-primaryTeal border-t-transparent"></div>
+          <div class="space-y-2">
+            <h3 class="text-xl font-extrabold text-white">Importing Event & Roster...</h3>
+            <p class="text-xs text-gray-300 leading-relaxed font-medium">
+              Fetching official event metadata and bulk-syncing participating team rosters from <span class="text-accentPurple font-bold">The Blue Alliance API</span>.
+            </p>
+          </div>
+          <div class="p-3 bg-bgMain rounded-xl border border-gray-800 text-[11px] text-accentYellow font-mono font-bold animate-pulse">
+            <font-awesome-icon icon="bolt" class="mr-1 text-accentYellow" /> Please wait — Registering event and updating FTA access permissions
+          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
 
     <!-- FTA Access Requests Section -->
     <BaseCard class="space-y-4">
@@ -246,40 +250,40 @@
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-bgMain border-b border-gray-800 text-[11px] font-bold uppercase tracking-wider text-teal-400">
-              <th class="px-4 py-3">Name</th>
-              <th class="px-4 py-3">Email</th>
-              <th class="px-4 py-3">Role</th>
-              <th class="px-4 py-3">Assigned Regional(s)</th>
-              <th class="px-4 py-3">Status</th>
-              <th class="px-4 py-3 text-right">Actions</th>
+              <th class="px-3 py-3 sm:px-4">Name</th>
+              <th class="px-3 py-3 sm:px-4 w-full">Email</th>
+              <th class="px-3 py-3 sm:px-4">Role</th>
+              <th class="px-3 py-3 sm:px-4 whitespace-nowrap">Assigned Regional(s)</th>
+              <th class="px-3 py-3 w-24 text-center">Status</th>
+              <th class="px-3 py-3 w-16 text-center">Actions</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-800 text-xs">
+          <tbody :key="userPage" class="divide-y divide-gray-800 text-xs animate-fadeIn transition-all duration-300">
             <tr v-for="u in users" :key="u._id" class="hover:bg-bgMain/30 transition">
-              <td class="px-4 py-3 font-bold text-white text-xs">{{ u.name }}</td>
-              <td class="px-4 py-3 text-xs text-gray-300 font-mono">{{ u.email }}</td>
-              <td class="px-4 py-3">
+              <td class="px-3 py-3 sm:px-4 font-bold text-white text-xs truncate max-w-[130px] sm:max-w-none" :title="u.name">{{ u.name }}</td>
+              <td class="px-3 py-3 sm:px-4 text-xs text-gray-300 font-mono truncate max-w-[150px] sm:max-w-none" :title="u.email">{{ u.email }}</td>
+              <td class="px-3 py-3 sm:px-4 whitespace-nowrap">
                 <RoleBadge :role="u.role" />
               </td>
 
               <!-- Assigned Regionals Column -->
-              <td class="px-4 py-3">
-                <div v-if="u.role === 'CSA'" class="flex items-center space-x-2">
+              <td class="px-3 py-3 sm:px-4">
+                <div v-if="u.role === 'CSA'" class="w-full max-w-[220px] sm:max-w-[260px]">
                   <CustomSelect
                     v-model="u.assignedEventCode"
                     :options="csaUserEventOptions"
                     @change="saveUserEventAssignment(u)"
-                    class="w-56 font-bold"
+                    class="w-full font-bold"
                   />
                 </div>
 
-                <div v-else-if="u.role === 'FTA'" class="space-y-2 max-w-xs">
-                  <div class="flex items-center space-x-2">
+                <div v-else-if="u.role === 'FTA'" class="w-full max-w-[220px] sm:max-w-[260px] space-y-2">
+                  <div class="w-full">
                     <CustomSelect
                       :model-value="''"
                       :options="ftaAddRegionalOptions"
                       @change="addFTARegionalValue(u, $event)"
-                      class="w-56 font-bold"
+                      class="w-full font-bold"
                     />
                   </div>
                   <div class="flex flex-wrap gap-1.5">
@@ -294,28 +298,63 @@
                 <span v-else class="text-xs text-gray-400 italic">N/A (Admin)</span>
               </td>
 
-              <td class="px-4 py-3">
-                <span :class="{
-                  'bg-accentGreen/10 text-accentGreen border border-accentGreen/30': u.status === 'ACTIVE',
-                  'bg-red-950/40 text-accentCoral border border-red-900/30': u.status === 'INACTIVE'
-                }" class="h-6 px-2.5 rounded-md text-xs font-bold uppercase font-mono tracking-wider inline-flex items-center justify-center leading-none">
-                  {{ u.status }}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-right whitespace-nowrap">
+              <td class="px-3 py-3 text-center whitespace-nowrap">
                 <button
+                  type="button"
                   @click="toggleUserStatus(u)"
                   :disabled="updatingUserStatus === u._id"
-                  :class="u.status === 'ACTIVE' ? 'text-accentCoral hover:text-red-300' : 'text-emerald-400 hover:text-emerald-300'"
-                  class="text-xs font-semibold hover:underline disabled:opacity-50 transition cursor-pointer"
+                  :title="`Click to change status to ${u.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'}`"
+                  :class="{
+                    'bg-accentGreen/10 text-accentGreen border border-accentGreen/30 hover:bg-accentGreen/20': u.status === 'ACTIVE',
+                    'bg-red-950/40 text-accentCoral border border-red-900/30 hover:bg-red-950/60': u.status === 'INACTIVE'
+                  }"
+                  class="h-6 w-[84px] min-w-[84px] px-2.5 rounded-md text-xs font-bold uppercase font-mono tracking-wider inline-flex items-center justify-center leading-none transition cursor-pointer active:scale-95 disabled:opacity-50"
                 >
-                  <font-awesome-icon v-if="updatingUserStatus === u._id" icon="spinner" spin class="mr-1" />
-                  {{ u.status === 'ACTIVE' ? 'Deactivate' : 'Reactivate' }}
+                  <font-awesome-icon v-if="updatingUserStatus === u._id" icon="spinner" spin class="mr-1 text-[10px]" />
+                  {{ u.status }}
                 </button>
+              </td>
+              <td class="px-3 py-3 text-center whitespace-nowrap">
+                <div class="inline-flex items-center justify-center gap-2">
+                  <BaseButton
+                    v-if="u.status === 'INACTIVE' && u._id !== authStore.user?._id"
+                    variant="danger"
+                    size="icon-xs"
+                    icon="trash-can"
+                    :loading="deletingUserId === u._id"
+                    @click="confirmDeleteUser(u)"
+                    title="Permanently Delete Inactive Account"
+                  />
+                  <span v-else-if="u.status === 'ACTIVE'" class="text-[11px] text-gray-500 italic font-mono">Active</span>
+                  <span v-else class="text-[11px] text-gray-500 italic">Protected</span>
+                </div>
               </td>
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- System User Accounts Pagination Bar (FTA Panel Style) -->
+      <div v-if="userTotalPages > 1" class="flex justify-between items-center border-t border-gray-800 pt-4 text-xs text-gray-400">
+        <span>Showing Page {{ userPage }} of {{ userTotalPages }} ({{ userTotalCount }} Total User Accounts)</span>
+        <div class="flex space-x-2">
+          <BaseButton 
+            :disabled="userPage === 1" 
+            @click="fetchUsers(userPage - 1)" 
+            variant="secondary"
+            size="icon-sm"
+            icon="chevron-left"
+            title="Previous Page"
+          />
+          <BaseButton 
+            :disabled="userPage === userTotalPages" 
+            @click="fetchUsers(userPage + 1)" 
+            variant="secondary"
+            size="icon-sm"
+            icon="chevron-right"
+            title="Next Page"
+          />
+        </div>
       </div>
     </BaseCard>
 
@@ -473,19 +512,36 @@
     </div>
 
     <!-- Note Detail Modal -->
-    <div 
-      v-if="showNoteModal" 
-      class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn"
-      @click.self="showNoteModal = false"
-    >
-      <div class="bg-bgCard border border-gray-800 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl animate-fadeIn">
-        <div class="flex items-center justify-between">
-          <h4 class="text-base font-extrabold text-white tracking-tight">Request Notes</h4>
-          <BaseButton variant="ghost" size="icon-xs" icon="xmark" @click="showNoteModal = false" />
+    <Teleport to="body">
+      <div 
+        v-if="showNoteModal" 
+        class="fixed inset-0 w-screen h-screen bg-black/80 backdrop-blur-sm z-[99999] flex items-center justify-center p-4 sm:p-6 animate-fadeIn overflow-y-auto"
+        @click.self="showNoteModal = false"
+      >
+        <div class="bg-bgCard border border-gray-800 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl animate-fadeIn my-auto max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar">
+          <div class="flex items-center justify-between">
+            <h4 class="text-base font-extrabold text-white tracking-tight">Request Notes</h4>
+            <BaseButton variant="ghost" size="icon-xs" icon="xmark" @click="showNoteModal = false" />
+          </div>
+          <p class="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">{{ noteModalText }}</p>
         </div>
-        <p class="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">{{ noteModalText }}</p>
       </div>
-    </div>
+    </Teleport>
+
+    <!-- Permanent User Deletion Modal -->
+    <ConfirmationModal
+      v-model="showDeleteUserModal"
+      title="Permanently Delete User Account?"
+      :message="`Are you sure you want to permanently delete user account '${userToDelete?.name}' (${userToDelete?.email})? This action cannot be undone.`"
+      icon="triangle-exclamation"
+      variant="danger"
+      confirm-text="Delete Permanently"
+      confirm-icon="trash-can"
+      :loading="deletingUserId !== null"
+      loading-text="Deleting..."
+      @confirm="handleDeleteUser"
+      @cancel="showDeleteUserModal = false; userToDelete = null"
+    />
   </div>
 </template>
 
@@ -652,6 +708,10 @@ const userForm = ref({ name: '', email: '', password: '', role: 'CSA' });
 const creatingUser = ref(false);
 const createUserError = ref(null);
 const updatingUserStatus = ref(null);
+const userPage = ref(1);
+const userTotalPages = ref(1);
+const userTotalCount = ref(0);
+const userLimit = 5;
 
 const userRoleOptions = [
   { value: 'CSA', label: 'Control System Advisor (CSA)' },
@@ -680,16 +740,21 @@ const fetchEvents = async () => {
   }
 };
 
-const fetchUsers = async () => {
+const fetchUsers = async (page = 1) => {
   loadingUsers.value = true;
   usersError.value = null;
+  userPage.value = page;
   try {
-    const res = await fetch(getApiUrl('/users'), {
+    const res = await fetch(getApiUrl(`/users?page=${page}&limit=${userLimit}`), {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     });
     if (!res.ok) throw new Error('Failed to fetch users list');
     const data = await res.json();
-    users.value = data.map(u => ({
+    const userList = data.users || (Array.isArray(data) ? data : []);
+    userTotalPages.value = data.totalPages || 1;
+    userTotalCount.value = data.total || userList.length;
+
+    users.value = userList.map(u => ({
       ...u,
       assignedEventCodes: u.assignedEventCodes || []
     }));
@@ -784,6 +849,39 @@ const toggleUserStatus = async (u) => {
     alert(err.message);
   } finally {
     updatingUserStatus.value = null;
+  }
+};
+
+const showDeleteUserModal = ref(false);
+const userToDelete = ref(null);
+const deletingUserId = ref(null);
+
+const confirmDeleteUser = (u) => {
+  userToDelete.value = u;
+  showDeleteUserModal.value = true;
+};
+
+const handleDeleteUser = async () => {
+  if (!userToDelete.value) return;
+  const u = userToDelete.value;
+  deletingUserId.value = u._id;
+  try {
+    const res = await fetch(getApiUrl(`/users/${u._id}`), {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${authStore.token}`
+      }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to delete user account');
+
+    showDeleteUserModal.value = false;
+    userToDelete.value = null;
+    await fetchUsers(userPage.value);
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    deletingUserId.value = null;
   }
 };
 

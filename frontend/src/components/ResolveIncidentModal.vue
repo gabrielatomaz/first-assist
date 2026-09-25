@@ -1,116 +1,118 @@
 <template>
-  <div class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 animate-fadeIn">
-    <div class="bg-bgCard w-full max-w-lg p-6 rounded-2xl shadow-2xl border border-gray-800 flex flex-col space-y-5">
-      <div class="flex justify-between items-start border-b border-gray-800 pb-4">
-        <div>
-          <h3 class="text-xl font-extrabold text-white tracking-tight flex items-center space-x-2">
-            <font-awesome-icon icon="circle-check" class="text-teal-400" />
-            <span>Resolve</span>
-          </h3>
-          <p class="text-xs text-gray-300 mt-1">Document the technical root cause and applied fix to close this ticket.</p>
+  <Teleport to="body">
+    <div class="fixed inset-0 w-screen h-screen bg-black/80 backdrop-blur-sm flex items-center justify-center z-[99999] p-4 sm:p-6 animate-fadeIn overflow-y-auto">
+      <div class="bg-bgCard w-full max-w-lg p-5 sm:p-6 rounded-2xl shadow-2xl border border-gray-800 flex flex-col space-y-5 my-auto max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3rem)] overflow-y-auto custom-scrollbar">
+        <div class="flex justify-between items-start border-b border-gray-800 pb-4">
+          <div>
+            <h3 class="text-xl font-extrabold text-white tracking-tight flex items-center space-x-2">
+              <font-awesome-icon icon="circle-check" class="text-teal-400" />
+              <span>Resolve Incident</span>
+            </h3>
+            <p class="text-xs text-gray-300 mt-1">Document the technical root cause and applied fix to close this ticket.</p>
+          </div>
+          <BaseButton 
+            @click="$emit('close')" 
+            variant="ghost" 
+            size="icon-sm" 
+            icon="xmark"
+            class="text-gray-400 hover:text-white"
+            title="Close modal"
+          />
         </div>
-        <BaseButton 
-          @click="$emit('close')" 
-          variant="ghost" 
-          size="icon-sm" 
-          icon="xmark"
-          class="text-gray-400 hover:text-white"
-          title="Close modal"
-        />
-      </div>
 
-      <!-- Quick AI Suggestion Shortcut -->
-      <div v-if="aiSuggestion" class="bg-accentPurple/10 border border-accentPurple/25 p-3 rounded-xl flex items-center justify-between">
-        <div class="flex items-center space-x-2 text-xs text-purple-200 font-semibold">
-          <font-awesome-icon icon="robot" class="text-sm text-accentPurple" />
-          <span>AI diagnostic recommendation available</span>
-        </div>
-        <BaseButton
-          type="button"
-          @click="applyAISuggestion"
-          variant="ai"
-          size="sm"
-          icon="wand-magic-sparkles"
-        >
-          Apply
-        </BaseButton>
-      </div>
-
-      <form @submit.prevent="handleSubmit" class="space-y-4">
-        <!-- Root Cause Field -->
-        <BaseTextarea
-          v-model="form.rootCause"
-          label="Root Cause"
-          required
-          rows="3"
-          placeholder="e.g. POE power cable loose terminal"
-          textarea-class="pb-12"
-        >
-          <template #action>
-            <BaseButton
-              type="button"
-              @click="isRecording && activeRecordingField === 'rootCause' ? stopRecording() : startRecording('rootCause')"
-              :disabled="isTranscribing"
-              :loading="isTranscribing && activeRecordingField === 'rootCause'"
-              :variant="isRecording && activeRecordingField === 'rootCause' ? 'danger' : 'secondary'"
-              size="icon-sm"
-              icon="microphone"
-              :class="{ 'animate-pulse': isRecording && activeRecordingField === 'rootCause' }"
-              :title="isTranscribing && activeRecordingField === 'rootCause' ? 'Transcribing audio...' : (isRecording && activeRecordingField === 'rootCause' ? 'Stop recording' : 'Record audio')"
-            />
-          </template>
-        </BaseTextarea>
-
-        <!-- Applied Solution Field -->
-        <BaseTextarea
-          v-model="form.appliedSolution"
-          label="Applied Solution"
-          required
-          rows="3"
-          placeholder="e.g. Secured ethernet cable connector, added zip-tie support"
-          textarea-class="pb-12"
-        >
-          <template #action>
-            <BaseButton
-              type="button"
-              @click="isRecording && activeRecordingField === 'appliedSolution' ? stopRecording() : startRecording('appliedSolution')"
-              :disabled="isTranscribing"
-              :loading="isTranscribing && activeRecordingField === 'appliedSolution'"
-              :variant="isRecording && activeRecordingField === 'appliedSolution' ? 'danger' : 'secondary'"
-              size="icon-sm"
-              icon="microphone"
-              :class="{ 'animate-pulse': isRecording && activeRecordingField === 'appliedSolution' }"
-              :title="isTranscribing && activeRecordingField === 'appliedSolution' ? 'Transcribing audio...' : (isRecording && activeRecordingField === 'appliedSolution' ? 'Stop recording' : 'Record audio')"
-            />
-          </template>
-        </BaseTextarea>
-
-        <p v-if="audioError" class="text-xs text-accentCoral font-medium">{{ audioError }}</p>
-
-        <div class="flex justify-end space-x-3 pt-4 border-t border-gray-800">
+        <!-- Quick AI Suggestion Shortcut -->
+        <div v-if="aiSuggestion" class="bg-accentPurple/10 border border-accentPurple/25 p-3 rounded-xl flex items-center justify-between">
+          <div class="flex items-center space-x-2 text-xs text-purple-200 font-semibold">
+            <font-awesome-icon icon="robot" class="text-sm text-accentPurple" />
+            <span>AI diagnostic recommendation available</span>
+          </div>
           <BaseButton
             type="button"
-            variant="secondary"
+            @click="applyAISuggestion"
+            variant="ai"
             size="sm"
-            @click="$emit('close')"
+            icon="wand-magic-sparkles"
           >
-            Cancel
-          </BaseButton>
-          <BaseButton
-            type="submit"
-            variant="primary"
-            size="sm"
-            icon="circle-check"
-            :disabled="submitting || !form.rootCause || !form.appliedSolution"
-            :loading="submitting"
-            loading-text="Resolving..."
-          >
-            Resolve
+            Apply
           </BaseButton>
         </div>
-      </form>
+
+        <form @submit.prevent="handleSubmit" class="space-y-4">
+          <!-- Root Cause Field -->
+          <BaseTextarea
+            v-model="form.rootCause"
+            label="Root Cause"
+            required
+            rows="3"
+            placeholder="e.g. POE power cable loose terminal"
+            textarea-class="pb-12"
+          >
+            <template #action>
+              <BaseButton
+                type="button"
+                @click="isRecording && activeRecordingField === 'rootCause' ? stopRecording() : startRecording('rootCause')"
+                :disabled="isTranscribing"
+                :loading="isTranscribing && activeRecordingField === 'rootCause'"
+                :variant="isRecording && activeRecordingField === 'rootCause' ? 'danger' : 'secondary'"
+                size="icon-sm"
+                icon="microphone"
+                :class="{ 'animate-pulse': isRecording && activeRecordingField === 'rootCause' }"
+                :title="isTranscribing && activeRecordingField === 'rootCause' ? 'Transcribing audio...' : (isRecording && activeRecordingField === 'rootCause' ? 'Stop recording' : 'Record audio')"
+              />
+            </template>
+          </BaseTextarea>
+
+          <!-- Applied Solution Field -->
+          <BaseTextarea
+            v-model="form.appliedSolution"
+            label="Applied Solution"
+            required
+            rows="3"
+            placeholder="e.g. Secured ethernet cable connector, added zip-tie support"
+            textarea-class="pb-12"
+          >
+            <template #action>
+              <BaseButton
+                type="button"
+                @click="isRecording && activeRecordingField === 'appliedSolution' ? stopRecording() : startRecording('appliedSolution')"
+                :disabled="isTranscribing"
+                :loading="isTranscribing && activeRecordingField === 'appliedSolution'"
+                :variant="isRecording && activeRecordingField === 'appliedSolution' ? 'danger' : 'secondary'"
+                size="icon-sm"
+                icon="microphone"
+                :class="{ 'animate-pulse': isRecording && activeRecordingField === 'appliedSolution' }"
+                :title="isTranscribing && activeRecordingField === 'appliedSolution' ? 'Transcribing audio...' : (isRecording && activeRecordingField === 'appliedSolution' ? 'Stop recording' : 'Record audio')"
+              />
+            </template>
+          </BaseTextarea>
+
+          <p v-if="audioError" class="text-xs text-accentCoral font-medium">{{ audioError }}</p>
+
+          <div class="flex justify-end space-x-3 pt-4 border-t border-gray-800">
+            <BaseButton
+              type="button"
+              variant="secondary"
+              size="sm"
+              @click="$emit('close')"
+            >
+              Cancel
+            </BaseButton>
+            <BaseButton
+              type="submit"
+              variant="primary"
+              size="sm"
+              icon="circle-check"
+              :disabled="submitting || !form.rootCause || !form.appliedSolution"
+              :loading="submitting"
+              loading-text="Resolving..."
+            >
+              Resolve
+            </BaseButton>
+          </div>
+        </form>
+      </div>
     </div>
-  </div>
+  </Teleport>
 </template>
 
 <script setup>

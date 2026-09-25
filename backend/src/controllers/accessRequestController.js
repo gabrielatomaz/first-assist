@@ -309,5 +309,66 @@ export const accessRequestController = {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
+  },
+
+  // Public endpoint: Claim session token when cached access request is approved
+  claimSession: async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email || !email.trim()) {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+
+      const formattedEmail = email.toLowerCase().trim();
+      const request = await AccessRequest.findOne({ email: formattedEmail }).sort({ createdAt: -1 });
+
+      if (!request) {
+        return res.status(404).json({ status: 'NOT_FOUND' });
+      }
+
+      if (request.status === 'PENDING') {
+        return res.json({ status: 'PENDING' });
+      }
+
+      if (request.status === 'REJECTED') {
+        return res.json({ status: 'REJECTED', reason: request.rejectionReason });
+      }
+
+      if (request.status === 'APPROVED') {
+        const user = await User.findOne({ email: formattedEmail });
+        if (!user) {
+          return res.status(404).json({ error: 'User account not found' });
+        }
+
+        const jwt = (await import('jsonwebtoken')).default;
+        const JWT_SECRET = process.env.JWT_SECRET || 'first-assist-secret-key-2025';
+        const token = jwt.sign(
+          { id: user._id, email: user.email, role: user.role },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+
+        return res.json({
+          status: 'APPROVED',
+          token,
+          user: {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            status: user.status,
+            assignedEventCode: user.assignedEventCode,
+            assignedEventCodes: user.assignedEventCodes,
+            avatarIcon: user.avatarIcon,
+            avatarColor: user.avatarColor,
+            hasCompletedOnboarding: user.hasCompletedOnboarding
+          }
+        });
+      }
+
+      res.status(400).json({ error: 'Unknown request status' });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
   }
 };

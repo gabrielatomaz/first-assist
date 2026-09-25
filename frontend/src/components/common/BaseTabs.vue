@@ -1,12 +1,12 @@
 <template>
-  <div class="flex items-center gap-2 border-b border-gray-800 pb-3 overflow-x-auto scrollbar-none">
+  <div class="flex items-center gap-2 border-b border-gray-800 pb-3 overflow-x-auto scrollbar-none w-full">
     <button
       v-for="tab in tabs"
       :key="tab.id"
       type="button"
       @click="selectTab(tab.id)"
       :class="[
-        'h-9 px-4 rounded-xl text-xs font-bold border transition flex items-center gap-2 cursor-pointer flex-shrink-0 select-none',
+        'h-9 px-3 sm:px-4 rounded-xl text-xs font-bold border transition flex items-center justify-center gap-2 cursor-pointer select-none flex-1 sm:flex-none sm:flex-shrink-0',
         modelValue === tab.id
           ? (tab.activeClass || 'bg-primaryTeal/20 text-teal-300 border-primaryTeal/50 shadow-sm')
           : 'bg-bgCard text-gray-300 border-gray-800 hover:text-white hover:border-gray-700'

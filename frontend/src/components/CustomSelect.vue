@@ -94,7 +94,7 @@ const sizeClasses = computed(() => {
   if (props.size === 'sm') {
     return 'h-8 px-3 py-1 rounded-xl text-xs font-semibold';
   }
-  return 'h-10 sm:h-9 px-3.5 py-1 sm:py-1.5 rounded-xl text-sm font-medium';
+  return 'h-10 sm:h-9 px-3.5 py-1 sm:py-1.5 rounded-xl text-xs font-semibold';
 });
 
 const isSelected = (optValue) => {
@@ -119,11 +119,13 @@ const updateMenuPosition = () => {
     const spaceBelow = window.innerHeight - rect.bottom;
     const menuMaxHeight = 240;
     const showAbove = spaceBelow < menuMaxHeight && rect.top > menuMaxHeight;
+    const menuWidth = Math.max(rect.width, 110);
+    const leftPos = Math.min(rect.left, window.innerWidth - menuWidth - 12);
 
     menuStyle.value = {
       top: showAbove ? `${Math.max(10, rect.top - menuMaxHeight)}px` : `${rect.bottom + 4}px`,
-      left: `${rect.left}px`,
-      width: `${Math.max(rect.width, 240)}px`
+      left: `${Math.max(8, leftPos)}px`,
+      width: `${menuWidth}px`
     };
   }
 };

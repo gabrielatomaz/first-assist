@@ -57,7 +57,8 @@ export const authController = {
           teamNumber: user.teamNumber || null,
           teamRole: user.teamRole || null,
           assignedEventCode: user.assignedEventCode || null,
-          assignedEventCodes: user.assignedEventCodes || []
+          assignedEventCodes: user.assignedEventCodes || [],
+          hasCompletedOnboarding: user.hasCompletedOnboarding ?? false
         }
       });
     } catch (error) {
@@ -80,7 +81,8 @@ export const authController = {
         teamNumber: user.teamNumber || null,
         teamRole: user.teamRole || null,
         assignedEventCode: user.assignedEventCode || null,
-        assignedEventCodes: user.assignedEventCodes || []
+        assignedEventCodes: user.assignedEventCodes || [],
+        hasCompletedOnboarding: user.hasCompletedOnboarding ?? false
       });
     } catch (error) {
       res.status(500).json({ error: error.message });

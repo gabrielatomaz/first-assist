@@ -26,6 +26,27 @@ export default {
         textMuted: 'var(--color-text-muted, #94A3B8)',
         borderDefault: 'var(--color-border-default, #334155)',
         borderSubtle: 'var(--color-border-subtle, #1E293B)',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        pulseGlow: {
+          '0%, 100%': { opacity: '1', transform: 'scale(1)' },
+          '50%': { opacity: '0.8', transform: 'scale(1.03)' },
+        },
+        stretchLoad: {
+          '0%': { transform: 'scaleY(0.4) scaleX(0.9)', opacity: '0.4' },
+          '40%': { transform: 'scaleY(1.5) scaleX(1.1)', opacity: '1' },
+          '70%': { transform: 'scaleY(0.85) scaleX(0.95)', opacity: '1' },
+          '100%': { transform: 'scaleY(1) scaleX(1)', opacity: '1' },
+        }
+      },
+      animation: {
+        fadeIn: 'fadeIn 0.35s ease-out forwards',
+        pulseGlow: 'pulseGlow 2s ease-in-out infinite',
+        stretch: 'stretchLoad 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
       }
     },
   },

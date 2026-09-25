@@ -21,6 +21,32 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Security HTTP Headers (FEAT-028)
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
+// Security: NoSQL Injection Body Key Sanitizer (FEAT-028)
+app.use((req, res, next) => {
+  if (req.body && typeof req.body === 'object') {
+    const sanitize = (obj) => {
+      for (const key in obj) {
+        if (key.startsWith('$') || key.includes('.')) {
+          delete obj[key];
+        } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+          sanitize(obj[key]);
+        }
+      }
+    };
+    sanitize(req.body);
+  }
+  next();
+});
+
 connectDB();
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

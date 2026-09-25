@@ -33,7 +33,7 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (val) => ['sm', 'md', 'lg', 'icon-xs', 'icon-sm', 'icon-md'].includes(val)
+    validator: (val) => ['xs', 'sm', 'md', 'lg', 'icon-xs', 'icon-sm', 'icon-md'].includes(val)
   },
   icon: {
     type: String,
@@ -59,6 +59,8 @@ const props = defineProps({
 
 const sizeClasses = computed(() => {
   switch (props.size) {
+    case 'xs':
+      return 'h-7 px-2.5 text-[11px] rounded-lg';
     case 'sm':
       return 'h-10 sm:h-8 px-3.5 sm:px-3 text-xs rounded-xl';
     case 'lg':

@@ -8,6 +8,7 @@ const router = express.Router();
 router.get('/events', accessRequestController.getPublicEvents);
 router.get('/validate-event/:key', accessRequestController.validateEvent);
 router.post('/', accessRequestController.createRequest);
+router.post('/claim-session', accessRequestController.claimSession);
 
 // Protected routes (ADMIN only)
 router.get('/', authMiddleware, requireRole(['ADMIN']), accessRequestController.getRequests);

@@ -21,13 +21,28 @@ export const incidentService = {
     }
     if (filters.category) query.category = filters.category;
     if (filters.priority) query.priority = filters.priority;
-    if (filters.teamNumber) query.teamNumber = Number(filters.teamNumber);
+    
+    const searchTerm = filters.search || filters.q || filters.teamNumber;
+    if (searchTerm !== undefined && searchTerm !== null && String(searchTerm).trim() !== '') {
+      const termStr = String(searchTerm).trim();
+      const num = Number(termStr);
+      if (!isNaN(num) && termStr !== '') {
+        query.teamNumber = num;
+      } else {
+        query.$or = [
+          { matchNumber: new RegExp(termStr, 'i') },
+          { description: new RegExp(termStr, 'i') },
+          { category: new RegExp(termStr, 'i') }
+        ];
+      }
+    }
     
     if (filters.eventCode && filters.eventCode !== 'ALL') {
-      const targetEvent = await Event.findOne({ code: filters.eventCode });
+      const eventRegex = new RegExp(`^${filters.eventCode}$`, 'i');
+      const targetEvent = await Event.findOne({ code: eventRegex });
       const eventTeams = targetEvent?.teams || [];
       query.$or = [
-        { eventCode: filters.eventCode },
+        { eventCode: eventRegex },
         {
           eventCode: { $in: [null, '', undefined] },
           teamNumber: { $in: eventTeams }
@@ -115,6 +130,36 @@ export const incidentService = {
 
     const previous = await Incident.findById(id);
     if (!previous) throw new Error("Incident not found");
+
+    if (assignedTo) {
+      const User = require('../models/User');
+      const targetUser = await User.findById(assignedTo);
+      if (!targetUser) {
+        throw new Error("Assigned user not found");
+      }
+      if (targetUser.status === 'INACTIVE') {
+        throw new Error("Cannot assign incident to an inactive user account");
+      }
+
+      const actingUser = await User.findById(userId);
+      const actingRole = (actingUser?.role || '').toUpperCase();
+
+      // FTAs can only assign tickets to CSAs (or themselves)
+      if (actingRole === 'FTA' && targetUser._id.toString() !== userId.toString()) {
+        if (targetUser.role !== 'CSA') {
+          throw new Error("FTAs can only assign tickets to CSAs assigned to this event");
+        }
+      }
+
+      if (targetUser.role !== 'ADMIN' && previous.eventCode) {
+        const isAssignedToEvent =
+          targetUser.assignedEventCode === previous.eventCode ||
+          (Array.isArray(targetUser.assignedEventCodes) && targetUser.assignedEventCodes.includes(previous.eventCode));
+        if (!isAssignedToEvent) {
+          throw new Error(`Technician '${targetUser.name}' is not assigned to event ${previous.eventCode}`);
+        }
+      }
+    }
 
     const extraUpdates = {};
     if (previous.status === 'PENDING_SCREENING' && status !== 'REJECTED' && userId) {

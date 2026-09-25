@@ -26,8 +26,8 @@ export function useSpeechRecognition() {
   // ========================
   const startSpeechAPI = (fieldName) => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognition = new SpeechRecognition();
-    recognition.lang = 'en-US';
+    const savedLocale = localStorage.getItem('first_assist_locale') || 'en';
+    recognition.lang = savedLocale === 'pt' || savedLocale === 'pt-BR' ? 'pt-BR' : 'en-US';
     recognition.interimResults = false;
     recognition.continuous = true;
     finalTranscript = '';

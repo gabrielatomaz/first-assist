@@ -109,42 +109,42 @@
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-bgMain border-b border-gray-800 text-xs font-bold uppercase tracking-wider text-teal-400">
-              <th class="px-6 py-4">Name</th>
-              <th class="px-6 py-4">Email</th>
-              <th class="px-6 py-4">Role</th>
-              <th class="px-6 py-4">Assigned Regional(s)</th>
-              <th class="px-6 py-4">Status</th>
-              <th class="px-6 py-4 text-right">Actions</th>
+              <th class="px-3 py-3.5 sm:px-4">Name</th>
+              <th class="px-3 py-3.5 sm:px-4 w-full">Email</th>
+              <th class="px-3 py-3.5 sm:px-4">Role</th>
+              <th class="px-3 py-3.5 sm:px-4 whitespace-nowrap">Assigned Regional(s)</th>
+              <th class="px-3 py-3.5 w-24 text-center">Status</th>
+              <th class="px-3 py-3.5 w-16 text-center">Actions</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-800 text-sm text-gray-300">
+          <tbody :key="currentPage" class="divide-y divide-gray-800 text-sm text-gray-300 animate-fadeIn transition-all duration-300">
             <tr v-for="user in users" :key="user._id" class="hover:bg-bgMain/30 transition">
-              <td class="px-6 py-4 font-semibold text-white">{{ user.name }}</td>
-              <td class="px-6 py-4 font-mono text-xs">{{ user.email }}</td>
-              <td class="px-6 py-4">
+              <td class="px-3 py-3.5 sm:px-4 font-semibold text-white truncate max-w-[130px] sm:max-w-none" :title="user.name">{{ user.name }}</td>
+              <td class="px-3 py-3.5 sm:px-4 font-mono text-xs truncate max-w-[150px] sm:max-w-none" :title="user.email">{{ user.email }}</td>
+              <td class="px-3 py-3.5 sm:px-4 whitespace-nowrap">
                 <RoleBadge :role="user.role" />
               </td>
 
               <!-- Assigned Regionals Column -->
-              <td class="px-6 py-4">
+              <td class="px-3 py-3.5 sm:px-4">
                 <!-- Single active regional dropdown for CSA -->
-                <div v-if="user.role === 'CSA'" class="flex items-center space-x-2">
+                <div v-if="user.role === 'CSA'" class="w-full max-w-[220px] sm:max-w-[260px]">
                   <CustomSelect
                     v-model="user.assignedEventCode"
                     :options="csaUserEventOptions"
                     @change="saveUserEventAssignment(user)"
-                    class="w-56 font-bold"
+                    class="w-full font-bold"
                   />
                 </div>
 
                 <!-- Multi-regional assignment for FTA (Editable by Admin) -->
-                <div v-else-if="user.role === 'FTA'" class="space-y-2 max-w-xs">
-                  <div v-if="authStore.isAdmin" class="flex items-center space-x-2">
+                <div v-else-if="user.role === 'FTA'" class="w-full max-w-[220px] sm:max-w-[260px] space-y-2">
+                  <div v-if="authStore.isAdmin" class="w-full">
                     <CustomSelect
                       :model-value="''"
                       :options="ftaAddRegionalOptions"
                       @change="addFTARegionalValue(user, $event)"
-                      class="w-56 font-bold"
+                      class="w-full font-bold"
                     />
                   </div>
 
@@ -172,27 +172,77 @@
                 <span v-else class="text-xs text-gray-400 italic">N/A (Admin)</span>
               </td>
 
-              <td class="px-6 py-4">
-                <StatusBadge :status="user.status || 'ACTIVE'" />
-              </td>
-              <td class="px-6 py-4 text-right whitespace-nowrap">
+              <td class="px-3 py-3.5 text-center whitespace-nowrap">
                 <button
                   v-if="canModifyUser(user)"
+                  type="button"
                   @click="toggleUserStatus(user)"
                   :disabled="updatingStatus === user._id"
-                  :class="user.status === 'ACTIVE' ? 'text-accentCoral hover:text-red-300' : 'text-emerald-400 hover:text-emerald-300'"
-                  class="text-xs font-semibold hover:underline disabled:opacity-50 transition cursor-pointer"
+                  :title="`Click to change status to ${user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'}`"
+                  class="cursor-pointer active:scale-95 transition inline-block"
                 >
-                  <font-awesome-icon v-if="updatingStatus === user._id" icon="spinner" spin class="mr-1" />
-                  {{ user.status === 'ACTIVE' ? 'Deactivate' : 'Reactivate' }}
+                  <StatusBadge :status="user.status || 'ACTIVE'" class="hover:brightness-125" />
                 </button>
+                <StatusBadge v-else :status="user.status || 'ACTIVE'" />
+              </td>
+              <td class="px-3 py-3.5 text-center whitespace-nowrap">
+                <div v-if="canModifyUser(user)" class="inline-flex items-center justify-center">
+                  <BaseButton
+                    v-if="user.status === 'INACTIVE' && user._id !== authStore.user?._id"
+                    variant="danger"
+                    size="icon-xs"
+                    icon="trash-can"
+                    :loading="deletingUserId === user._id"
+                    @click="confirmDeleteUser(user)"
+                    title="Permanently Delete Inactive Account"
+                  />
+                  <span v-else-if="user.status === 'ACTIVE'" class="text-[11px] text-gray-500 italic font-mono">Active</span>
+                </div>
                 <span v-else class="text-xs text-gray-400 italic">Protected</span>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
+
+      <!-- Pagination Controls (FTA Panel Style) -->
+      <div v-if="totalPages > 1" class="flex justify-between items-center border-t border-gray-800 pt-4 p-4 text-xs text-gray-400">
+        <span>Showing Page {{ currentPage }} of {{ totalPages }} ({{ totalCount }} Total User Accounts)</span>
+        <div class="flex space-x-2">
+          <BaseButton 
+            :disabled="currentPage === 1" 
+            @click="fetchUsers(currentPage - 1)" 
+            variant="secondary"
+            size="icon-sm"
+            icon="chevron-left"
+            title="Previous Page"
+          />
+          <BaseButton 
+            :disabled="currentPage === totalPages" 
+            @click="fetchUsers(currentPage + 1)" 
+            variant="secondary"
+            size="icon-sm"
+            icon="chevron-right"
+            title="Next Page"
+          />
+        </div>
+      </div>
     </div>
+
+    <!-- Permanent User Deletion Modal -->
+    <ConfirmationModal
+      v-model="showDeleteModal"
+      title="Permanently Delete User Account?"
+      :message="`Are you sure you want to permanently delete user account '${userToDelete?.name}' (${userToDelete?.email})? This action cannot be undone.`"
+      icon="triangle-exclamation"
+      variant="danger"
+      confirm-text="Delete Permanently"
+      confirm-icon="trash-can"
+      :loading="deletingUserId !== null"
+      loading-text="Deleting..."
+      @confirm="handleDeleteUser"
+      @cancel="showDeleteModal = false; userToDelete = null"
+    />
   </div>
 </template>
 
@@ -203,6 +253,7 @@ import {
   BaseCard,
   BaseInput,
   CustomSelect,
+  ConfirmationModal,
   PageHeader,
   RoleBadge,
   StatusBadge,
@@ -301,16 +352,26 @@ const fetchEvents = async () => {
   }
 };
 
-const fetchUsers = async () => {
+const currentPage = ref(1);
+const totalPages = ref(1);
+const totalCount = ref(0);
+const limit = 5;
+
+const fetchUsers = async (page = 1) => {
   loading.value = true;
   error.value = null;
+  currentPage.value = page;
   try {
-    const response = await fetch(getApiUrl('/users'), {
+    const response = await fetch(getApiUrl(`/users?page=${page}&limit=${limit}`), {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     });
     if (!response.ok) throw new Error('Failed to fetch users list');
     const data = await response.json();
-    users.value = data.map(u => ({
+    const userList = data.users || (Array.isArray(data) ? data : []);
+    totalPages.value = data.totalPages || 1;
+    totalCount.value = data.total || userList.length;
+
+    users.value = userList.map(u => ({
       ...u,
       assignedEventCodes: u.assignedEventCodes || []
     }));
@@ -407,6 +468,39 @@ const toggleUserStatus = async (user) => {
     alert(err.message);
   } finally {
     updatingStatus.value = null;
+  }
+};
+
+const showDeleteModal = ref(false);
+const userToDelete = ref(null);
+const deletingUserId = ref(null);
+
+const confirmDeleteUser = (user) => {
+  userToDelete.value = user;
+  showDeleteModal.value = true;
+};
+
+const handleDeleteUser = async () => {
+  if (!userToDelete.value) return;
+  const u = userToDelete.value;
+  deletingUserId.value = u._id;
+  try {
+    const res = await fetch(getApiUrl(`/users/${u._id}`), {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${authStore.token}`
+      }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to delete user account');
+
+    showDeleteModal.value = false;
+    userToDelete.value = null;
+    await fetchUsers(currentPage.value);
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    deletingUserId.value = null;
   }
 };
 

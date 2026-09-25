@@ -1,6 +1,7 @@
 <template>
-  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-3 animate-fadeIn overflow-y-auto">
-    <div class="bg-bgCard border border-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full p-6 space-y-4 relative my-auto">
+  <Teleport to="body">
+    <div class="fixed inset-0 w-screen h-screen bg-black/80 backdrop-blur-sm z-[99999] flex items-center justify-center p-3 sm:p-6 animate-fadeIn overflow-y-auto">
+      <div class="bg-bgCard border border-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full p-6 space-y-4 relative my-auto max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar">
       <BaseButton 
         @click="$emit('close')" 
         variant="ghost"
@@ -181,6 +182,7 @@
       </form>
     </div>
   </div>
+  </Teleport>
 </template>
 
 <script setup>
@@ -284,6 +286,7 @@ const handleSubmit = async () => {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to submit request');
+    localStorage.setItem('first_assist_pending_access', JSON.stringify({ email: form.value.email.toLowerCase().trim(), submittedAt: Date.now() }));
     success.value = true;
   } catch (err) {
     error.value = err.message;

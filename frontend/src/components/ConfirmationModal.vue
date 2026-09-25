@@ -1,14 +1,15 @@
 <template>
-  <div 
-    v-if="modelValue" 
-    class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn"
-    @click.self="handleBackdropClick"
-    @keydown.esc="handleCancel"
-  >
+  <Teleport to="body">
     <div 
-      class="bg-bgCard border rounded-2xl p-6 max-w-md w-full text-center space-y-4 shadow-2xl animate-fadeIn relative"
-      :class="borderClass"
+      v-if="modelValue" 
+      class="fixed inset-0 w-screen h-screen bg-black/80 backdrop-blur-sm z-[99999] flex items-center justify-center p-4 sm:p-6 animate-fadeIn overflow-y-auto"
+      @click.self="handleBackdropClick"
+      @keydown.esc="handleCancel"
     >
+      <div 
+        class="bg-bgCard border rounded-2xl p-6 max-w-md w-full text-center space-y-4 shadow-2xl animate-fadeIn relative my-auto max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar"
+        :class="borderClass"
+      >
       <!-- Icon Indicator Badge -->
       <div 
         class="w-12 h-12 mx-auto rounded-full flex items-center justify-center text-xl border shadow-inner"
@@ -76,6 +77,7 @@
       </div>
     </div>
   </div>
+  </Teleport>
 </template>
 
 <script setup>

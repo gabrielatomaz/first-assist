@@ -60,8 +60,8 @@
       </div>
 
       <div class="flex flex-col sm:flex-row sm:flex-nowrap items-stretch sm:items-center gap-2.5 w-full md:w-auto">
-        <!-- 1. Technician selection dropdown (with "Assign to Me") -->
-        <div v-if="authStore.isAdmin || authStore.isFTA || authStore.user" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1 sm:space-x-1.5 w-full sm:w-auto flex-shrink-0">
+        <!-- 1a. Technician selection dropdown for FTA / Admin -->
+        <div v-if="authStore.isAdmin || authStore.isFTA" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1 sm:space-x-1.5 w-full sm:w-auto flex-shrink-0">
           <label class="text-xs font-semibold text-gray-300 uppercase tracking-wider whitespace-nowrap">Technician:</label>
           <CustomSelect
             v-model="selectedAssignee"
@@ -70,6 +70,8 @@
             class="w-full sm:w-44 text-xs font-semibold"
           />
         </div>
+
+
 
         <!-- 2. Status update select dropdown -->
         <div v-if="authStore.isAdmin || authStore.isFTA || isAssignee" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1 sm:space-x-1.5 w-full sm:w-auto flex-shrink-0">
@@ -110,16 +112,43 @@
     <!-- Detail Box -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
       <!-- Mobile Technical Assignee Header Card (Visible on mobile only, above Issue Description) -->
-      <BaseCard class="block md:hidden space-y-4">
+      <BaseCard class="block md:hidden space-y-3">
         <div class="flex items-center justify-between border-b border-gray-800 pb-2 min-h-[32px]">
           <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">Technical Assignee</h3>
           <RoleBadge v-if="incident.assignedTo" :role="incident.assignedTo?.role" />
         </div>
-        <div v-if="incident.assignedTo" class="flex items-center space-x-3 pt-2">
-          <UserAvatar :icon="incident.assignedTo?.avatarIcon" :color="incident.assignedTo?.avatarColor" size="md" :has-bg="true" />
-          <p class="text-sm font-bold text-white leading-tight">{{ incident.assignedTo?.name }}</p>
+
+        <div v-if="incident.assignedTo" class="flex flex-wrap items-center justify-between gap-2.5 pt-1">
+          <div class="flex items-center space-x-3 min-w-0">
+            <UserAvatar :icon="incident.assignedTo?.avatarIcon" :color="incident.assignedTo?.avatarColor" size="md" :has-bg="true" />
+            <p class="text-sm font-bold text-white leading-tight break-words" :title="incident.assignedTo?.name">{{ incident.assignedTo?.name }}</p>
+          </div>
+          <BaseButton
+            v-if="!authStore.isAdmin && !authStore.isFTA && isAssignee"
+            variant="secondary"
+            size="sm"
+            icon="user-minus"
+            @click="unassignMe"
+            title="Withdraw assignment"
+            class="font-bold whitespace-nowrap text-accentCoral hover:text-red-300 w-full justify-center"
+          >
+            Withdraw
+          </BaseButton>
         </div>
-        <p v-else class="text-xs text-gray-400 font-medium">Unassigned queue</p>
+
+        <div v-else class="pt-1">
+          <p v-if="authStore.isAdmin || authStore.isFTA" class="text-xs text-gray-400 font-medium italic">Unassigned</p>
+          <BaseButton
+            v-if="!authStore.isAdmin && !authStore.isFTA && authStore.user"
+            variant="primary"
+            size="md"
+            icon="user-check"
+            @click="assignToMe"
+            class="w-full justify-center font-bold"
+          >
+            Assign to Me
+          </BaseButton>
+        </div>
       </BaseCard>
 
       <div class="md:col-span-2 space-y-6">
@@ -173,16 +202,43 @@
       <!-- Desktop Sidebar Column -->
       <div class="space-y-6">
         <!-- Desktop Assignee Card info -->
-        <BaseCard class="hidden md:block space-y-4">
+        <BaseCard class="hidden md:block space-y-3">
           <div class="flex items-center justify-between border-b border-gray-800 pb-2 min-h-[32px]">
             <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">Technical Assignee</h3>
             <RoleBadge v-if="incident.assignedTo" :role="incident.assignedTo?.role" />
           </div>
-          <div v-if="incident.assignedTo" class="flex items-center space-x-3 pt-2">
-            <UserAvatar :icon="incident.assignedTo?.avatarIcon" :color="incident.assignedTo?.avatarColor" size="md" :has-bg="true" />
-            <p class="text-sm font-bold text-white leading-tight">{{ incident.assignedTo?.name }}</p>
+
+          <div v-if="incident.assignedTo" class="flex flex-wrap items-center justify-between gap-2.5 pt-1">
+            <div class="flex items-center space-x-3 min-w-0">
+              <UserAvatar :icon="incident.assignedTo?.avatarIcon" :color="incident.assignedTo?.avatarColor" size="md" :has-bg="true" />
+              <p class="text-sm font-bold text-white leading-tight break-words" :title="incident.assignedTo?.name">{{ incident.assignedTo?.name }}</p>
+            </div>
+            <BaseButton
+              v-if="!authStore.isAdmin && !authStore.isFTA && isAssignee"
+              variant="secondary"
+              size="sm"
+              icon="user-minus"
+              @click="unassignMe"
+              title="Withdraw assignment"
+              class="font-bold whitespace-nowrap text-accentCoral hover:text-red-300 w-full justify-center"
+            >
+              Withdraw
+            </BaseButton>
           </div>
-          <p v-else class="text-xs text-gray-400 font-medium">Unassigned queue</p>
+
+          <div v-else class="pt-1">
+            <p v-if="authStore.isAdmin || authStore.isFTA" class="text-xs text-gray-400 font-medium italic">Unassigned</p>
+            <BaseButton
+              v-if="!authStore.isAdmin && !authStore.isFTA && authStore.user"
+              variant="primary"
+              size="md"
+              icon="user-check"
+              @click="assignToMe"
+              class="w-full justify-center font-bold"
+            >
+              Assign to Me
+            </BaseButton>
+          </div>
         </BaseCard>
 
         <!-- Desktop Resolution Details Card (Visible on desktop only) -->
@@ -360,6 +416,27 @@ const statusOptions = computed(() => {
 
 const technicianOptions = computed(() => {
   const options = [{ value: null, label: 'Unassigned' }];
+
+  // CSAs can ONLY assign incidents to themselves or view current assignee
+  if (!authStore.isAdmin && !authStore.isFTA) {
+    if (authStore.user) {
+      options.push({
+        value: authStore.user._id,
+        label: `Assign to Me (${userRoleLabel.value})`,
+        class: 'text-accentYellow font-bold'
+      });
+    }
+    if (incident.value?.assignedTo && String(incident.value.assignedTo._id) !== String(authStore.user?._id)) {
+      options.unshift({
+        value: incident.value.assignedTo._id,
+        label: `${incident.value.assignedTo.name} (${incident.value.assignedTo.role || 'Tech'})`,
+        disabled: true
+      });
+    }
+    return options;
+  }
+
+  // FTAs and ADMINs can assign any active technician/CSA assigned to this event
   if (authStore.user) {
     options.push({
       value: authStore.user._id,
@@ -367,14 +444,23 @@ const technicianOptions = computed(() => {
       class: 'text-accentYellow font-bold'
     });
   }
+
   technicians.value
-    .filter(u => u._id !== authStore.user?._id)
+    .filter(u => String(u._id) !== String(authStore.user?._id))
     .forEach(u => {
       options.push({
         value: u._id,
         label: `${u.name} (${u.role})`
       });
     });
+
+  if (incident.value?.assignedTo && !options.some(o => String(o.value) === String(incident.value.assignedTo._id))) {
+    options.push({
+      value: incident.value.assignedTo._id,
+      label: `${incident.value.assignedTo.name} (${incident.value.assignedTo.role || 'Tech'})`
+    });
+  }
+
   return options;
 });
 
@@ -450,7 +536,7 @@ const fetchDetails = async (isBackground = false) => {
     selectedAssignee.value = data.assignedTo?._id || null;
     selectedStatus.value = data.status;
 
-    // Refresh technicians list scoped to this event
+    // Refresh technicians list scoped to this event for FTA/Admin
     if (authStore.isAdmin || authStore.isFTA) {
       fetchTechnicians();
     }
@@ -466,35 +552,48 @@ const fetchDetails = async (isBackground = false) => {
 };
 
 const fetchTechnicians = async () => {
-  console.log('fetchTechnicians called. Token present:', !!authStore.token);
   try {
     const response = await fetch(getApiUrl('/users'), {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     });
-    console.log('fetchTechnicians response status:', response.status);
     if (response.ok) {
-      const allUsers = await response.json();
-      console.log('All users fetched:', allUsers.length);
+      const allUsersData = await response.json();
+      const allUsers = Array.isArray(allUsersData) ? allUsersData : (allUsersData.users || []);
       const eventCode = incident.value?.eventCode;
       
       technicians.value = allUsers.filter(u => {
         const role = (u.role || '').toUpperCase();
-        if (role !== 'CSA' && role !== 'FTA') return false;
+        const status = (u.status || 'ACTIVE').toUpperCase();
+        
+        // Exclude inactive user accounts
+        if (status === 'INACTIVE') return false;
 
-        // If incident event code is missing, allow all FTAs/CSAs
+        // FTAs can ONLY assign CSAs for that event
+        if (authStore.isFTA && !authStore.isAdmin) {
+          if (role !== 'CSA') return false;
+        } else if (authStore.isAdmin) {
+          // Admins can assign any FTA, CSA, or Admin
+          if (role !== 'CSA' && role !== 'FTA' && role !== 'ADMIN') return false;
+        }
+
+        // Admins are always available for assignment
+        if (role === 'ADMIN') return true;
+
+        // If incident event code is missing, allow
         if (!eventCode) return true;
 
-        // User must be assigned to this specific event (assignedEventCode or in assignedEventCodes array)
+        const cleanEventCode = eventCode.trim().toUpperCase();
+        const userEventCode = (u.assignedEventCode || '').trim().toUpperCase();
+        const userEventCodes = Array.isArray(u.assignedEventCodes)
+          ? u.assignedEventCodes.map(c => (c || '').trim().toUpperCase())
+          : [];
+
         const isAssignedToEvent =
-          u.assignedEventCode === eventCode ||
-          (Array.isArray(u.assignedEventCodes) && u.assignedEventCodes.includes(eventCode));
+          userEventCode === cleanEventCode ||
+          userEventCodes.includes(cleanEventCode);
 
         return isAssignedToEvent;
       });
-      console.log(`Filtered technicians for event ${eventCode}:`, technicians.value.length);
-    } else {
-      const errText = await response.text();
-      console.error('Failed to fetch technicians:', response.status, errText);
     }
   } catch (err) {
     console.error('Error fetching technicians:', err);
@@ -537,6 +636,27 @@ const assignToMe = async () => {
     incident.value = data;
     selectedStatus.value = data.status;
     selectedAssignee.value = data.assignedTo?._id || null;
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
+const unassignMe = async () => {
+  try {
+    const nextStatus = incident.value.status === 'ASSIGNED' ? 'OPEN' : incident.value.status;
+    const response = await fetch(getApiUrl(`/incidents/${incident.value._id}/status`), {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authStore.token}`
+      },
+      body: JSON.stringify({ status: nextStatus, assignedTo: null })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Failed to unassign incident');
+    incident.value = data;
+    selectedStatus.value = data.status;
+    selectedAssignee.value = null;
   } catch (err) {
     alert(err.message);
   }

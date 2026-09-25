@@ -1,8 +1,10 @@
 import express from 'express';
 import { userController } from '../controllers/userController.js';
-import { requireRole } from '../middleware/authMiddleware.js';
+import { requireRole, authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
+
+router.patch('/profile', authMiddleware, userController.updateProfile);
 
 /**
  * @openapi
@@ -82,6 +84,7 @@ const router = express.Router();
 router.get('/', requireRole(['ADMIN', 'FTA']), userController.getUsers);
 router.post('/', requireRole(['ADMIN', 'FTA']), userController.createUser);
 router.patch('/:id/status', requireRole(['ADMIN', 'FTA']), userController.updateStatus);
+router.delete('/:id', requireRole(['ADMIN', 'FTA']), userController.deleteUser);
 
 // Setting active event context per CSA (Admin/FTA) or multi-regionals for FTA (Admin only)
 router.patch('/:id/assigned-event', requireRole(['ADMIN', 'FTA']), async (req, res) => {

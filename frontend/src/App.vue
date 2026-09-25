@@ -11,9 +11,21 @@
       <div class="container mx-auto px-6 py-4 flex justify-between items-center">
         <div class="flex items-center space-x-6">
           <div>
-            <router-link to="/" class="text-2xl font-extrabold tracking-wider text-white hover:opacity-95 transition">
-              FIRST Assist
-            </router-link>
+            <div class="flex items-center gap-3">
+              <router-link to="/" class="text-2xl font-extrabold tracking-wider text-white hover:opacity-95 transition">
+                FIRST Assist
+              </router-link>
+              <!-- Sleek Compact Desktop Language Toggle Pill next to Brand Logo -->
+              <button
+                type="button"
+                @click="i18nStore.toggleLocale()"
+                class="hidden md:inline-flex items-center gap-1.5 h-7 px-2.5 rounded-lg bg-bgCard border border-gray-800 hover:border-teal-500/40 text-[11px] font-mono font-extrabold text-gray-300 hover:text-white transition cursor-pointer flex-shrink-0 shadow-sm"
+                :title="i18nStore.locale === 'pt' ? 'Switch to English' : 'Mudar para Português'"
+              >
+                <font-awesome-icon icon="globe" class="text-teal-400 text-xs" />
+                <span class="text-teal-300 font-extrabold uppercase">{{ i18nStore.locale }}</span>
+              </button>
+            </div>
             <!-- Active Event Context Indicator (Epic 11) -->
             <span v-if="activeEvent" class="block text-[10px] text-teal-400 font-bold uppercase font-mono tracking-wider mt-0.5">
               <span class="md:hidden"><font-awesome-icon icon="trophy" class="mr-1.5 text-accentYellow" />{{ activeEvent.code }}</span>
@@ -23,16 +35,16 @@
           
           <div class="hidden md:flex items-center space-x-6 text-sm font-semibold">
             <router-link to="/" class="text-gray-300 hover:text-teal-300 transition duration-150" active-class="!text-teal-400 font-bold">
-              Dashboard
+              {{ i18nStore.t('nav_dashboard') }}
             </router-link>
             <router-link to="/knowledge-base" class="text-gray-300 hover:text-teal-300 transition duration-150" active-class="!text-teal-400 font-bold">
-              Knowledge Base
+              {{ i18nStore.t('nav_kb') }}
             </router-link>
             <router-link v-if="authStore.isAdmin || authStore.isFTA" to="/fta" class="text-gray-300 hover:text-teal-300 transition duration-150" active-class="!text-teal-400 font-bold">
-              FTA Panel
+              {{ i18nStore.t('nav_fta') }}
             </router-link>
-            <router-link v-if="authStore.isAdmin" to="/admin" class="text-gray-300 hover:text-teal-300 transition duration-150" active-class="!text-teal-400 font-bold">
-              Admin Panel
+            <router-link v-if="authStore.isAdmin" @click="mobileMenuOpen = false" to="/admin" class="text-gray-300 hover:text-teal-300 transition duration-150" active-class="!text-teal-400 font-bold">
+              {{ i18nStore.t('nav_admin') }}
             </router-link>
           </div>
         </div>
@@ -61,6 +73,11 @@
             <RoleBadge v-if="authStore.user?.role" :role="authStore.user?.role" />
           </router-link>
 
+          <!-- Desktop Logout Button -->
+          <button @click="handleLogout" class="hidden md:inline-block text-gray-400 hover:text-accentCoral text-sm font-semibold transition duration-150 cursor-pointer ml-2">
+            {{ i18nStore.t('nav_logout') }}
+          </button>
+
           <!-- Mobile Hamburger Toggle Button -->
           <button 
             @click="mobileMenuOpen = !mobileMenuOpen" 
@@ -70,16 +87,11 @@
             <font-awesome-icon v-if="!mobileMenuOpen" icon="bars" class="text-sm" />
             <font-awesome-icon v-else icon="xmark" class="text-sm" />
           </button>
-
-          <!-- Desktop Logout Button -->
-          <button @click="handleLogout" class="hidden md:inline-block text-gray-400 hover:text-accentCoral text-sm font-semibold transition duration-150 cursor-pointer">
-            Logout
-          </button>
         </div>
       </div>
 
       <!-- Mobile Dropdown Navigation Drawer (FEAT-019) -->
-      <div v-if="mobileMenuOpen" class="md:hidden border-t border-borderSubtle bg-primaryNavy p-4 space-y-3 animate-fadeIn">
+      <div v-if="mobileMenuOpen" class="md:hidden border-t border-borderSubtle bg-primaryNavy p-4 space-y-4 animate-fadeIn">
         <!-- Profile Badge Inside Mobile Hamburger Menu -->
         <router-link @click="mobileMenuOpen = false" to="/profile" class="flex items-center space-x-3 p-3 rounded-xl bg-bgCard border border-gray-800 hover:border-gray-700 transition shadow-sm mb-2">
           <UserAvatar :icon="authStore.user?.avatarIcon" :color="authStore.user?.avatarColor" size="md" />
@@ -93,24 +105,51 @@
 
         <div class="flex flex-col space-y-2 text-sm font-bold">
           <router-link @click="mobileMenuOpen = false" to="/" class="py-2.5 px-3 rounded-xl hover:bg-white/10 transition flex items-center text-gray-200" active-class="!text-teal-400 font-bold bg-white/10">
-            <font-awesome-icon icon="chart-simple" class="w-4 mr-2.5 text-primaryTeal" /> Dashboard
+            <font-awesome-icon icon="chart-simple" class="w-4 mr-2.5 text-primaryTeal" /> {{ i18nStore.t('nav_dashboard') }}
           </router-link>
           <router-link @click="mobileMenuOpen = false" to="/knowledge-base" class="py-2.5 px-3 rounded-xl hover:bg-white/10 transition flex items-center text-gray-200" active-class="!text-teal-400 font-bold bg-white/10">
-            <font-awesome-icon icon="book" class="w-4 mr-2.5 text-primaryTeal" /> Knowledge Base
+            <font-awesome-icon icon="book" class="w-4 mr-2.5 text-primaryTeal" /> {{ i18nStore.t('nav_kb') }}
           </router-link>
           <router-link v-if="authStore.isAdmin || authStore.isFTA" @click="mobileMenuOpen = false" to="/fta" class="py-2.5 px-3 rounded-xl hover:bg-white/10 transition flex items-center text-gray-200" active-class="!text-teal-400 font-bold bg-white/10">
-            <font-awesome-icon icon="wrench" class="w-4 mr-2.5 text-primaryTeal" /> FTA Panel
+            <font-awesome-icon icon="wrench" class="w-4 mr-2.5 text-primaryTeal" /> {{ i18nStore.t('nav_fta') }}
           </router-link>
           <router-link v-if="authStore.isAdmin" @click="mobileMenuOpen = false" to="/admin" class="py-2.5 px-3 rounded-xl hover:bg-white/10 transition flex items-center text-gray-200" active-class="!text-teal-400 font-bold bg-white/10">
-            <font-awesome-icon icon="user-shield" class="w-4 mr-2.5 text-primaryTeal" /> Admin Panel
+            <font-awesome-icon icon="user-shield" class="w-4 mr-2.5 text-primaryTeal" /> {{ i18nStore.t('nav_admin') }}
           </router-link>
-          <button @click="mobileMenuOpen = false; handleLogout()" class="py-2.5 px-3 rounded-xl text-left text-accentCoral font-bold hover:bg-white/10 flex items-center cursor-pointer">
+
+          <!-- Mobile Language Selector Section (2-Button Grid) -->
+          <div class="pt-3 border-t border-gray-800/80">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-2">Language / Idioma</p>
+            <div class="grid grid-cols-2 gap-2">
+              <BaseButton
+                :variant="i18nStore.locale === 'en' ? 'primary' : 'secondary'"
+                size="sm"
+                icon="globe"
+                @click="i18nStore.setLocale('en')"
+                class="w-full justify-center font-mono"
+              >
+                English (EN)
+              </BaseButton>
+              <BaseButton
+                :variant="i18nStore.locale === 'pt' ? 'primary' : 'secondary'"
+                size="sm"
+                icon="globe"
+                @click="i18nStore.setLocale('pt')"
+                class="w-full justify-center font-mono"
+              >
+                Português (PT)
+              </BaseButton>
+            </div>
+          </div>
+
+          <button @click="mobileMenuOpen = false; handleLogout()" class="py-2.5 px-3 rounded-xl text-left text-accentCoral font-bold hover:bg-white/10 flex items-center cursor-pointer pt-2">
             <font-awesome-icon icon="right-from-bracket" class="w-4 mr-2.5 text-accentCoral" />
-            <span>Logout</span>
+            <span>{{ i18nStore.t('nav_logout') }}</span>
           </button>
         </div>
       </div>
     </nav>
+
 
     <!-- Main Container -->
     <main class="container mx-auto px-6 py-8 flex-grow">
@@ -121,6 +160,12 @@
     <footer class="bg-primaryNavy border-t border-gray-800 py-4 text-center text-xs text-gray-500">
       <p>&copy; 2026 FIRST Assist</p>
     </footer>
+
+    <!-- FTA & CSA Onboarding Tutorial Modal (FEAT-026) -->
+    <OnboardingTutorialModal
+      v-if="shouldShowTutorial"
+      @close="authStore.completeOnboarding()"
+    />
   </div>
 </template>
 
@@ -128,16 +173,28 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from './stores/auth';
+import { useI18nStore } from './stores/i18n';
 import { getApiUrl } from './config/api';
 import UserAvatar from './components/UserAvatar.vue';
-import { RoleBadge } from './components';
+import { RoleBadge, OnboardingTutorialModal, BaseButton, CustomSelect } from './components';
 
 const router = useRouter();
 const authStore = useAuthStore();
+const i18nStore = useI18nStore();
 
 const isOffline = ref(!navigator.onLine);
 const activeEvent = ref(null);
 const mobileMenuOpen = ref(false);
+
+const toggleLanguage = () => {
+  i18nStore.toggleLocale();
+};
+
+const shouldShowTutorial = computed(() => {
+  if (!authStore.user) return false;
+  const role = (authStore.user.role || '').toUpperCase();
+  return (role === 'FTA' || role === 'CSA') && !authStore.user.hasCompletedOnboarding;
+});
 
 const roleTextColor = computed(() => {
   const r = (authStore.user?.role || '').toUpperCase();

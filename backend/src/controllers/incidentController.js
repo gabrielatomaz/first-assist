@@ -6,7 +6,7 @@ import { Event } from '../models/Event.js';
 export const incidentController = {
   getIncidents: async (req, res) => {
     try {
-      let { status, category, priority, teamNumber, eventCode, page, limit } = req.query;
+      let { status, category, priority, teamNumber, eventCode, q, search, page, limit } = req.query;
       const userRole = (req.user?.role || '').toUpperCase();
 
       // Role-based event access scoping:
@@ -23,8 +23,8 @@ export const incidentController = {
         }
       }
 
-      const filters = { status, category, priority, teamNumber, eventCode };
-      const incidents = await incidentService.getAllIncidents(filters, page, limit);
+      const filters = { status, category, priority, teamNumber, eventCode, q, search };
+      const incidents = await incidentService.getAllIncidents(filters, { page, limit });
       res.json(incidents);
     } catch (error) {
       res.status(500).json({ error: error.message });

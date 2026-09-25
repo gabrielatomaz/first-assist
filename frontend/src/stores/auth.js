@@ -65,6 +65,26 @@ export const useAuthStore = defineStore('auth', {
       } catch (err) {
         console.error('Failed to sync current user profile:', err);
       }
+    },
+    async completeOnboarding() {
+      if (!this.user) return;
+      this.user = {
+        ...this.user,
+        hasCompletedOnboarding: true
+      };
+      localStorage.setItem('user', JSON.stringify(this.user));
+      try {
+        await fetch(getApiUrl('/users/profile'), {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.token}`
+          },
+          body: JSON.stringify({ hasCompletedOnboarding: true })
+        });
+      } catch (err) {
+        console.error('Failed to save onboarding completion state to server:', err);
+      }
     }
   }
 });
