@@ -20,7 +20,14 @@
           buttonClass
         ]"
       >
-        <span class="truncate pr-2" :class="selectedOption?.class">{{ selectedLabel }}</span>
+        <span 
+          class="truncate pr-2" 
+          :class="[
+            selectedOption ? selectedOption.class : 'font-normal text-gray-500 text-sm'
+          ]"
+        >
+          {{ selectedLabel }}
+        </span>
         <font-awesome-icon icon="chevron-down" class="text-xs text-gray-400 flex-shrink-0 transition-transform duration-200" :class="{ 'rotate-180': isOpen }" />
       </button>
 
@@ -45,17 +52,18 @@
               :disabled="opt.disabled"
               @click="selectOption(opt)"
               :class="[
-                'block w-full px-3.5 py-2 text-left text-xs font-semibold transition cursor-pointer flex items-center justify-between border-b border-gray-800/40 last:border-b-0',
+                'block w-full px-3.5 py-2 text-left font-semibold transition cursor-pointer flex items-center justify-between border-b border-gray-800/40 last:border-b-0',
+                size === 'sm' ? 'text-xs' : 'text-sm',
                 opt.disabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-white/15 text-white',
                 isSelected(opt.value) ? 'bg-primaryTeal/25 text-teal-300 font-bold' : 'text-gray-200'
               ]"
             >
               <div v-if="opt.teamNumber" class="flex items-center justify-between w-full min-w-0 pr-2">
-                <span class="font-semibold text-teal-400 text-xs flex-shrink-0">Team {{ opt.teamNumber }}</span>
-                <span v-if="opt.teamName" class="text-gray-400 text-xs truncate ml-2 max-w-[140px] font-sans font-normal">{{ opt.teamName }}</span>
+                <span class="font-semibold text-teal-400 flex-shrink-0" :class="size === 'sm' ? 'text-xs' : 'text-sm'">Team {{ opt.teamNumber }}</span>
+                <span v-if="opt.teamName" class="text-gray-400 truncate ml-2 max-w-[140px] font-sans font-normal" :class="size === 'sm' ? 'text-xs' : 'text-sm'">{{ opt.teamName }}</span>
               </div>
               <span v-else class="truncate pr-2">{{ opt.label }}</span>
-              <font-awesome-icon v-if="isSelected(opt.value)" icon="check" class="text-xs text-teal-300 ml-1.5 flex-shrink-0" />
+              <font-awesome-icon v-if="isSelected(opt.value)" icon="check" class="text-teal-300 ml-1.5 flex-shrink-0" :class="size === 'sm' ? 'text-xs' : 'text-sm'" />
             </button>
           </div>
         </transition>
@@ -114,7 +122,7 @@ const sizeClasses = computed(() => {
   if (props.size === 'sm') {
     return 'h-9 px-3 py-1 rounded-xl text-xs font-semibold';
   }
-  return 'h-9 px-3.5 py-1.5 rounded-xl text-xs font-semibold';
+  return 'h-9 px-3.5 py-1.5 rounded-xl text-sm font-semibold';
 });
 
 const isSelected = (optValue) => {

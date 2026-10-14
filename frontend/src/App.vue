@@ -44,7 +44,7 @@
               FTA Dashboard
             </router-link>
             <router-link v-if="authStore.isAdmin" @click="mobileMenuOpen = false" to="/admin" class="text-gray-300 hover:text-teal-300 transition duration-150" active-class="!text-teal-400 font-bold">
-              Admin
+              Admin Panel
             </router-link>
           </div>
         </div>
@@ -114,7 +114,7 @@
             <font-awesome-icon icon="wrench" class="w-4 mr-2.5 text-primaryTeal" /> FTA Dashboard
           </router-link>
           <router-link v-if="authStore.isAdmin" @click="mobileMenuOpen = false" to="/admin" class="py-2.5 px-3 rounded-xl hover:bg-white/10 transition flex items-center text-gray-200" active-class="!text-teal-400 font-bold bg-white/10">
-            <font-awesome-icon icon="user-shield" class="w-4 mr-2.5 text-primaryTeal" /> Admin
+            <font-awesome-icon icon="user-shield" class="w-4 mr-2.5 text-primaryTeal" /> Admin Panel
           </router-link>
 
           <!-- Mobile Language Selector Section (2-Button Grid) -->

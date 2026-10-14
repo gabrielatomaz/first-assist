@@ -76,12 +76,13 @@
 
         <AlertBanner v-if="createError" type="error" :message="createError" />
 
-        <div class="flex justify-end gap-2 pt-2">
+        <div class="flex items-center justify-end gap-2 pt-2 w-full">
           <BaseButton
             type="button"
             variant="secondary"
             size="sm"
             @click="showCreateForm = false"
+            class="flex-1 sm:flex-none sm:w-28 justify-center"
           >
             Cancel
           </BaseButton>
@@ -92,6 +93,7 @@
             :disabled="creating"
             :loading="creating"
             loading-text="Registering..."
+            class="flex-1 sm:flex-none sm:w-28 justify-center"
           >
             Register
           </BaseButton>

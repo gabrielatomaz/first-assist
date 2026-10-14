@@ -214,12 +214,13 @@
             {{ createUserError }}
           </div>
 
-          <div class="flex justify-end gap-2 pt-2">
+          <div class="flex items-center justify-end gap-2 pt-2 w-full">
             <BaseButton
               type="button"
               variant="secondary"
               size="sm"
               @click="showCreateUserForm = false"
+              class="flex-1 sm:flex-none sm:w-28 justify-center"
             >
               Cancel
             </BaseButton>
@@ -230,6 +231,7 @@
               :disabled="creatingUser || !userForm.name || !userForm.email || !userForm.password"
               :loading="creatingUser"
               loading-text="Registering..."
+              class="flex-1 sm:flex-none sm:w-28 justify-center"
             >
               Register
             </BaseButton>

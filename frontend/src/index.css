@@ -78,7 +78,7 @@
   }
   
   input::placeholder, textarea::placeholder {
-    @apply text-gray-500 !important;
+    @apply text-gray-500 font-normal text-sm !important;
   }
 
   /* Custom Stylized Single Select Dropdowns */

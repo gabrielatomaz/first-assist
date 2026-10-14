@@ -50,7 +50,7 @@
             v-model="statusFilter"
             :options="statusOptions"
             @change="fetchIncidents"
-            class="w-full md:w-28 lg:w-32 md:flex-shrink-0"
+            class="w-full md:w-32 lg:w-36 md:flex-shrink-0"
           />
 
           <!-- Priority Filter -->

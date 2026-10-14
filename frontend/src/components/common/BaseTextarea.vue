@@ -1,7 +1,7 @@
 <template>
   <div class="w-full space-y-1.5">
     <div v-if="label || $slots.labelAction" class="flex justify-between items-center">
-      <label v-if="label" :for="textareaId" class="block text-xs font-semibold text-gray-300 uppercase tracking-wider">
+      <label v-if="label" :for="textareaId" :class="['block text-xs font-semibold text-gray-300 uppercase tracking-wider', labelClass]">
         {{ label }}
         <span v-if="required" class="text-accentCoral ml-0.5">*</span>
       </label>
@@ -83,6 +83,10 @@ const props = defineProps({
     default: ''
   },
   textareaClass: {
+    type: String,
+    default: ''
+  },
+  labelClass: {
     type: String,
     default: ''
   }

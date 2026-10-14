@@ -134,12 +134,12 @@
 
     <!-- Post Comment Form with Attachment Icon & Lighter Color Compact Send Button -->
     <form @submit.prevent="handlePostComment" class="flex items-center space-x-2">
-      <!-- Paperclip Attachment Icon Button (h-11 matching BaseInput) -->
+      <!-- Paperclip Attachment Icon Button (matching BaseInput height) -->
       <BaseButton
         type="button"
         @click="triggerFileInput"
         variant="secondary"
-        size="icon-md"
+        size="icon-sm"
         icon="paperclip"
         title="Attach Picture"
       />
@@ -151,20 +151,20 @@
         @change="handleFileSelected" 
       />
 
-      <!-- Text Input (h-11) -->
+      <!-- Text Input -->
       <BaseInput
         v-model="newComment"
         placeholder="Type an update or attach a picture..."
         class="flex-1"
       />
 
-      <!-- Send Button (h-11) -->
+      <!-- Send Button (matching BaseInput height) -->
       <BaseButton
         type="submit"
         :disabled="posting || (!newComment.trim() && !attachedImage)"
         :loading="posting"
         variant="primary"
-        size="icon-md"
+        size="icon-sm"
         icon="paper-plane"
         title="Send Update"
       />

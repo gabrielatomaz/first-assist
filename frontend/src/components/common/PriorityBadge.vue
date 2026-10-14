@@ -32,7 +32,7 @@ const sizeClasses = computed(() => {
       return 'h-7 px-3.5 text-xs rounded-lg min-w-[90px]';
     case 'md':
     default:
-      return 'h-6 px-2.5 text-xs rounded-md min-w-[76px]';
+      return 'h-6 px-2.5 text-xs rounded-md min-w-[84px]';
   }
 });
 

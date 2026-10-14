@@ -21,7 +21,7 @@
             label="Team Number"
             required 
             placeholder="e.g. 254 (or select below)"
-            input-class="!h-9 !px-3.5 !py-1.5 !rounded-xl !text-xs !font-semibold !bg-bgCard !border-gray-800 hover:!border-gray-700 font-sans placeholder:!text-xs placeholder:!font-normal placeholder:!text-gray-500"
+            input-class="!h-9 !px-3.5 !py-1.5 !rounded-xl !text-sm !font-semibold !bg-bgCard !border-gray-800 hover:!border-gray-700 font-sans placeholder:!text-sm placeholder:!font-normal placeholder:!text-gray-500"
             @focus="showTeamSuggestions = true"
             @input="showTeamSuggestions = true"
           />
@@ -55,6 +55,7 @@
             :options="matchOptions"
             :disabled="!form.teamNumber"
             :placeholder="form.teamNumber ? 'Select Match...' : 'Select Team Number first...'"
+            button-class="!text-sm"
           />
         </div>
       </div>
@@ -64,12 +65,14 @@
           v-model="form.category"
           label="Category"
           :options="categoryOptions"
+          button-class="!text-sm"
         />
 
         <CustomSelect
           v-model="form.priority"
           label="Priority"
           :options="priorityOptions"
+          button-class="!text-sm"
         />
       </div>
 
@@ -80,7 +83,7 @@
           required 
           rows="4" 
           placeholder="Detailed explanation of the issue (e.g., Radio lost power on hit, CAN error on drive motor, etc.)"
-          textarea-class="pb-12 !bg-bgCard !border-gray-800 hover:!border-gray-700 !text-xs"
+          textarea-class="pb-12 !bg-bgCard !border-gray-800 hover:!border-gray-700 !text-xs placeholder:!text-sm placeholder:!font-normal"
         >
           <template #action>
             <BaseButton

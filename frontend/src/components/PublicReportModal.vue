@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <div class="fixed inset-0 w-screen h-screen bg-black/80 backdrop-blur-sm z-[99999] flex items-center justify-center p-4 sm:p-6 animate-fadeIn overflow-y-auto">
-      <div class="bg-bgCard border border-gray-800 rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4 relative my-auto max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar">
+      <div class="bg-bgCard border border-gray-800 rounded-2xl shadow-2xl max-w-lg w-full p-4 sm:p-6 space-y-4 relative my-auto max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar">
       <!-- Styled Cancellation Confirmation Modal Overlay -->
       <ConfirmationModal
         :model-value="!!incidentToCancel"
@@ -30,57 +30,57 @@
 
       <!-- Header -->
       <div class="border-b border-gray-800 pb-3 pr-8">
-        <h3 class="text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
-          <font-awesome-icon icon="clipboard-list" class="text-teal-400 text-base" />
+        <h3 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
+          <font-awesome-icon icon="clipboard-list" class="text-teal-400 text-lg sm:text-xl" />
           <span>Report Incident (Guest Mode)</span>
         </h3>
-        <p class="text-xs text-gray-400 mt-0.5">No login required. Tickets are submitted to the event triage queue.</p>
+        <p class="text-sm text-gray-400 mt-1">No login required. Tickets are submitted to the event triage queue.</p>
       </div>
 
       <!-- Navigation Tabs (Form vs My Cached Tickets) -->
-      <BaseTabs v-model="viewMode" :tabs="modalTabs" />
+      <BaseTabs v-model="viewMode" :tabs="modalTabs" size="sm" />
 
       <!-- VIEW 1: Success Notification Screen -->
       <div v-if="viewMode === 'success' && successTicket" class="p-5 bg-bgMain/70 border border-emerald-500/30 rounded-2xl space-y-4 animate-fadeIn">
         <div class="flex flex-col items-center text-center space-y-1">
           <font-awesome-icon icon="circle-check" class="text-3xl text-emerald-400 mb-1" />
           <h4 class="text-base font-extrabold text-white">Incident Submitted Successfully!</h4>
-          <p class="text-xs text-gray-300">
+          <p class="text-sm text-gray-300">
             Your ticket has been logged into the queue in <strong class="text-amber-400">In Triage</strong> status.
           </p>
         </div>
 
         <!-- Structured Ticket Summary (Team, Event, Match) -->
-        <div class="bg-bgCard border border-gray-800 rounded-xl p-3.5 space-y-2.5 text-xs">
+        <div class="bg-bgCard border border-gray-800 rounded-xl p-3.5 space-y-2.5 text-sm">
           <div class="grid grid-cols-3 gap-2 text-center border-b border-gray-800 pb-2.5">
             <div>
-              <span class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Team</span>
+              <span class="block text-sm font-semibold text-gray-300 uppercase tracking-wider mb-1">Team</span>
               <span class="font-bold text-white text-sm font-mono">Team {{ successTicket.teamNumber }}</span>
             </div>
             <div>
-              <span class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Event</span>
+              <span class="block text-sm font-semibold text-gray-300 uppercase tracking-wider mb-1">Event</span>
               <span class="font-bold text-teal-400 text-sm uppercase font-mono">
                 {{ successTicket.eventCode || form.eventCode || 'N/A' }}
               </span>
             </div>
             <div>
-              <span class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Match</span>
+              <span class="block text-sm font-semibold text-gray-300 uppercase tracking-wider mb-1">Match</span>
               <span class="font-bold text-accentYellow text-sm font-mono">
                 {{ successTicket.matchNumber && successTicket.matchNumber !== 'N/A' ? successTicket.matchNumber : (form.matchNumber || 'Pit / Practice') }}
               </span>
             </div>
           </div>
 
-          <div class="flex justify-between items-center text-xs pt-0.5">
+          <div class="flex justify-between items-center text-sm pt-0.5">
             <div class="flex items-center space-x-1.5">
-              <span class="text-xs font-semibold text-gray-300 uppercase tracking-wider">Category</span>
+              <span class="text-sm font-semibold text-gray-300 uppercase tracking-wider">Category</span>
               <CategoryBadge :category="successTicket.category || form.category" size="xs" />
             </div>
             <StatusBadge :status="successTicket.status || 'IN_TRIAGE'" size="xs" />
           </div>
         </div>
 
-        <p class="text-xs text-gray-400 text-center leading-relaxed">
+        <p class="text-sm text-gray-400 text-center leading-relaxed">
           Saved to your browser's local cache. Event staff (CSA/FTA) will review and accept your ticket shortly.
         </p>
 
@@ -103,10 +103,10 @@
       <div v-else-if="viewMode === 'history'" class="space-y-4 animate-fadeIn">
         <div class="flex justify-between items-center border-b border-gray-800 pb-2.5 min-h-[32px]">
           <div class="flex items-center space-x-2">
-            <h4 class="text-xs font-bold text-gray-300 uppercase tracking-wider">
+            <h4 class="text-sm font-bold text-gray-300 uppercase tracking-wider">
               Cached Incidents on this Browser
             </h4>
-            <span class="px-2 py-0.5 text-[10px] font-extrabold bg-bgMain text-gray-300 rounded-full font-mono border border-gray-800">
+            <span class="min-w-[20px] h-[20px] px-1 inline-flex items-center justify-center text-xs font-extrabold bg-bgMain text-gray-300 rounded-full font-mono border border-gray-800 leading-none">
               {{ cachedIncidents.length }}
             </span>
           </div>
@@ -126,8 +126,8 @@
             <font-awesome-icon icon="inbox" />
           </div>
           <div class="space-y-1">
-            <h5 class="text-sm font-bold text-gray-200">No Cached Incidents</h5>
-            <p class="text-xs text-gray-400 max-w-xs mx-auto leading-relaxed">
+            <h5 class="text-base font-bold text-gray-200">No Cached Incidents</h5>
+            <p class="text-sm text-gray-400 max-w-xs mx-auto leading-relaxed">
               No submitted incident tickets are currently stored on this browser.
             </p>
           </div>
@@ -153,17 +153,17 @@
           >
             <div class="flex justify-between items-start gap-2">
               <div>
-                <span class="font-extrabold text-white text-xs font-mono">Team {{ inc.teamNumber }}</span>
-                <span class="text-gray-400 text-[11px] ml-1.5 font-mono uppercase font-semibold">
+                <span class="font-extrabold text-white text-sm font-mono">Team {{ inc.teamNumber }}</span>
+                <span class="text-gray-400 text-xs ml-1.5 font-mono uppercase font-semibold">
                   {{ inc.eventCode }} • {{ inc.matchNumber && inc.matchNumber !== 'N/A' ? inc.matchNumber : 'Pit / Practice' }}
                 </span>
               </div>
               <StatusBadge :status="inc.status" size="xs" />
             </div>
 
-            <p class="text-[11px] text-gray-300 line-clamp-2 leading-relaxed">{{ inc.description || 'No description provided' }}</p>
+            <p class="text-xs sm:text-sm text-gray-300 line-clamp-2 leading-relaxed">{{ inc.description || 'No description provided' }}</p>
 
-            <div class="flex justify-between items-center text-[10px] text-gray-500 pt-2 border-t border-gray-800">
+            <div class="flex justify-between items-center flex-wrap gap-2 text-xs text-gray-500 pt-2 border-t border-gray-800">
               <div class="flex items-center space-x-2">
                 <CategoryBadge :category="inc.category" size="xs" />
                 <span class="text-gray-400">{{ formatTime(inc.createdAt) }}</span>
@@ -173,7 +173,7 @@
                 type="button" 
                 @click="incidentToCancel = inc._id" 
                 :disabled="cancelingId === inc._id"
-                class="text-xs font-semibold text-accentCoral hover:text-red-300 hover:underline cursor-pointer disabled:opacity-50 inline-flex items-center space-x-1"
+                class="text-xs sm:text-sm font-semibold text-accentCoral hover:text-red-300 hover:underline cursor-pointer disabled:opacity-50 inline-flex items-center space-x-1"
                 title="Cancel ticket"
               >
                 <font-awesome-icon v-if="cancelingId === inc._id" icon="spinner" spin class="text-[10px]" />
@@ -189,8 +189,8 @@
       <form v-else @submit.prevent="handleSubmit" class="space-y-3.5 animate-fadeIn">
         <!-- Team Number & TBA Search Button -->
         <div>
-          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5">Team Number <span class="text-accentCoral ml-0.5">*</span></label>
-          <div class="flex space-x-2">
+          <label class="block text-sm font-semibold text-gray-300 uppercase tracking-wider mb-1.5">Team Number <span class="text-accentCoral ml-0.5">*</span></label>
+          <div class="flex items-center space-x-2">
             <BaseInput 
               v-model.number="form.teamNumber" 
               @input="handleTeamNumberChange"
@@ -199,42 +199,43 @@
               min="1"
               required 
               placeholder="e.g. 1156"
-              input-class="font-mono placeholder:font-sans placeholder:font-normal"
+              input-class="!h-9 !px-3.5 !py-1.5 !rounded-xl !text-sm !font-semibold !bg-bgCard !border-gray-800 hover:!border-gray-700 font-sans placeholder:!text-sm placeholder:!font-normal placeholder:!text-gray-500"
               class="flex-1"
             />
             <BaseButton 
               type="button" 
-              @click="searchTeamOnTBA"
+              @click="searchTeamOnTBA" 
               :disabled="!form.teamNumber || loadingEvents"
               :loading="loadingEvents"
               variant="primary"
-              size="icon-md"
+              size="icon-sm"
               icon="magnifying-glass"
               title="Search on TBA"
+              class="!w-9 !h-9 !text-sm"
             />
           </div>
 
           <!-- Team Found Badge -->
-          <div v-if="searchCompleted && teamFound && teamDetails" class="mt-2 flex items-center space-x-2 text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-3 py-2 rounded-xl animate-fadeIn">
-            <font-awesome-icon icon="circle-check" class="text-xs flex-shrink-0 text-emerald-400" />
-            <span class="font-medium truncate text-xs">
+          <div v-if="searchCompleted && teamFound && teamDetails" class="mt-2 flex items-center space-x-2 text-sm text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-3 py-2 rounded-xl animate-fadeIn">
+            <font-awesome-icon icon="circle-check" class="text-sm flex-shrink-0 text-emerald-400" />
+            <span class="font-medium truncate text-sm">
               <strong class="text-white font-mono">Team {{ teamDetails.number }}</strong> — {{ teamDetails.name }}
-              <span v-if="teamDetails.city || teamDetails.state" class="text-gray-400 text-[11px]">
+              <span v-if="teamDetails.city || teamDetails.state" class="text-gray-400 text-xs">
                 ({{ [teamDetails.city, teamDetails.state].filter(Boolean).join(', ') }})
               </span>
             </span>
           </div>
 
           <!-- Team Not Found Warning -->
-          <div v-if="searchCompleted && !teamFound" class="mt-2 bg-red-950/40 border border-red-900/40 p-2.5 rounded-xl text-accentCoral text-xs font-medium flex items-center space-x-2 animate-fadeIn">
-            <font-awesome-icon icon="triangle-exclamation" class="text-xs flex-shrink-0" />
+          <div v-if="searchCompleted && !teamFound" class="mt-2 bg-red-950/40 border border-red-900/40 p-2.5 rounded-xl text-accentCoral text-sm font-medium flex items-center space-x-2 animate-fadeIn">
+            <font-awesome-icon icon="triangle-exclamation" class="text-sm flex-shrink-0" />
             <span>Team {{ searchedTeamNumber }} was not found on The Blue Alliance.</span>
           </div>
         </div>
 
         <!-- Event Selection (only after TBA search completes and team is found) -->
         <div v-if="searchCompleted && teamFound" class="animate-fadeIn space-y-1.5">
-          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider">
+          <label class="block text-sm font-semibold text-gray-300 uppercase tracking-wider">
             Select Event ({{ currentYear }}) <span class="text-accentCoral ml-0.5">*</span>
           </label>
           <div v-if="teamEvents.length > 0">
@@ -243,39 +244,43 @@
               :options="teamEventOptions"
               @change="handleEventChange"
               :disabled="loadingEvents"
+              button-class="!text-sm"
             />
           </div>
-          <div v-else class="bg-amber-950/40 border border-amber-800/40 p-2.5 rounded-xl text-amber-300 text-xs font-medium flex items-center space-x-2">
-            <font-awesome-icon icon="triangle-exclamation" class="text-xs flex-shrink-0" />
+          <div v-else class="bg-amber-950/40 border border-amber-800/40 p-2.5 rounded-xl text-amber-300 text-sm font-medium flex items-center space-x-2">
+            <font-awesome-icon icon="triangle-exclamation" class="text-sm flex-shrink-0" />
             <span>Team {{ searchedTeamNumber }} is not listed for any competition events in {{ currentYear }}.</span>
           </div>
         </div>
 
         <!-- Match Selection -->
         <div v-if="searchCompleted && teamFound && form.eventCode" class="animate-fadeIn space-y-1.5">
-          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider" title="Select match number">Match Number</label>
+          <label class="block text-sm font-semibold text-gray-300 uppercase tracking-wider" title="Select match number">Match Number</label>
           <CustomSelect 
             v-model="form.matchNumber" 
             :options="matchOptions"
             :disabled="loadingMatches"
+            button-class="!text-sm"
           />
         </div>
 
         <!-- Category & Priority -->
         <div class="grid grid-cols-2 gap-3">
           <div class="space-y-1.5">
-            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider">Category</label>
+            <label class="block text-sm font-semibold text-gray-300 uppercase tracking-wider">Category</label>
             <CustomSelect 
               v-model="form.category" 
               :options="categoryOptions"
+              button-class="!text-sm"
             />
           </div>
 
           <div class="space-y-1.5">
-            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider">Priority</label>
+            <label class="block text-sm font-semibold text-gray-300 uppercase tracking-wider">Priority</label>
             <CustomSelect 
               v-model="form.priority" 
               :options="priorityOptions"
+              button-class="!text-sm"
             />
           </div>
         </div>
@@ -284,12 +289,14 @@
         <BaseTextarea 
           v-model="form.description" 
           label="Issue Description"
+          label-class="!text-sm"
           required 
           rows="3" 
           placeholder="Describe the issue observed during match or pit prep..."
+          textarea-class="!bg-bgCard !border-gray-800 hover:!border-gray-700 !text-sm placeholder:!text-sm placeholder:!font-normal"
         />
 
-        <div v-if="error" class="bg-red-950/40 text-accentCoral p-3 rounded-xl text-xs font-medium border border-red-900/30">
+        <div v-if="error" class="bg-red-950/40 text-accentCoral p-3 rounded-xl text-sm font-medium border border-red-900/30">
           {{ error }}
         </div>
 
@@ -323,7 +330,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { getApiUrl } from '../config/api';
 import ConfirmationModal from './ConfirmationModal.vue';
 import BaseButton from './common/BaseButton.vue';
@@ -355,10 +362,10 @@ const categoryOptions = [
 ];
 
 const priorityOptions = [
-  { value: 'LOW', label: 'LOW' },
-  { value: 'MEDIUM', label: 'MEDIUM' },
-  { value: 'HIGH', label: 'HIGH' },
-  { value: 'CRITICAL', label: 'CRITICAL' }
+  { value: 'LOW', label: 'Low' },
+  { value: 'MEDIUM', label: 'Medium' },
+  { value: 'HIGH', label: 'High' },
+  { value: 'CRITICAL', label: 'Critical' }
 ];
 
 const form = ref({
@@ -396,14 +403,22 @@ const cachedIncidents = ref([]);
 const refreshingStatus = ref(false);
 
 const modalTabs = computed(() => [
-  { id: 'form', label: 'New Incident', icon: 'plus' },
+  { id: 'form', label: 'New Incident', shortLabel: 'New Incident', icon: 'plus' },
   {
     id: 'history',
     label: 'My Submitted Tickets',
+    shortLabel: 'My Tickets',
     icon: 'clock-rotate-left',
     count: cachedIncidents.value.length || undefined
   }
 ]);
+
+watch(viewMode, (newMode) => {
+  if (newMode === 'history') {
+    loadCachedIncidents();
+    refreshCachedStatus();
+  }
+});
 
 const teamEventOptions = computed(() => [
   { value: '', label: '-- Select Competition Event --' },

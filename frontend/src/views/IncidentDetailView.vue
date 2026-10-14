@@ -84,8 +84,8 @@
           />
         </div>
 
-        <!-- 3 & 4. Action buttons group (Side by Side full width, Icon-only) -->
-        <div v-if="canDelete || (incident.status === 'ASSIGNED' || incident.status === 'IN_PROGRESS' || incident.status === 'WAITING')" class="flex items-center gap-2 w-full sm:w-auto flex-1">
+        <!-- 3 & 4. Action buttons group (Side by Side full width on mobile, matching dropdown height) -->
+        <div v-if="canDelete || (incident.status === 'ASSIGNED' || incident.status === 'IN_PROGRESS' || incident.status === 'WAITING')" class="flex items-center gap-2 w-full sm:w-auto">
           <BaseButton
             v-if="incident.status === 'ASSIGNED' || incident.status === 'IN_PROGRESS' || incident.status === 'WAITING'"
             @click="showResolveModal = true"
@@ -93,7 +93,7 @@
             size="md"
             icon="check"
             title="Resolve Incident"
-            class="flex-1 justify-center"
+            class="flex-1 sm:flex-initial sm:w-9 !h-9 sm:p-0 justify-center"
           />
 
           <BaseButton
@@ -103,7 +103,7 @@
             size="md"
             icon="trash-can"
             title="Delete Incident"
-            class="flex-1 justify-center"
+            class="flex-1 sm:flex-initial sm:w-9 !h-9 sm:p-0 justify-center"
           />
         </div>
       </div>

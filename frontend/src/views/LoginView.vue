@@ -28,6 +28,7 @@
           type="email"
           label="Email Address"
           required
+          :show-asterisk="false"
           placeholder="csa@first.org"
           autocomplete="email"
         />
@@ -37,6 +38,7 @@
           type="password"
           label="Password"
           required
+          :show-asterisk="false"
           placeholder="******"
           autocomplete="current-password"
           input-class="font-mono"
@@ -68,31 +70,31 @@
 
       <!-- Guest Incident Action -->
       <div class="bg-bgMain p-4 rounded-xl border border-borderDefault text-center space-y-2.5">
-        <p class="text-xs text-textMuted font-medium">Need technical assistance at the pits?</p>
+        <p class="text-sm text-textMuted font-medium">Need technical assistance at the pits?</p>
         <div>
           <BaseButton 
             type="button" 
             @click="showPublicModal = true"
             variant="secondary"
-            size="sm"
+            size="md"
             icon="circle-plus"
-            class="text-teal-400 hover:text-teal-300"
+            class="text-teal-400 hover:text-teal-300 w-full sm:w-auto"
           >
             Request CSA Support
           </BaseButton>
         </div>
       </div>
 
-      <div class="mt-6 text-center text-xs text-textMuted border-t border-borderSubtle pt-5 space-y-2.5">
+      <div class="mt-6 text-center text-sm text-textMuted border-t border-borderSubtle pt-5 space-y-2.5">
         <p>If you need account access, please see the FTA or event Administrator.</p>
         <div>
           <BaseButton 
             type="button" 
             @click="showRequestModal = true"
             variant="secondary"
-            size="sm"
+            size="md"
             icon="id-card"
-            class="text-accentYellow hover:text-amber-300"
+            class="text-accentYellow hover:text-amber-300 w-full sm:w-auto"
           >
             Request FTA Event Access
           </BaseButton>

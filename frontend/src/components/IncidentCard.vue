@@ -39,9 +39,9 @@
           </p>
         </div>
 
-        <div class="flex flex-col items-end space-y-1.5">
-          <StatusBadge :status="incident.status" />
-          <PriorityBadge :priority="incident.priority" />
+        <div class="flex flex-col items-end space-y-1.5 w-28 flex-shrink-0">
+          <StatusBadge :status="incident.status" class="w-full justify-center" />
+          <PriorityBadge :priority="incident.priority" class="w-full justify-center" />
         </div>
       </div>
 
