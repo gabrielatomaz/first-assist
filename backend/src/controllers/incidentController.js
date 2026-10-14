@@ -412,5 +412,27 @@ export const incidentController = {
       }
       res.status(500).json({ error: error.message });
     }
+  },
+
+  getIncidentStatistics: async (req, res) => {
+    try {
+      let { eventCode } = req.query;
+      const userRole = (req.user?.role || '').toUpperCase();
+
+      // Authorization & event scoping checks:
+      // Allowed roles: CSA, FTA, ADMIN
+      if (!['ADMIN', 'FTA', 'CSA'].includes(userRole)) {
+        return res.status(403).json({ error: 'Access forbidden: Insufficient permissions to view incident statistics' });
+      }
+
+      if (userRole === 'ADMIN' || userRole === 'FTA' || userRole === 'CSA') {
+        // All authorized roles can view all events (when eventCode is 'ALL' or empty) or filter by a specific event
+      }
+
+      const statistics = await incidentService.getIncidentStatistics(eventCode);
+      res.json(statistics);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
   }
 };

@@ -31,6 +31,38 @@ router.get('/search', async (req, res) => {
   }
 });
 
+// Get team by number (with TBA fallback)
+router.get('/:number', async (req, res) => {
+  try {
+    const num = Number(req.params.number);
+    if (isNaN(num)) return res.status(400).json({ error: 'Invalid team number' });
+
+    let team = await Team.findOne({ number: num });
+    if (!team) {
+      try {
+        const { getTeamFromTBA } = await import('../services/tbaService.js');
+        const tbaTeam = await getTeamFromTBA(num);
+        if (tbaTeam) {
+          team = {
+            number: num,
+            name: tbaTeam.nickname || tbaTeam.name || `Team ${num}`,
+            city: tbaTeam.city || '',
+            state: tbaTeam.state_prov || '',
+            country: tbaTeam.country || '',
+            rookieYear: tbaTeam.rookie_year
+          };
+        }
+      } catch (tbaErr) {
+        // Fallback team info
+        team = { number: num, name: `Team ${num}` };
+      }
+    }
+    res.json(team);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get team incident history logs
 router.get('/:number/history', async (req, res) => {
   try {

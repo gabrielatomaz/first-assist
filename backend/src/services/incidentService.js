@@ -383,5 +383,223 @@ export const incidentService = {
     });
 
     return incident;
+  },
+
+  getIncidentStatistics: async (eventCode) => {
+    const matchStage = {};
+    if (eventCode && eventCode !== 'ALL') {
+      const eventRegex = new RegExp(`^${eventCode}$`, 'i');
+      const targetEvent = await Event.findOne({ code: eventRegex });
+      const eventTeams = targetEvent?.teams || [];
+      matchStage.$or = [
+        { eventCode: eventRegex },
+        {
+          eventCode: { $in: [null, '', undefined] },
+          teamNumber: { $in: eventTeams }
+        }
+      ];
+    }
+
+    const [stats] = await Incident.aggregate([
+      { $match: matchStage },
+      {
+        $facet: {
+          summary: [
+            {
+              $group: {
+                _id: null,
+                total: { $sum: 1 },
+                active: {
+                  $sum: {
+                    $cond: [
+                      { $in: ['$status', ['PENDING_SCREENING', 'OPEN', 'ASSIGNED', 'IN_PROGRESS', 'WAITING']] },
+                      1,
+                      0
+                    ]
+                  }
+                },
+                resolved: {
+                  $sum: {
+                    $cond: [
+                      { $in: ['$status', ['RESOLVED', 'CLOSED']] },
+                      1,
+                      0
+                    ]
+                  }
+                },
+                criticalOrHigh: {
+                  $sum: {
+                    $cond: [
+                      { $in: ['$priority', ['HIGH', 'CRITICAL']] },
+                      1,
+                      0
+                    ]
+                  }
+                },
+                avgResolutionMinutes: {
+                  $avg: {
+                    $cond: [
+                      {
+                        $and: [
+                          { $in: ['$status', ['RESOLVED', 'CLOSED']] },
+                          { $ne: ['$resolvedAt', null] },
+                          { $ne: ['$createdAt', null] }
+                        ]
+                      },
+                      { $divide: [{ $subtract: ['$resolvedAt', '$createdAt'] }, 60000] },
+                      null
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          byCategory: [
+            {
+              $group: {
+                _id: '$category',
+                count: { $sum: 1 }
+              }
+            },
+            { $sort: { count: -1 } }
+          ],
+          byStatus: [
+            {
+              $group: {
+                _id: '$status',
+                count: { $sum: 1 }
+              }
+            },
+            { $sort: { count: -1 } }
+          ],
+          byPriority: [
+            {
+              $group: {
+                _id: '$priority',
+                count: { $sum: 1 }
+              }
+            },
+            { $sort: { count: -1 } }
+          ],
+          phaseBreakdown: [
+            {
+              $group: {
+                _id: {
+                  $cond: [
+                    {
+                      $and: [
+                        { $ne: ['$matchNumber', null] },
+                        { $ne: ['$matchNumber', ''] }
+                      ]
+                    },
+                    'match',
+                    'pit'
+                  ]
+                },
+                count: { $sum: 1 }
+              }
+            }
+          ],
+          topTeams: [
+            {
+              $group: {
+                _id: '$teamNumber',
+                total: { $sum: 1 },
+                activeCount: {
+                  $sum: {
+                    $cond: [
+                      { $in: ['$status', ['PENDING_SCREENING', 'OPEN', 'ASSIGNED', 'IN_PROGRESS', 'WAITING']] },
+                      1,
+                      0
+                    ]
+                  }
+                },
+                categories: { $push: '$category' },
+                priorities: { $push: '$priority' }
+              }
+            },
+            { $sort: { total: -1, activeCount: -1 } },
+            { $limit: 10 }
+          ]
+        }
+      }
+    ]);
+
+    const summaryRaw = stats.summary[0] || {
+      total: 0,
+      active: 0,
+      resolved: 0,
+      criticalOrHigh: 0,
+      avgResolutionMinutes: null
+    };
+
+    const total = summaryRaw.total || 0;
+    const resolved = summaryRaw.resolved || 0;
+    const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
+    const avgResolutionMinutes = summaryRaw.avgResolutionMinutes
+      ? Math.round(summaryRaw.avgResolutionMinutes)
+      : null;
+
+    // Calculate percentages for categories
+    const byCategory = (stats.byCategory || []).map(cat => ({
+      category: cat._id,
+      count: cat.count,
+      percentage: total > 0 ? Math.round((cat.count / total) * 100) : 0
+    }));
+
+    // Process topTeams top failure category and highest priority
+    const priorityWeights = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
+    const topTeams = (stats.topTeams || []).map(team => {
+      // Find mode category
+      const catCounts = {};
+      (team.categories || []).forEach(c => {
+        if (c) catCounts[c] = (catCounts[c] || 0) + 1;
+      });
+      let topCategory = 'OTHER';
+      let maxCatCount = 0;
+      for (const [c, cnt] of Object.entries(catCounts)) {
+        if (cnt > maxCatCount) {
+          maxCatCount = cnt;
+          topCategory = c;
+        }
+      }
+
+      // Find max priority
+      let maxPriority = 'LOW';
+      let maxWeight = 0;
+      (team.priorities || []).forEach(p => {
+        const w = priorityWeights[p] || 0;
+        if (w > maxWeight) {
+          maxWeight = w;
+          maxPriority = p;
+        }
+      });
+
+      return {
+        teamNumber: team._id,
+        total: team.total,
+        activeCount: team.activeCount,
+        topCategory,
+        maxPriority
+      };
+    });
+
+    // Process phaseBreakdown
+    const matchCount = (stats.phaseBreakdown || []).find(p => p._id === 'match')?.count || 0;
+    const pitCount = (stats.phaseBreakdown || []).find(p => p._id === 'pit')?.count || 0;
+
+    return {
+      total,
+      active: summaryRaw.active || 0,
+      resolved,
+      criticalOrHigh: summaryRaw.criticalOrHigh || 0,
+      resolutionRate,
+      avgResolutionMinutes,
+      byCategory,
+      byStatus: stats.byStatus || [],
+      byPriority: stats.byPriority || [],
+      phaseBreakdown: { match: matchCount, pit: pitCount },
+      topTeams
+    };
   }
 };

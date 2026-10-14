@@ -18,6 +18,7 @@ router.post('/public', incidentController.createPublicIncident);
 
 // Protected routes (Require Authentication)
 router.get('/', authMiddleware, incidentController.getIncidents);
+router.get('/statistics', authMiddleware, requireRole(['CSA', 'FTA', 'ADMIN']), incidentController.getIncidentStatistics);
 router.get('/search', authMiddleware, incidentController.searchIncidents);
 router.get('/:id', authMiddleware, incidentController.getIncidentById);
 router.post('/', authMiddleware, incidentController.createIncident);

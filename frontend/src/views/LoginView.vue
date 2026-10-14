@@ -70,7 +70,7 @@
 
       <!-- Guest Incident Action -->
       <div class="bg-bgMain p-4 rounded-xl border border-borderDefault text-center space-y-2.5">
-        <p class="text-sm text-textMuted font-medium">Need technical assistance at the pits?</p>
+        <p class="text-sm text-textMuted">Need technical assistance at the pits?</p>
         <div>
           <BaseButton 
             type="button" 

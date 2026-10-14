@@ -3,7 +3,7 @@
     <!-- Header -->
     <PageHeader
       :title="'Team ' + teamNumber"
-      :subtitle="'Rookie Year: ' + (team ? team.rookieYear || 'N/A' : 'N/A')"
+      :subtitle="team?.name || ''"
       :card="true"
     >
       <template #actions>
@@ -41,20 +41,24 @@
       />
 
       <div v-else class="space-y-4">
-        <div 
+        <router-link 
           v-for="inc in incidents" 
           :key="inc._id"
-          class="p-4 rounded-xl border border-gray-800 bg-bgMain hover:border-gray-700 hover:shadow-md transition flex flex-col space-y-3"
+          :to="`/incidents/${inc._id}`"
+          class="block p-4 rounded-xl border border-gray-800 bg-bgMain hover:border-teal-500/50 hover:shadow-lg transition-all flex flex-col space-y-3 cursor-pointer group"
         >
           <div class="flex justify-between items-center">
             <div class="flex items-center space-x-2">
+              <span class="text-xs font-bold font-mono text-teal-400 bg-teal-400/10 border border-teal-400/20 px-2 py-0.5 rounded-md">
+                #{{ inc._id.slice(-6).toUpperCase() }}
+              </span>
               <span class="text-xs font-bold font-mono text-gray-400 uppercase">Match {{ inc.matchNumber || 'N/A' }}</span>
               <CategoryBadge :category="inc.category" />
             </div>
             <StatusBadge :status="inc.status" />
           </div>
 
-          <p class="text-xs text-gray-200 leading-relaxed font-medium">{{ inc.description }}</p>
+          <p class="text-xs text-gray-200 group-hover:text-white leading-relaxed font-medium transition">{{ inc.description }}</p>
 
           <div v-if="inc.rootCause || inc.appliedSolution" class="p-3 bg-bgCard rounded-lg border border-gray-800 space-y-1.5 text-xs">
             <div v-if="inc.rootCause">
@@ -71,7 +75,7 @@
             <span>Reported by: {{ inc.reportedBy?.name || 'Anonymous' }}</span>
             <span>{{ formatTime(inc.createdAt) }}</span>
           </div>
-        </div>
+        </router-link>
       </div>
     </BaseCard>
   </div>
@@ -106,12 +110,11 @@ const openCount = computed(() => incidents.value.filter(i => i.status !== 'RESOL
 
 const fetchTeamDetails = async () => {
   try {
-    const response = await fetch(getApiUrl(`/teams/search?q=${teamNumber.value}`), {
+    const response = await fetch(getApiUrl(`/teams/${teamNumber.value}`), {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     });
     if (response.ok) {
-      const data = await response.json();
-      if (data.length > 0) team.value = data[0];
+      team.value = await response.json();
     }
   } catch (err) {
     console.error(err);
