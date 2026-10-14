@@ -273,7 +273,7 @@ export const incidentController = {
       }
 
       // If setting an assignee that is not self, verify the user is ADMIN or FTA
-      if (assignedTo && assignedTo !== req.user._id.toString()) {
+      if (assignedTo && String(assignedTo) !== String(req.user._id)) {
         if (userRole !== 'ADMIN' && userRole !== 'FTA') {
           return res.status(403).json({ error: 'CSAs can only assign incidents to themselves' });
         }

@@ -1,0 +1,189 @@
+<svg width="1240" height="920" viewBox="0 0 1240 920" xmlns="http://www.w3.org/2000/svg">
+  <!-- Transparent Background -->
+
+  <!-- Title & Subtitle in Class Background Tone (#253344) -->
+  <text x="620" y="42" text-anchor="middle" fill="#253344" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="24" font-weight="bold">FIRST Assist — Diagrama de Classes UML</text>
+  <text x="620" y="66" text-anchor="middle" fill="#253344" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="500">Modelo de Dados e Cardinalidades do Sistema</text>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#253344"/>
+    </marker>
+  </defs>
+
+  <!-- ==================== CLASS: USER ==================== -->
+  <g transform="translate(50, 95)">
+    <rect width="250" height="35" rx="6" fill="#38777E"/>
+    <text x="125" y="23" text-anchor="middle" fill="#FFFFFF" font-weight="bold" font-size="14" font-family="sans-serif">User</text>
+    <rect y="35" width="250" height="245" rx="6" fill="#253344" stroke="#38777E" stroke-width="1.5"/>
+    <text x="12" y="55" fill="#E2E8F0" font-size="12" font-family="monospace">+ ObjectId _id</text>
+    <text x="12" y="73" fill="#E2E8F0" font-size="12" font-family="monospace">+ String name</text>
+    <text x="12" y="91" fill="#E2E8F0" font-size="12" font-family="monospace">+ String email</text>
+    <text x="12" y="109" fill="#E2E8F0" font-size="12" font-family="monospace">+ UserRole role</text>
+    <text x="12" y="127" fill="#E2E8F0" font-size="12" font-family="monospace">+ Number teamNumber</text>
+    <text x="12" y="145" fill="#E2E8F0" font-size="12" font-family="monospace">+ String passwordHash</text>
+    <text x="12" y="163" fill="#E2E8F0" font-size="12" font-family="monospace">+ UserStatus status</text>
+    <text x="12" y="181" fill="#E2E8F0" font-size="12" font-family="monospace">+ String assignedEventCode</text>
+    <text x="12" y="199" fill="#E2E8F0" font-size="12" font-family="monospace">+ String[] assignedEventCodes</text>
+    <text x="12" y="217" fill="#E2E8F0" font-size="12" font-family="monospace">+ Boolean hasCompletedOnboarding</text>
+    <line x1="0" y1="230" x2="250" y2="230" stroke="#334155" stroke-width="1"/>
+    <text x="12" y="252" fill="#38B2AC" font-size="12" font-family="monospace">+ comparePassword()</text>
+  </g>
+
+  <!-- ==================== CLASS: INCIDENT ==================== -->
+  <g transform="translate(480, 95)">
+    <rect width="280" height="35" rx="6" fill="#E25C43"/>
+    <text x="140" y="23" text-anchor="middle" fill="#FFFFFF" font-weight="bold" font-size="14" font-family="sans-serif">Incident</text>
+    <rect y="35" width="280" height="325" rx="6" fill="#253344" stroke="#E25C43" stroke-width="1.5"/>
+    <text x="12" y="55" fill="#E2E8F0" font-size="12" font-family="monospace">+ ObjectId _id</text>
+    <text x="12" y="73" fill="#E2E8F0" font-size="12" font-family="monospace">+ Number teamNumber</text>
+    <text x="12" y="91" fill="#E2E8F0" font-size="12" font-family="monospace">+ String matchNumber</text>
+    <text x="12" y="109" fill="#E2E8F0" font-size="12" font-family="monospace">+ String eventCode</text>
+    <text x="12" y="127" fill="#E2E8F0" font-size="12" font-family="monospace">+ String description</text>
+    <text x="12" y="145" fill="#E2E8F0" font-size="12" font-family="monospace">+ IncidentCategory category</text>
+    <text x="12" y="163" fill="#E2E8F0" font-size="12" font-family="monospace">+ IncidentPriority priority</text>
+    <text x="12" y="181" fill="#E2E8F0" font-size="12" font-family="monospace">+ IncidentStatus status</text>
+    <text x="12" y="199" fill="#E2E8F0" font-size="12" font-family="monospace">+ String audioUrl</text>
+    <text x="12" y="217" fill="#E2E8F0" font-size="12" font-family="monospace">+ ObjectId reportedBy</text>
+    <text x="12" y="235" fill="#E2E8F0" font-size="12" font-family="monospace">+ ObjectId assignedTo</text>
+    <text x="12" y="253" fill="#E2E8F0" font-size="12" font-family="monospace">+ String diagnosis</text>
+    <text x="12" y="271" fill="#E2E8F0" font-size="12" font-family="monospace">+ String rootCause</text>
+    <text x="12" y="289" fill="#E2E8F0" font-size="12" font-family="monospace">+ String appliedSolution</text>
+    <text x="12" y="307" fill="#E2E8F0" font-size="12" font-family="monospace">+ Date resolvedAt</text>
+    <text x="12" y="325" fill="#E2E8F0" font-size="12" font-family="monospace">+ ObjectId closedBy</text>
+    <text x="12" y="343" fill="#E2E8F0" font-size="12" font-family="monospace">+ Date createdAt / updatedAt</text>
+  </g>
+
+  <!-- ==================== CLASS: AI SUGGESTION ==================== -->
+  <g transform="translate(910, 95)">
+    <rect width="270" height="35" rx="6" fill="#9D85C5"/>
+    <text x="135" y="23" text-anchor="middle" fill="#FFFFFF" font-weight="bold" font-size="14" font-family="sans-serif">AISuggestion</text>
+    <rect y="35" width="270" height="175" rx="6" fill="#253344" stroke="#9D85C5" stroke-width="1.5"/>
+    <text x="12" y="55" fill="#E2E8F0" font-size="12" font-family="monospace">+ ObjectId _id</text>
+    <text x="12" y="73" fill="#E2E8F0" font-size="12" font-family="monospace">+ ObjectId incidentId</text>
+    <text x="12" y="91" fill="#E2E8F0" font-size="12" font-family="monospace">+ String suggestedCause</text>
+    <text x="12" y="109" fill="#E2E8F0" font-size="12" font-family="monospace">+ String suggestedSolution</text>
+    <text x="12" y="127" fill="#E2E8F0" font-size="12" font-family="monospace">+ Boolean isRagGrounded</text>
+    <text x="12" y="145" fill="#E2E8F0" font-size="12" font-family="monospace">+ CitedIncident[] citedIncidents</text>
+    <text x="12" y="163" fill="#E2E8F0" font-size="12" font-family="monospace">+ SuggestionRating rating</text>
+    <text x="12" y="181" fill="#E2E8F0" font-size="12" font-family="monospace">+ Date createdAt / updatedAt</text>
+  </g>
+
+  <!-- ==================== CLASS: COMMENT ==================== -->
+  <g transform="translate(910, 335)">
+    <rect width="270" height="35" rx="6" fill="#3A8B8C"/>
+    <text x="135" y="23" text-anchor="middle" fill="#FFFFFF" font-weight="bold" font-size="14" font-family="sans-serif">Comment</text>
+    <rect y="35" width="270" height="125" rx="6" fill="#253344" stroke="#3A8B8C" stroke-width="1.5"/>
+    <text x="12" y="55" fill="#E2E8F0" font-size="12" font-family="monospace">+ ObjectId _id</text>
+    <text x="12" y="73" fill="#E2E8F0" font-size="12" font-family="monospace">+ ObjectId incidentId</text>
+    <text x="12" y="91" fill="#E2E8F0" font-size="12" font-family="monospace">+ ObjectId authorId</text>
+    <text x="12" y="109" fill="#E2E8F0" font-size="12" font-family="monospace">+ String text</text>
+    <text x="12" y="127" fill="#E2E8F0" font-size="12" font-family="monospace">+ String imageUrl</text>
+    <text x="12" y="145" fill="#E2E8F0" font-size="12" font-family="monospace">+ Date createdAt</text>
+  </g>
+
+  <!-- ==================== CLASS: ACCESS REQUEST ==================== -->
+  <g transform="translate(50, 420)">
+    <rect width="250" height="35" rx="6" fill="#DCA951"/>
+    <text x="125" y="23" text-anchor="middle" fill="#131C26" font-weight="bold" font-size="14" font-family="sans-serif">AccessRequest</text>
+    <rect y="35" width="250" height="185" rx="6" fill="#253344" stroke="#DCA951" stroke-width="1.5"/>
+    <text x="12" y="55" fill="#E2E8F0" font-size="12" font-family="monospace">+ ObjectId _id</text>
+    <text x="12" y="73" fill="#E2E8F0" font-size="12" font-family="monospace">+ String name</text>
+    <text x="12" y="91" fill="#E2E8F0" font-size="12" font-family="monospace">+ String email</text>
+    <text x="12" y="109" fill="#E2E8F0" font-size="12" font-family="monospace">+ String passwordHash</text>
+    <text x="12" y="127" fill="#E2E8F0" font-size="12" font-family="monospace">+ String[] requestedEventCodes</text>
+    <text x="12" y="145" fill="#E2E8F0" font-size="12" font-family="monospace">+ String notes</text>
+    <text x="12" y="163" fill="#E2E8F0" font-size="12" font-family="monospace">+ RequestStatus status</text>
+    <text x="12" y="181" fill="#E2E8F0" font-size="12" font-family="monospace">+ ObjectId reviewedBy</text>
+    <text x="12" y="199" fill="#E2E8F0" font-size="12" font-family="monospace">+ Date reviewedAt</text>
+  </g>
+
+  <!-- ==================== CLASS: EVENT ==================== -->
+  <g transform="translate(50, 680)">
+    <rect width="250" height="35" rx="6" fill="#2B6CB0"/>
+    <text x="125" y="23" text-anchor="middle" fill="#FFFFFF" font-weight="bold" font-size="14" font-family="sans-serif">Event</text>
+    <rect y="35" width="250" height="135" rx="6" fill="#253344" stroke="#2B6CB0" stroke-width="1.5"/>
+    <text x="12" y="55" fill="#E2E8F0" font-size="12" font-family="monospace">+ ObjectId _id</text>
+    <text x="12" y="73" fill="#E2E8F0" font-size="12" font-family="monospace">+ String code (unique)</text>
+    <text x="12" y="91" fill="#E2E8F0" font-size="12" font-family="monospace">+ String name</text>
+    <text x="12" y="109" fill="#E2E8F0" font-size="12" font-family="monospace">+ String location</text>
+    <text x="12" y="127" fill="#E2E8F0" font-size="12" font-family="monospace">+ Boolean isActive</text>
+    <text x="12" y="145" fill="#E2E8F0" font-size="12" font-family="monospace">+ Number[] teams</text>
+  </g>
+
+  <!-- ==================== CLASS: TEAM ==================== -->
+  <g transform="translate(495, 680)">
+    <rect width="250" height="35" rx="6" fill="#319795"/>
+    <text x="125" y="23" text-anchor="middle" fill="#FFFFFF" font-weight="bold" font-size="14" font-family="sans-serif">Team</text>
+    <rect y="35" width="250" height="110" rx="6" fill="#253344" stroke="#319795" stroke-width="1.5"/>
+    <text x="12" y="55" fill="#E2E8F0" font-size="12" font-family="monospace">+ ObjectId _id</text>
+    <text x="12" y="73" fill="#E2E8F0" font-size="12" font-family="monospace">+ Number number (unique)</text>
+    <text x="12" y="91" fill="#E2E8F0" font-size="12" font-family="monospace">+ String name</text>
+    <text x="12" y="109" fill="#E2E8F0" font-size="12" font-family="monospace">+ Number rookieYear</text>
+    <text x="12" y="127" fill="#E2E8F0" font-size="12" font-family="monospace">+ Date createdAt</text>
+  </g>
+
+  <!-- ==================== CLASS: AUDIT LOG ==================== -->
+  <g transform="translate(910, 520)">
+    <rect width="270" height="35" rx="6" fill="#718096"/>
+    <text x="135" y="23" text-anchor="middle" fill="#FFFFFF" font-weight="bold" font-size="14" font-family="sans-serif">AuditLog</text>
+    <rect y="35" width="270" height="145" rx="6" fill="#253344" stroke="#718096" stroke-width="1.5"/>
+    <text x="12" y="55" fill="#E2E8F0" font-size="12" font-family="monospace">+ ObjectId _id</text>
+    <text x="12" y="73" fill="#E2E8F0" font-size="12" font-family="monospace">+ ObjectId incidentId</text>
+    <text x="12" y="91" fill="#E2E8F0" font-size="12" font-family="monospace">+ ObjectId userId</text>
+    <text x="12" y="109" fill="#E2E8F0" font-size="12" font-family="monospace">+ String action</text>
+    <text x="12" y="127" fill="#E2E8F0" font-size="12" font-family="monospace">+ String oldValue</text>
+    <text x="12" y="145" fill="#E2E8F0" font-size="12" font-family="monospace">+ String newValue</text>
+    <text x="12" y="163" fill="#E2E8F0" font-size="12" font-family="monospace">+ Date timestamp</text>
+  </g>
+
+  <!-- ==================== RELATIONSHIPS & CARDINALITIES (Color: #253344) ==================== -->
+
+  <!-- User ── Incident (reportedBy) -->
+  <path d="M 300 195 L 480 195" fill="none" stroke="#253344" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="315" y="185" fill="#253344" font-size="13" font-weight="bold" font-family="sans-serif">0..1</text>
+  <text x="365" y="185" fill="#253344" font-size="11" font-weight="600" font-family="sans-serif">reportedBy</text>
+  <text x="445" y="185" fill="#253344" font-size="13" font-weight="bold" font-family="sans-serif">0..*</text>
+
+  <!-- User ── Incident (assignedTo) -->
+  <path d="M 300 255 L 480 255" fill="none" stroke="#253344" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="315" y="245" fill="#253344" font-size="13" font-weight="bold" font-family="sans-serif">0..1</text>
+  <text x="365" y="245" fill="#253344" font-size="11" font-weight="600" font-family="sans-serif">assignedTo</text>
+  <text x="445" y="245" fill="#253344" font-size="13" font-weight="bold" font-family="sans-serif">0..*</text>
+
+  <!-- Incident ── AISuggestion -->
+  <path d="M 760 175 L 910 175" fill="none" stroke="#253344" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="775" y="165" fill="#253344" font-size="13" font-weight="bold" font-family="sans-serif">1</text>
+  <text x="815" y="165" fill="#253344" font-size="11" font-weight="600" font-family="sans-serif">incidentId</text>
+  <text x="875" y="165" fill="#253344" font-size="13" font-weight="bold" font-family="sans-serif">0..1</text>
+
+  <!-- Incident ── Comment -->
+  <path d="M 760 385 L 910 385" fill="none" stroke="#253344" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="775" y="375" fill="#253344" font-size="13" font-weight="bold" font-family="sans-serif">1</text>
+  <text x="815" y="375" fill="#253344" font-size="11" font-weight="600" font-family="sans-serif">incidentId</text>
+  <text x="875" y="375" fill="#253344" font-size="13" font-weight="bold" font-family="sans-serif">0..*</text>
+
+  <!-- User ── AccessRequest -->
+  <path d="M 175 375 L 175 420" fill="none" stroke="#253344" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="185" y="390" fill="#253344" font-size="13" font-weight="bold" font-family="sans-serif">0..1</text>
+  <text x="185" y="405" fill="#253344" font-size="11" font-weight="600" font-family="sans-serif">reviewedBy</text>
+  <text x="185" y="418" fill="#253344" font-size="13" font-weight="bold" font-family="sans-serif">0..*</text>
+
+  <!-- Incident ── Team -->
+  <path d="M 620 455 L 620 680" fill="none" stroke="#253344" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="630" y="480" fill="#253344" font-size="13" font-weight="bold" font-family="sans-serif">0..*</text>
+  <text x="630" y="580" fill="#253344" font-size="11" font-weight="600" font-family="sans-serif">teamNumber</text>
+  <text x="630" y="665" fill="#253344" font-size="13" font-weight="bold" font-family="sans-serif">1</text>
+
+  <!-- Event ── Team -->
+  <path d="M 300 740 L 495 740" fill="none" stroke="#253344" stroke-width="2" stroke-dasharray="4,4"/>
+  <text x="315" y="730" fill="#253344" font-size="13" font-weight="bold" font-family="sans-serif">0..*</text>
+  <text x="380" y="730" fill="#253344" font-size="11" font-weight="600" font-family="sans-serif">teams [ ]</text>
+  <text x="465" y="730" fill="#253344" font-size="13" font-weight="bold" font-family="sans-serif">0..*</text>
+
+  <!-- Incident ── AuditLog -->
+  <path d="M 760 410 L 835 410 L 835 580 L 910 580" fill="none" stroke="#253344" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="775" y="400" fill="#253344" font-size="13" font-weight="bold" font-family="sans-serif">0..1</text>
+  <text x="875" y="570" fill="#253344" font-size="13" font-weight="bold" font-family="sans-serif">0..*</text>
+
+</svg>

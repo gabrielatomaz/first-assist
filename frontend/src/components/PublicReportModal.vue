@@ -199,7 +199,7 @@
               min="1"
               required 
               placeholder="e.g. 1156"
-              input-class="font-mono"
+              input-class="font-mono placeholder:font-sans placeholder:font-normal"
               class="flex-1"
             />
             <BaseButton 

@@ -21,7 +21,7 @@
             label="Team Number"
             required 
             placeholder="e.g. 254 (or select below)"
-            input-class="font-mono"
+            input-class="!h-9 !px-3.5 !py-1.5 !rounded-xl !text-xs !font-semibold !bg-bgCard !border-gray-800 hover:!border-gray-700 font-sans placeholder:!text-xs placeholder:!font-normal placeholder:!text-gray-500"
             @focus="showTeamSuggestions = true"
             @input="showTeamSuggestions = true"
           />
@@ -36,10 +36,12 @@
               :key="team._id"
               type="button"
               @click="form.teamNumber = team.number; showTeamSuggestions = false"
-              class="w-full px-3.5 py-2 text-left text-xs text-gray-200 hover:bg-white/15 hover:text-white transition flex items-center justify-between cursor-pointer border-b border-gray-800/40 last:border-b-0"
+              class="w-full px-3.5 py-2 text-left text-xs font-semibold text-gray-200 hover:bg-white/15 hover:text-white transition flex items-center justify-between cursor-pointer border-b border-gray-800/40 last:border-b-0"
             >
-              <span class="font-mono font-bold text-teal-400">Team {{ team.number }}</span>
-              <span class="text-gray-400 text-[11px] truncate max-w-[200px]">{{ team.name }}</span>
+              <div class="flex items-center justify-between w-full min-w-0 pr-1">
+                <span class="font-semibold text-teal-400 text-xs flex-shrink-0">Team {{ team.number }}</span>
+                <span v-if="team.name" class="text-gray-400 text-xs font-normal truncate ml-2 max-w-[200px]">{{ team.name }}</span>
+              </div>
             </button>
           </div>
         </div>
@@ -53,7 +55,6 @@
             :options="matchOptions"
             :disabled="!form.teamNumber"
             :placeholder="form.teamNumber ? 'Select Match...' : 'Select Team Number first...'"
-            button-class="font-mono"
           />
         </div>
       </div>
@@ -79,7 +80,7 @@
           required 
           rows="4" 
           placeholder="Detailed explanation of the issue (e.g., Radio lost power on hit, CAN error on drive motor, etc.)"
-          textarea-class="pb-12"
+          textarea-class="pb-12 !bg-bgCard !border-gray-800 hover:!border-gray-700 !text-xs"
         >
           <template #action>
             <BaseButton

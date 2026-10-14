@@ -93,6 +93,7 @@
           loading-text="Saving..."
           variant="primary"
           size="md"
+          class="w-full sm:w-auto"
         >
           Save Profile
         </BaseButton>
@@ -143,6 +144,7 @@
           loading-text="Updating..."
           variant="primary"
           size="md"
+          class="w-full sm:w-auto"
         >
           Update Password
         </BaseButton>

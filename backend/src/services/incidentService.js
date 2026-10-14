@@ -132,7 +132,6 @@ export const incidentService = {
     if (!previous) throw new Error("Incident not found");
 
     if (assignedTo) {
-      const User = require('../models/User');
       const targetUser = await User.findById(assignedTo);
       if (!targetUser) {
         throw new Error("Assigned user not found");
@@ -152,9 +151,12 @@ export const incidentService = {
       }
 
       if (targetUser.role !== 'ADMIN' && previous.eventCode) {
-        const isAssignedToEvent =
-          targetUser.assignedEventCode === previous.eventCode ||
-          (Array.isArray(targetUser.assignedEventCodes) && targetUser.assignedEventCodes.includes(previous.eventCode));
+        const prevCode = String(previous.eventCode).trim().toUpperCase();
+        const userCode = targetUser.assignedEventCode ? String(targetUser.assignedEventCode).trim().toUpperCase() : null;
+        const userCodes = Array.isArray(targetUser.assignedEventCodes)
+          ? targetUser.assignedEventCodes.map(c => String(c).trim().toUpperCase())
+          : [];
+        const isAssignedToEvent = userCode === prevCode || userCodes.includes(prevCode);
         if (!isAssignedToEvent) {
           throw new Error(`Technician '${targetUser.name}' is not assigned to event ${previous.eventCode}`);
         }
@@ -185,8 +187,12 @@ export const incidentService = {
     }
 
     // Audit and Notification for assignment changes
-    const prevAssigneeStr = previous.assignedTo ? previous.assignedTo.toString() : null;
-    const newAssigneeStr = updated.assignedTo ? updated.assignedTo.toString() : null;
+    const prevAssigneeStr = previous.assignedTo
+      ? (previous.assignedTo._id ? previous.assignedTo._id.toString() : previous.assignedTo.toString())
+      : null;
+    const newAssigneeStr = updated.assignedTo
+      ? (updated.assignedTo._id ? updated.assignedTo._id.toString() : updated.assignedTo.toString())
+      : null;
 
     if (prevAssigneeStr !== newAssigneeStr) {
       await logIncidentChange({
@@ -201,7 +207,7 @@ export const incidentService = {
       // Dispatch assignment notification (US-NOTIF-001)
       if (newAssigneeStr) {
         await createAssignmentNotification({
-          recipientId: updated.assignedTo,
+          recipientId: updated.assignedTo?._id || updated.assignedTo,
           incidentId: id,
           text: `Incident for Team ${updated.teamNumber} has been assigned to you.`
         });

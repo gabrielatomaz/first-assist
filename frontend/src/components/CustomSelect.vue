@@ -51,8 +51,8 @@
               ]"
             >
               <div v-if="opt.teamNumber" class="flex items-center justify-between w-full min-w-0 pr-2">
-                <span class="font-mono font-bold text-teal-400 text-xs flex-shrink-0">Team {{ opt.teamNumber }}</span>
-                <span v-if="opt.teamName" class="text-gray-400 text-[11px] truncate ml-2 max-w-[140px] font-sans font-normal">{{ opt.teamName }}</span>
+                <span class="font-semibold text-teal-400 text-xs flex-shrink-0">Team {{ opt.teamNumber }}</span>
+                <span v-if="opt.teamName" class="text-gray-400 text-xs truncate ml-2 max-w-[140px] font-sans font-normal">{{ opt.teamName }}</span>
               </div>
               <span v-else class="truncate pr-2">{{ opt.label }}</span>
               <font-awesome-icon v-if="isSelected(opt.value)" icon="check" class="text-xs text-teal-300 ml-1.5 flex-shrink-0" />

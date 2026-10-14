@@ -611,7 +611,7 @@ const assignTechnician = async () => {
       body: JSON.stringify({ status: incident.value.status, assignedTo: selectedAssignee.value })
     });
     const data = await response.json();
-    if (!response.ok) throw new Error('Failed to reassign technician');
+    if (!response.ok) throw new Error(data.error || 'Failed to reassign technician');
     incident.value = data;
     selectedStatus.value = data.status;
   } catch (err) {
@@ -622,17 +622,19 @@ const assignTechnician = async () => {
 
 const assignToMe = async () => {
   try {
-    const nextStatus = incident.value.status === 'OPEN' ? 'ASSIGNED' : incident.value.status;
+    const currentUserId = authStore.user?._id || authStore.user?.id;
+    if (!currentUserId) throw new Error('User information not found');
+    const nextStatus = (incident.value.status === 'OPEN' || incident.value.status === 'PENDING_SCREENING') ? 'ASSIGNED' : incident.value.status;
     const response = await fetch(getApiUrl(`/incidents/${incident.value._id}/status`), {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${authStore.token}`
       },
-      body: JSON.stringify({ status: nextStatus, assignedTo: authStore.user._id })
+      body: JSON.stringify({ status: nextStatus, assignedTo: currentUserId })
     });
     const data = await response.json();
-    if (!response.ok) throw new Error('Failed to claim incident');
+    if (!response.ok) throw new Error(data.error || 'Failed to claim incident');
     incident.value = data;
     selectedStatus.value = data.status;
     selectedAssignee.value = data.assignedTo?._id || null;
@@ -673,7 +675,7 @@ const updateStatus = async () => {
       body: JSON.stringify({ status: selectedStatus.value })
     });
     const data = await response.json();
-    if (!response.ok) throw new Error('Failed to change ticket status');
+    if (!response.ok) throw new Error(data.error || 'Failed to change ticket status');
     incident.value = data;
   } catch (err) {
     alert(err.message);

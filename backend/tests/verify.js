@@ -17,7 +17,7 @@ const runTests = async () => {
 
     // Cleanup previous test data
     console.log('Cleaning up previous test data...');
-    await User.deleteMany({ email: /test-fta/i });
+    await User.deleteMany({ email: /test-fta|test-csa/i });
     await Incident.deleteMany({ teamNumber: 9999 });
     await Event.deleteMany({ code: '2026test' });
     await Team.deleteMany({ number: 9999 });
@@ -80,7 +80,31 @@ const runTests = async () => {
     }, ftaUser._id);
     console.log(`Incident created: Team ${incident.teamNumber}, Event=${incident.eventCode}`);
 
-    console.log('All FTA management and team-event association checks PASSED!');
+    // 7. Claim Incident test (CSA claims ticket)
+    console.log('Testing Claim Incident by CSA...');
+    const csaUser = await User.create({
+      name: 'Test CSA User',
+      email: 'test-csa@first.org',
+      role: 'CSA',
+      passwordHash,
+      status: 'ACTIVE',
+      assignedEventCode: '2026test'
+    });
+    const updatedIncident = await incidentService.updateIncidentStatus(
+      incident._id,
+      'ASSIGNED',
+      csaUser._id,
+      csaUser._id
+    );
+    console.log(`Incident claimed successfully! Status: ${updatedIncident.status}, AssignedTo: ${updatedIncident.assignedTo.name}`);
+    if (updatedIncident.status !== 'ASSIGNED' || updatedIncident.assignedTo._id.toString() !== csaUser._id.toString()) {
+      throw new Error('Claim incident assertion failed');
+    }
+
+    // Cleanup test users
+    await User.deleteMany({ email: /test-csa/i });
+
+    console.log('All FTA management, team-event association, and incident claiming checks PASSED!');
   } catch (error) {
     console.error('Test execution failed:', error);
   } finally {
