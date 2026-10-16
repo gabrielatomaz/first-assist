@@ -47,10 +47,13 @@
           :to="`/incidents/${inc._id}`"
           class="block p-4 rounded-xl border border-gray-800 bg-bgMain hover:border-teal-500/50 hover:shadow-lg transition-all flex flex-col space-y-3 cursor-pointer group"
         >
-          <div class="flex justify-between items-center">
-            <div class="flex items-center space-x-2">
+          <div class="flex flex-wrap justify-between items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
               <span class="text-xs font-bold font-mono text-teal-400 bg-teal-400/10 border border-teal-400/20 px-2 py-0.5 rounded-md">
                 #{{ inc._id.slice(-6).toUpperCase() }}
+              </span>
+              <span v-if="inc.eventCode" class="h-6 px-2 rounded-md text-xs font-bold text-accentYellow/90 bg-accentYellow/10 border border-accentYellow/20 font-mono uppercase tracking-wider inline-flex items-center justify-center leading-none flex-shrink-0" :title="'Regional: ' + inc.eventCode">
+                <font-awesome-icon icon="trophy" class="mr-1 text-[10px]" /> {{ inc.eventCode }}
               </span>
               <span class="text-xs font-bold font-mono text-gray-400 uppercase">Match {{ inc.matchNumber || 'N/A' }}</span>
               <CategoryBadge :category="inc.category" />
