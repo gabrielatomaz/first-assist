@@ -51,10 +51,9 @@
           <CustomSelect 
             v-model="form.matchNumber" 
             label="Match Number"
-            required
             :options="matchOptions"
             :disabled="!form.teamNumber"
-            :placeholder="form.teamNumber ? 'Select Match...' : 'Select Team Number first...'"
+            :placeholder="form.teamNumber ? 'Pit Area (or select Match)...' : 'Select Team Number first...'"
             button-class="!text-sm"
           />
         </div>
@@ -233,8 +232,6 @@ const isFormValid = computed(() => {
   return Boolean(
     form.value.teamNumber &&
     Number(form.value.teamNumber) > 0 &&
-    form.value.matchNumber &&
-    form.value.matchNumber.trim().length > 0 &&
     form.value.description &&
     form.value.description.trim().length > 0
   );
@@ -272,8 +269,14 @@ const availableMatchSuggestions = computed(() => {
 });
 
 const matchOptions = computed(() => {
-  if (!availableMatchSuggestions.value || availableMatchSuggestions.value.length === 0) return [];
-  return availableMatchSuggestions.value.map(m => ({ value: m, label: m }));
+  if (!form.value.teamNumber) return [];
+  const options = [
+    { value: '', label: 'Pit Area (Not in Match)' }
+  ];
+  if (availableMatchSuggestions.value && availableMatchSuggestions.value.length > 0) {
+    options.push(...availableMatchSuggestions.value.map(m => ({ value: m, label: m })));
+  }
+  return options;
 });
 
 watch(() => form.value.teamNumber, (newTeam) => {
@@ -397,7 +400,7 @@ const submitIncident = async () => {
           {
             _id: createdIncident._id,
             teamNumber: createdIncident.teamNumber,
-            matchNumber: createdIncident.matchNumber || 'N/A',
+            matchNumber: createdIncident.matchNumber || 'Pit Area',
             category: createdIncident.category,
             status: createdIncident.status || 'OPEN',
             eventCode: createdIncident.eventCode,

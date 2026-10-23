@@ -66,7 +66,7 @@
             <div>
               <span class="block text-sm font-semibold text-gray-300 uppercase tracking-wider mb-1">Match</span>
               <span class="font-bold text-accentYellow text-sm font-mono">
-                {{ successTicket.matchNumber && successTicket.matchNumber !== 'N/A' ? successTicket.matchNumber : (form.matchNumber || 'Pit / Practice') }}
+                {{ successTicket.matchNumber && !['pit', 'pit prep', 'pit area', 'n/a'].includes(String(successTicket.matchNumber).toLowerCase()) ? successTicket.matchNumber : 'Pit Area' }}
               </span>
             </div>
           </div>
@@ -155,7 +155,7 @@
               <div>
                 <span class="font-extrabold text-white text-sm font-mono">Team {{ inc.teamNumber }}</span>
                 <span class="text-gray-400 text-xs ml-1.5 font-mono uppercase font-semibold">
-                  {{ inc.eventCode }} • {{ inc.matchNumber && inc.matchNumber !== 'N/A' ? inc.matchNumber : 'Pit / Practice' }}
+                  {{ inc.eventCode }} • {{ inc.matchNumber && !['pit', 'pit prep', 'pit area', 'n/a'].includes(String(inc.matchNumber).toLowerCase()) ? inc.matchNumber : 'Pit Area' }}
                 </span>
               </div>
               <StatusBadge :status="inc.status" size="xs" />
@@ -429,7 +429,7 @@ const teamEventOptions = computed(() => [
 ]);
 
 const matchOptions = computed(() => [
-  { value: '', label: 'Select match number' },
+  { value: '', label: 'Pit Area (Not in Match)' },
   ...eventMatches.value.map(m => ({
     value: m.key,
     label: m.label
@@ -545,7 +545,7 @@ const handleSubmit = async () => {
           {
             _id: createdIncident._id,
             teamNumber: createdIncident.teamNumber,
-            matchNumber: createdIncident.matchNumber || form.value.matchNumber || 'Pit / Practice',
+            matchNumber: createdIncident.matchNumber || form.value.matchNumber || 'Pit Area',
             category: createdIncident.category || form.value.category,
             priority: createdIncident.priority || form.value.priority,
             status: createdIncident.status || 'PENDING_SCREENING',

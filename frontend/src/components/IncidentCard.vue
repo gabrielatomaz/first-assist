@@ -35,7 +35,12 @@
             Team {{ incident.teamNumber }}
           </router-link>
           <p class="text-xs text-textMuted font-medium">
-            Match: <span class="text-textMain font-mono font-semibold">{{ incident.matchNumber || 'N/A' }}</span>
+            <span v-if="incident.matchNumber && !['pit', 'pit prep', 'pit area', 'n/a'].includes(String(incident.matchNumber).toLowerCase())">
+              Match: <span class="text-textMain font-mono font-semibold">{{ incident.matchNumber }}</span>
+            </span>
+            <span v-else class="text-teal-400 font-semibold flex items-center gap-1">
+              <font-awesome-icon icon="wrench" class="text-[10px]" /> Pit Area
+            </span>
           </p>
         </div>
 

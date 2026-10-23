@@ -489,7 +489,12 @@ export const incidentService = {
                     {
                       $and: [
                         { $ne: ['$matchNumber', null] },
-                        { $ne: ['$matchNumber', ''] }
+                        { $ne: ['$matchNumber', ''] },
+                        { $ne: ['$matchNumber', 'Pit'] },
+                        { $ne: ['$matchNumber', 'Pit Prep'] },
+                        { $ne: ['$matchNumber', 'Pit Area'] },
+                        { $ne: ['$matchNumber', 'Pit / Practice'] },
+                        { $ne: ['$matchNumber', 'N/A'] }
                       ]
                     },
                     'match',

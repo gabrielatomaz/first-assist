@@ -55,7 +55,14 @@
         </div>
 
         <p class="text-sm text-gray-400 font-medium sm:whitespace-nowrap pt-0.5">
-          Event: <span class="font-bold text-gray-200 uppercase">{{ incident.eventCode || 'N/A' }}</span> | Match: <span class="font-bold text-gray-200">{{ incident.matchNumber || 'N/A' }}</span> | Reported: <span class="text-gray-400">{{ formatTime(incident.createdAt) }}</span>
+          Event: <span class="font-bold text-gray-200 uppercase">{{ incident.eventCode || 'N/A' }}</span> | 
+          <span v-if="incident.matchNumber && !['pit', 'pit prep', 'pit area', 'n/a'].includes(String(incident.matchNumber).toLowerCase())">
+            Match: <span class="font-bold text-gray-200">{{ incident.matchNumber }}</span>
+          </span>
+          <span v-else class="text-teal-400 font-bold">
+            <font-awesome-icon icon="wrench" class="text-xs mr-0.5" /> Pit Area
+          </span>
+          | Reported: <span class="text-gray-400">{{ formatTime(incident.createdAt) }}</span>
         </p>
       </div>
 

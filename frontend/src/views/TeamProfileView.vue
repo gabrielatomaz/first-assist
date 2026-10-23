@@ -55,7 +55,12 @@
               <span v-if="inc.eventCode" class="h-6 px-2 rounded-md text-xs font-bold text-accentYellow/90 bg-accentYellow/10 border border-accentYellow/20 font-mono uppercase tracking-wider inline-flex items-center justify-center leading-none flex-shrink-0" :title="'Regional: ' + inc.eventCode">
                 <font-awesome-icon icon="trophy" class="mr-1 text-[10px]" /> {{ inc.eventCode }}
               </span>
-              <span class="text-xs font-bold font-mono text-gray-400 uppercase">Match {{ inc.matchNumber || 'N/A' }}</span>
+              <span v-if="inc.matchNumber && !['pit', 'pit prep', 'pit area', 'n/a'].includes(String(inc.matchNumber).toLowerCase())" class="text-xs font-bold font-mono text-gray-400 uppercase">
+                Match {{ inc.matchNumber }}
+              </span>
+              <span v-else class="text-xs font-bold font-mono text-teal-400 uppercase flex items-center gap-1">
+                <font-awesome-icon icon="wrench" class="text-[10px]" /> Pit Area
+              </span>
               <CategoryBadge :category="inc.category" />
             </div>
             <StatusBadge :status="inc.status" />

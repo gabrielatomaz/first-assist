@@ -93,7 +93,12 @@
               </div>
               
               <p class="text-xs text-gray-400 font-medium flex items-center space-x-2">
-                <span>Match: <strong class="text-gray-200">{{ incident.matchNumber || 'N/A' }}</strong></span>
+                <span v-if="incident.matchNumber && !['pit', 'pit prep', 'pit area', 'n/a'].includes(String(incident.matchNumber).toLowerCase())">
+                  Match: <strong class="text-gray-200">{{ incident.matchNumber }}</strong>
+                </span>
+                <span v-else class="text-teal-400 font-semibold flex items-center gap-1">
+                  <font-awesome-icon icon="wrench" class="text-[10px]" /> Pit Area
+                </span>
                 <span>•</span>
                 <span>Resolved: <strong class="text-gray-200">{{ formatDate(incident.resolvedAt) }}</strong></span>
               </p>
