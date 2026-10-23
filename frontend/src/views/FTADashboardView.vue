@@ -70,7 +70,9 @@
                 variant="ghost"
                 size="icon-sm"
                 icon="star"
-                title="Set Active Competition Event"
+                :loading="settingActiveEvent"
+                :disabled="settingActiveEvent"
+                :title="settingActiveEvent ? 'Setting active competition event...' : 'Set Active Competition Event'"
                 class="text-accentYellow border border-accentYellow/40 hover:bg-accentYellow/20 flex-shrink-0"
               />
             </div>
@@ -392,6 +394,7 @@ const eventForm = ref({ code: '', name: '', location: '', isActive: false });
 const tbaEventKey = ref('');
 const importingTBAEvent = ref(false);
 const creatingEvent = ref(false);
+const settingActiveEvent = ref(false);
 
 const csaUsers = ref([]);
 const loadingCsaUsers = ref(false);
@@ -592,6 +595,8 @@ const handleCreateEvent = async () => {
 };
 
 const handleSetActiveEvent = async (code) => {
+  if (!code || settingActiveEvent.value) return;
+  settingActiveEvent.value = true;
   try {
     // 1. Update FTA user's assigned active event in backend profile
     const userRes = await fetch(getApiUrl(`/users/${authStore.user._id}/assigned-event`), {
@@ -620,6 +625,8 @@ const handleSetActiveEvent = async (code) => {
     await loadEvents();
   } catch (err) {
     showAlert(err.message, 'error');
+  } finally {
+    settingActiveEvent.value = false;
   }
 };
 
