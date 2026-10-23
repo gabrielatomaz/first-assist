@@ -26,3 +26,4 @@ export { default as UserAvatar } from './UserAvatar.vue';
 export { default as PublicReportModal } from './PublicReportModal.vue';
 export { default as ConfirmationModal } from './ConfirmationModal.vue';
 export { default as OnboardingTutorialModal } from './OnboardingTutorialModal.vue';
+export { default as LanguageExplanationModal } from './LanguageExplanationModal.vue';

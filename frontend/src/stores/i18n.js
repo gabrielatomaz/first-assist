@@ -364,6 +364,7 @@ const translations = {
 
 export const useI18nStore = defineStore('i18n', () => {
   const currentLocale = ref(localStorage.getItem('first_assist_locale') || 'en');
+  const showLanguageModal = ref(false);
 
   const locale = computed(() => currentLocale.value);
 
@@ -375,6 +376,18 @@ export const useI18nStore = defineStore('i18n', () => {
   const toggleLocale = () => {
     const next = currentLocale.value === 'en' ? 'pt' : 'en';
     setLocale(next);
+    showLanguageModal.value = true;
+  };
+
+  const openLanguageModal = (targetLocale) => {
+    if (targetLocale) {
+      setLocale(targetLocale);
+    }
+    showLanguageModal.value = true;
+  };
+
+  const closeLanguageModal = () => {
+    showLanguageModal.value = false;
   };
 
   const t = (key, defaultText) => {
@@ -390,8 +403,11 @@ export const useI18nStore = defineStore('i18n', () => {
   return {
     currentLocale,
     locale,
+    showLanguageModal,
     setLocale,
     toggleLocale,
+    openLanguageModal,
+    closeLanguageModal,
     t
   };
 });

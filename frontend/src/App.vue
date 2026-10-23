@@ -18,7 +18,7 @@
               <!-- Sleek Compact Desktop Language Toggle Pill next to Brand Logo -->
               <button
                 type="button"
-                @click="i18nStore.toggleLocale()"
+                @click="toggleLanguage"
                 class="hidden md:inline-flex items-center gap-1.5 h-7 px-2.5 rounded-lg bg-bgCard border border-gray-800 hover:border-teal-500/40 text-[11px] font-mono font-extrabold text-gray-300 hover:text-white transition cursor-pointer flex-shrink-0 shadow-sm"
                 :title="i18nStore.locale === 'pt' ? 'Switch to English' : 'Mudar para Português'"
               >
@@ -125,7 +125,7 @@
                 :variant="i18nStore.locale === 'en' ? 'primary' : 'secondary'"
                 size="sm"
                 icon="globe"
-                @click="i18nStore.setLocale('en')"
+                @click="mobileMenuOpen = false; openLanguageModal('en')"
                 class="w-full justify-center font-mono"
               >
                 English (EN)
@@ -134,7 +134,7 @@
                 :variant="i18nStore.locale === 'pt' ? 'primary' : 'secondary'"
                 size="sm"
                 icon="globe"
-                @click="i18nStore.setLocale('pt')"
+                @click="mobileMenuOpen = false; openLanguageModal('pt')"
                 class="w-full justify-center font-mono"
               >
                 Português (PT)
@@ -166,6 +166,14 @@
       v-if="shouldShowTutorial"
       @close="authStore.completeOnboarding()"
     />
+
+    <!-- Language Feature Explanation Modal -->
+    <LanguageExplanationModal
+      v-if="i18nStore.showLanguageModal"
+      :locale="activeModalLocale"
+      @change-locale="openLanguageModal"
+      @close="i18nStore.closeLanguageModal()"
+    />
   </div>
 </template>
 
@@ -176,7 +184,7 @@ import { useAuthStore } from './stores/auth';
 import { useI18nStore } from './stores/i18n';
 import { getApiUrl } from './config/api';
 import UserAvatar from './components/UserAvatar.vue';
-import { RoleBadge, OnboardingTutorialModal, BaseButton, CustomSelect } from './components';
+import { RoleBadge, OnboardingTutorialModal, BaseButton, CustomSelect, LanguageExplanationModal } from './components';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -185,9 +193,16 @@ const i18nStore = useI18nStore();
 const isOffline = ref(!navigator.onLine);
 const activeEvent = ref(null);
 const mobileMenuOpen = ref(false);
+const activeModalLocale = ref(i18nStore.locale);
+
+const openLanguageModal = (lang) => {
+  activeModalLocale.value = lang;
+  i18nStore.openLanguageModal(lang);
+};
 
 const toggleLanguage = () => {
-  i18nStore.toggleLocale();
+  const next = i18nStore.locale === 'en' ? 'pt' : 'en';
+  openLanguageModal(next);
 };
 
 const shouldShowTutorial = computed(() => {
