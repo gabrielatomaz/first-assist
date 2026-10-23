@@ -299,7 +299,7 @@
             <!-- Vertical Timeline Track -->
             <div v-else class="relative border-l-2 border-primaryTeal/30 ml-2.5 space-y-4 my-1">
               <div 
-                v-for="log in auditLogs" 
+                v-for="log in sortedAuditLogs" 
                 :key="log._id" 
                 class="relative pl-5 text-xs group/log"
               >
@@ -466,6 +466,9 @@ const technicianOptions = computed(() => {
 
 const incident = ref(null);
 const auditLogs = ref([]);
+const sortedAuditLogs = computed(() => {
+  return [...auditLogs.value].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+});
 const loading = ref(true);
 const error = ref(null);
 const showResolveModal = ref(false);

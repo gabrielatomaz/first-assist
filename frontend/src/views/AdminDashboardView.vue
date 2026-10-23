@@ -506,7 +506,7 @@
                 >
                   {{ log.userId?.name || 'System' }}
                 </span>
-                <span class="text-[10px] text-gray-400 font-mono">{{ formatTime(log.createdAt) }}</span>
+                <span class="text-[10px] text-gray-400 font-mono">{{ formatTime(log.timestamp || log.createdAt) }}</span>
               </div>
 
               <p class="text-xs text-gray-300 font-medium leading-normal pt-0.5">{{ log.details || 'System event recorded' }}</p>
@@ -699,8 +699,11 @@ const fetchAuditLogs = async () => {
 };
 
 const filteredAuditLogs = computed(() => {
-  if (actionFilter.value === 'ALL') return auditLogs.value;
-  return auditLogs.value.filter(l => l.action === actionFilter.value);
+  let list = auditLogs.value;
+  if (actionFilter.value !== 'ALL') {
+    list = list.filter(l => l.action === actionFilter.value);
+  }
+  return [...list].sort((a, b) => new Date(b.timestamp || b.createdAt) - new Date(a.timestamp || a.createdAt));
 });
 
 // User Management State

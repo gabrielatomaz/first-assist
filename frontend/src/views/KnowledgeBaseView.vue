@@ -117,15 +117,35 @@
           <!-- 3 Distinct Content Blocks with Fixed Equal Heights & Read More Modal -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs pt-1">
             <!-- Issue Description Block -->
-            <div class="p-3.5 bg-bgMain rounded-xl border border-gray-800/80 flex flex-col justify-between h-36">
+            <div class="p-3.5 bg-bgMain rounded-xl border border-gray-800/80 flex flex-col justify-between min-h-[9rem] sm:h-36">
               <div class="space-y-1.5 overflow-hidden">
-                <div class="flex items-center space-x-1.5 text-gray-400 font-bold uppercase tracking-wider text-[10px]">
-                  <font-awesome-icon icon="circle-info" class="text-gray-400 text-xs" />
-                  <span>Issue Description</span>
+                <div class="flex items-center justify-between text-gray-400 font-bold uppercase tracking-wider text-[10px]">
+                  <div class="flex items-center space-x-1.5">
+                    <font-awesome-icon icon="circle-info" class="text-gray-400 text-xs" />
+                    <span>Issue Description</span>
+                  </div>
+                  <div v-if="incident.description" class="flex items-center gap-1">
+                    <button
+                      type="button"
+                      @click.stop.prevent="speakText(incident.description)"
+                      class="text-gray-400 hover:text-white p-1 rounded hover:bg-white/10 transition cursor-pointer"
+                      :title="isSpeaking && currentlySpeakingText === incident.description ? 'Stop reading' : 'Read aloud'"
+                    >
+                      <font-awesome-icon :icon="isSpeaking && currentlySpeakingText === incident.description ? 'volume-xmark' : 'volume-high'" class="text-[11px]" />
+                    </button>
+                    <button
+                      type="button"
+                      @click.stop.prevent="openTextModal(`Team ${incident.teamNumber} — Issue Description`, incident.description, true)"
+                      class="text-gray-400 hover:text-teal-400 p-1 rounded hover:bg-white/10 transition cursor-pointer"
+                      title="Translate text"
+                    >
+                      <font-awesome-icon icon="language" class="text-[11px]" />
+                    </button>
+                  </div>
                 </div>
                 <p class="text-gray-200 leading-relaxed font-medium line-clamp-3 text-xs">{{ incident.description }}</p>
               </div>
-              <div v-if="incident.description && incident.description.length > 140" class="pt-1">
+              <div v-if="incident.description && incident.description.length > 140" class="mt-3 sm:mt-1 pt-1">
                 <button 
                   @click.stop.prevent="openTextModal(`Team ${incident.teamNumber} — Issue Description`, incident.description)"
                   class="text-xs sm:text-[11px] font-bold text-teal-400 hover:text-teal-300 hover:underline inline-flex items-center gap-1.5 px-2.5 py-1 sm:p-0 bg-teal-500/15 sm:bg-transparent border border-teal-500/30 sm:border-0 rounded-lg sm:rounded-none cursor-pointer flex-shrink-0 transition shadow-sm sm:shadow-none"
@@ -136,15 +156,35 @@
             </div>
 
             <!-- Root Cause Block -->
-            <div class="p-3.5 bg-teal-500/10 rounded-xl border border-teal-500/25 flex flex-col justify-between h-36">
+            <div class="p-3.5 bg-teal-500/10 rounded-xl border border-teal-500/25 flex flex-col justify-between min-h-[9rem] sm:h-36">
               <div class="space-y-1.5 overflow-hidden">
-                <div class="flex items-center space-x-1.5 text-teal-300 font-bold uppercase tracking-wider text-[10px]">
-                  <font-awesome-icon icon="lightbulb" class="text-teal-300 text-xs" />
-                  <span>Root Cause</span>
+                <div class="flex items-center justify-between text-teal-300 font-bold uppercase tracking-wider text-[10px]">
+                  <div class="flex items-center space-x-1.5">
+                    <font-awesome-icon icon="lightbulb" class="text-teal-300 text-xs" />
+                    <span>Root Cause</span>
+                  </div>
+                  <div v-if="incident.rootCause && incident.rootCause !== 'N/A'" class="flex items-center gap-1">
+                    <button
+                      type="button"
+                      @click.stop.prevent="speakText(incident.rootCause)"
+                      class="text-teal-400/80 hover:text-white p-1 rounded hover:bg-white/10 transition cursor-pointer"
+                      :title="isSpeaking && currentlySpeakingText === incident.rootCause ? 'Stop reading' : 'Read aloud'"
+                    >
+                      <font-awesome-icon :icon="isSpeaking && currentlySpeakingText === incident.rootCause ? 'volume-xmark' : 'volume-high'" class="text-[11px]" />
+                    </button>
+                    <button
+                      type="button"
+                      @click.stop.prevent="openTextModal(`Team ${incident.teamNumber} — Root Cause`, incident.rootCause, true)"
+                      class="text-teal-400/80 hover:text-teal-300 p-1 rounded hover:bg-white/10 transition cursor-pointer"
+                      title="Translate text"
+                    >
+                      <font-awesome-icon icon="language" class="text-[11px]" />
+                    </button>
+                  </div>
                 </div>
                 <p class="text-teal-100 leading-relaxed font-medium line-clamp-3 text-xs">{{ incident.rootCause || 'N/A' }}</p>
               </div>
-              <div v-if="incident.rootCause && incident.rootCause.length > 140" class="pt-1">
+              <div v-if="incident.rootCause && incident.rootCause.length > 140" class="mt-3 sm:mt-1 pt-1">
                 <button 
                   @click.stop.prevent="openTextModal(`Team ${incident.teamNumber} — Root Cause`, incident.rootCause)"
                   class="text-xs sm:text-[11px] font-bold text-teal-300 hover:text-teal-200 hover:underline inline-flex items-center gap-1.5 px-2.5 py-1 sm:p-0 bg-teal-500/20 sm:bg-transparent border border-teal-500/40 sm:border-0 rounded-lg sm:rounded-none cursor-pointer flex-shrink-0 transition shadow-sm sm:shadow-none"
@@ -155,15 +195,35 @@
             </div>
 
             <!-- Applied Fix Block -->
-            <div class="p-3.5 bg-accentGreen/10 rounded-xl border border-accentGreen/30 flex flex-col justify-between h-36">
+            <div class="p-3.5 bg-accentGreen/10 rounded-xl border border-accentGreen/30 flex flex-col justify-between min-h-[9rem] sm:h-36">
               <div class="space-y-1.5 overflow-hidden">
-                <div class="flex items-center space-x-1.5 text-emerald-400 font-bold uppercase tracking-wider text-[10px]">
-                  <font-awesome-icon icon="circle-check" class="text-emerald-400 text-xs" />
-                  <span>Applied Fix</span>
+                <div class="flex items-center justify-between text-emerald-400 font-bold uppercase tracking-wider text-[10px]">
+                  <div class="flex items-center space-x-1.5">
+                    <font-awesome-icon icon="circle-check" class="text-emerald-400 text-xs" />
+                    <span>Applied Fix</span>
+                  </div>
+                  <div v-if="incident.appliedSolution && incident.appliedSolution !== 'N/A'" class="flex items-center gap-1">
+                    <button
+                      type="button"
+                      @click.stop.prevent="speakText(incident.appliedSolution)"
+                      class="text-emerald-400/80 hover:text-white p-1 rounded hover:bg-white/10 transition cursor-pointer"
+                      :title="isSpeaking && currentlySpeakingText === incident.appliedSolution ? 'Stop reading' : 'Read aloud'"
+                    >
+                      <font-awesome-icon :icon="isSpeaking && currentlySpeakingText === incident.appliedSolution ? 'volume-xmark' : 'volume-high'" class="text-[11px]" />
+                    </button>
+                    <button
+                      type="button"
+                      @click.stop.prevent="openTextModal(`Team ${incident.teamNumber} — Applied Fix`, incident.appliedSolution, true)"
+                      class="text-emerald-400/80 hover:text-emerald-300 p-1 rounded hover:bg-white/10 transition cursor-pointer"
+                      title="Translate text"
+                    >
+                      <font-awesome-icon icon="language" class="text-[11px]" />
+                    </button>
+                  </div>
                 </div>
                 <p class="text-emerald-200 leading-relaxed font-semibold line-clamp-3 text-xs">{{ incident.appliedSolution || 'N/A' }}</p>
               </div>
-              <div v-if="incident.appliedSolution && incident.appliedSolution.length > 140" class="pt-1">
+              <div v-if="incident.appliedSolution && incident.appliedSolution.length > 140" class="mt-3 sm:mt-1 pt-1">
                 <button 
                   @click.stop.prevent="openTextModal(`Team ${incident.teamNumber} — Applied Fix`, incident.appliedSolution)"
                   class="text-xs sm:text-[11px] font-bold text-emerald-400 hover:text-emerald-300 hover:underline inline-flex items-center gap-1.5 px-2.5 py-1 sm:p-0 bg-emerald-500/20 sm:bg-transparent border border-emerald-500/40 sm:border-0 rounded-lg sm:rounded-none cursor-pointer flex-shrink-0 transition shadow-sm sm:shadow-none"
@@ -486,14 +546,24 @@
           </div>
           <p class="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap font-medium">{{ textModalContent }}</p>
           <div class="flex justify-between items-center pt-2 border-t border-gray-800/60">
-            <button 
-              @click="translateModalText" 
-              :disabled="isTranslatingModal"
-              class="text-xs font-bold text-teal-400 hover:text-teal-300 inline-flex items-center gap-1 cursor-pointer disabled:opacity-50"
-            >
-              <font-awesome-icon icon="language" />
-              <span>{{ isTranslatingModal ? 'Translating...' : 'Translate text' }}</span>
-            </button>
+            <div class="flex items-center gap-2">
+              <button 
+                @click="translateModalText" 
+                :disabled="isTranslatingModal"
+                class="text-xs font-bold text-teal-400 hover:text-teal-300 inline-flex items-center gap-1 cursor-pointer disabled:opacity-50"
+              >
+                <font-awesome-icon icon="language" />
+                <span>{{ isTranslatingModal ? 'Translating...' : (textModalContent !== originalModalContent ? 'Translate again' : 'Translate text') }}</span>
+              </button>
+              <button
+                v-if="textModalContent !== originalModalContent"
+                @click="revertModalText"
+                class="text-xs font-bold text-gray-400 hover:text-white inline-flex items-center gap-1 cursor-pointer"
+              >
+                <font-awesome-icon icon="rotate-left" class="text-[10px]" />
+                <span>Show original</span>
+              </button>
+            </div>
             <BaseButton size="xs" variant="secondary" @click="showTextModal = false; if (isSpeaking) window.speechSynthesis.cancel();">Close</BaseButton>
           </div>
         </div>
@@ -739,30 +809,42 @@ const textModalContent = ref('');
 const originalModalContent = ref('');
 const isSpeaking = ref(false);
 const isTranslatingModal = ref(false);
+const currentlySpeakingText = ref('');
 
-const openTextModal = (title, content) => {
+const openTextModal = (title, content, autoTranslate = false) => {
   textModalTitle.value = title;
   textModalContent.value = content;
   originalModalContent.value = content;
   showTextModal.value = true;
+  if (autoTranslate) {
+    translateModalText();
+  }
+};
+
+const revertModalText = () => {
+  textModalContent.value = originalModalContent.value;
 };
 
 const speakText = (text) => {
+  if (!text) return;
   if (!('speechSynthesis' in window)) {
     alert('Speech synthesis is not supported in this browser.');
     return;
   }
-  if (isSpeaking.value) {
+  if (isSpeaking.value && currentlySpeakingText.value === text) {
     window.speechSynthesis.cancel();
     isSpeaking.value = false;
+    currentlySpeakingText.value = '';
     return;
   }
+  window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   const savedLocale = localStorage.getItem('first_assist_locale') || 'en';
   utterance.lang = savedLocale === 'pt' ? 'pt-BR' : 'en-US';
-  utterance.onend = () => { isSpeaking.value = false; };
-  utterance.onerror = () => { isSpeaking.value = false; };
+  utterance.onend = () => { isSpeaking.value = false; currentlySpeakingText.value = ''; };
+  utterance.onerror = () => { isSpeaking.value = false; currentlySpeakingText.value = ''; };
   isSpeaking.value = true;
+  currentlySpeakingText.value = text;
   window.speechSynthesis.speak(utterance);
 };
 

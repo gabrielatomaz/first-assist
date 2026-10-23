@@ -392,7 +392,7 @@ export const incidentController = {
       const { AuditLog } = await import('../models/AuditLog.js');
       const logs = await AuditLog.find({ incidentId: req.params.id })
         .populate('userId', 'name role')
-        .sort({ timestamp: 1 });
+        .sort({ timestamp: -1 });
       res.json(logs);
     } catch (error) {
       res.status(500).json({ error: error.message });
